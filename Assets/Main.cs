@@ -19,7 +19,7 @@ public class Main : MonoBehaviour
     private float minDistance = 20; //15;
     private float speed = 10F;
     private float gridSpacing = 20F;
-    private float yPos = 2.5F;
+    private float yPos = 4F;
 
     private Vector3[] waypoints;
     private int waypointsSize;
@@ -39,8 +39,13 @@ public class Main : MonoBehaviour
         Color floorColor = new Color(255, 255, 255);
         Color wallColor = new Color(0, 0, 200);
         Color bodyColor = new Color(0, 200, 0);
-        Color noseColor = new Color(200, 0, 0);
+        Color antennaColor = new Color32(238,130,238, 255);
+        Color hatColor = new Color32(0, 0, 200, 255);
+        Color noseColor = new Color32(0, 100, 0, 255);
+        Color eyeColor = new Color32(255, 255, 255, 255);
+        Color pupilColor = new Color32(0, 0, 0, 255);
         Color waypointColor = new Color(200, 200, 0);
+        Color mouthColor = new Color32(0, 0, 0, 255);
 
         // Floor
         GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -74,7 +79,7 @@ public class Main : MonoBehaviour
 
         // Head
         head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        head.transform.localScale = new Vector3(5, 5, 5);        
+        head.transform.localScale = new Vector3(5, 6, 5);        
         head.transform.position = new Vector3(0, yPos, 0);
         head.GetComponent<Renderer>().material.color = bodyColor;
 
@@ -87,17 +92,107 @@ public class Main : MonoBehaviour
         waypoint2.transform.localScale = new Vector3(5, 5, 5);        
         waypoint2.GetComponent<Renderer>().material.color = waypointColor;
 
+        // Hat
+        // GameObject hat = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        // hat.transform.localScale = new Vector3(5, 0.5f, 5);        
+        // hat.transform.position = head.transform.position;
+        // hat.GetComponent<Renderer>().material.color = hatColor;
+        // hat.transform.parent = head.transform;        
+        // hat.transform.Translate(0, 3, 0);
+
+        // Hat Top
+        // GameObject hatTop = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        // hatTop.transform.localScale = new Vector3(4, 4, 4);        
+        // hatTop.transform.position = head.transform.position;
+        // hatTop.GetComponent<Renderer>().material.color = hatColor;
+        // hatTop.transform.parent = head.transform;        
+        // hatTop.transform.Translate(0, 3, 0);
+
+        // Left Antenna
+        // GameObject leftAntenna = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        // leftAntenna.transform.localScale = new Vector3(0.5f, 4, 0.5f);
+        // leftAntenna.GetComponent<Renderer>().material.color = antennaColor;
+        // leftAntenna.transform.parent = head.transform;        
+        // leftAntenna.transform.position = head.transform.position;
+        // leftAntenna.transform.Translate(1, 3, 0);
+        // leftAntenna.transform.rotation = Quaternion.AngleAxis(-30, Vector3.forward);
+
+        // Left Antenna Tip
+        // GameObject leftAntennaTip = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        // leftAntennaTip.GetComponent<Renderer>().material.color = antennaColor;
+        // leftAntennaTip.transform.parent = leftAntenna.transform;        
+        // leftAntennaTip.transform.localScale = new Vector3(1, 1, 1);
+        // leftAntennaTip.transform.position = head.transform.position;
+        // leftAntennaTip.transform.Translate(0, 4, 0);
+
+        // Left Eye
+        GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        leftEye.transform.localScale = new Vector3(2, 3, 2);
+        leftEye.GetComponent<Renderer>().material.color = eyeColor;
+        leftEye.transform.parent = head.transform;        
+        leftEye.transform.position = head.transform.position;
+        leftEye.transform.Translate(1, 1, 1.5f);
+
+        // Left Pupil
+        GameObject leftPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        leftPupil.transform.localScale = new Vector3(1, 2, 1);
+        leftPupil.GetComponent<Renderer>().material.color = pupilColor;
+        leftPupil.transform.parent = head.transform;        
+        leftPupil.transform.position = head.transform.position;
+        leftPupil.transform.Translate(1, 1.5f, 2.25f);
+
+        // Right Eye
+        GameObject rightEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        rightEye.transform.localScale = new Vector3(2, 3, 2);
+        rightEye.GetComponent<Renderer>().material.color = eyeColor;
+        rightEye.transform.parent = head.transform;        
+        rightEye.transform.position = head.transform.position;
+        rightEye.transform.Translate(-1, 1, 1.5f);
+
+        // Right Pupil
+        GameObject rightPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        rightPupil.transform.localScale = new Vector3(1, 2, 1);
+        rightPupil.GetComponent<Renderer>().material.color = pupilColor;
+        rightPupil.transform.parent = head.transform;        
+        rightPupil.transform.position = head.transform.position;
+        rightPupil.transform.Translate(-1, 1.5f, 2.25f);
+
         // Nose
         GameObject nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        nose.transform.localScale = new Vector3(2, 2, 2);
+        nose.transform.localScale = new Vector3(3, 2, 2);
         nose.GetComponent<Renderer>().material.color = noseColor;
         nose.transform.parent = head.transform;        
         nose.transform.position = head.transform.position;
         nose.transform.Translate(0, 0, 2.5f);
 
+        // Mouth
+        GameObject mouth = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        mouth.transform.localScale = new Vector3(3, 0.5f, 2);
+        mouth.GetComponent<Renderer>().material.color = mouthColor;
+        mouth.transform.parent = head.transform;        
+        mouth.transform.position = head.transform.position;
+        mouth.transform.Translate(0, -1.5f, 1f);
+        mouth.transform.rotation = Quaternion.AngleAxis(90, Vector3.up);
+
+        // GameObject mouth = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        // mouth.transform.localScale = new Vector3(3, 0.5f, 2);
+        // mouth.GetComponent<Renderer>().material.color = mouthColor;
+        // mouth.transform.parent = head.transform;        
+        // mouth.transform.position = head.transform.position;
+        // mouth.transform.Translate(0, -1.5f, 1.5f);
+
+        // Mouth Left
+        // GameObject mouthLeft = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        // mouth.transform.localScale = new Vector3(3, 0.5f, 2);
+        // mouthLeft.GetComponent<Renderer>().material.color = mouthColor;
+        // mouthLeft.transform.parent = head.transform;        
+        // mouthLeft.transform.position = head.transform.position;
+        // mouthLeft.transform.Translate(1, -1.5f, 1.5f);
+        // mouthLeft.transform.rotation = Quaternion.AngleAxis(90, Vector3.forward);
+
         // Tail
         tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        tail.transform.localScale = new Vector3(5, 5, 5);        
+        tail.transform.localScale = new Vector3(5, 6, 5);        
         tail.transform.position = new Vector3(0, yPos, 0);
         tail.GetComponent<Renderer>().material.color = bodyColor;
 
@@ -140,7 +235,7 @@ public class Main : MonoBehaviour
     }
 
     // Update - using waypoints to ensure the tail follows the exact same path as the head
-    void Update()
+    void UpdateOther()
     {
 
         // TODO consider using buffered input, so that multiple consecutive key presses can be acted upon while turning
@@ -372,57 +467,57 @@ public class Main : MonoBehaviour
 
     // Update (OLD) - Each tail part is following the tail part ahead of it.
     // Note: The tail parts do not follow the exact same path as the head using this technique
-    // void Update()
-    // {
-    //     if (!turning) {
-    //         float horizontal = Input.GetAxisRaw("Horizontal");
-    //         if (horizontal != 0) {
-    //             turning = true;
-    //             turningStartTime = Time.fixedTime;
-    //             if (horizontal == 1) {
-    //                 // Turning Right
-    //                 //ball.transform.Rotate(Vector2.up, 90);
-    //                 direction = Quaternion.AngleAxis(90, Vector3.up) * direction;
-    //                 rotation = rotation + 90;
+    void Update()
+    {
+        if (!turning) {
+            float horizontal = Input.GetAxisRaw("Horizontal");
+            if (horizontal != 0) {
+                turning = true;
+                turningStartTime = Time.fixedTime;
+                if (horizontal == 1) {
+                    // Turning Right
+                    //ball.transform.Rotate(Vector2.up, 90);
+                    direction = Quaternion.AngleAxis(90, Vector3.up) * direction;
+                    rotation = rotation + 90;
 
-    //             } else {
-    //                 // Turning Left
-    //                 //ball.transform.Rotate(Vector2.up, -90);
-    //                 direction = Quaternion.AngleAxis(-90, Vector3.up) * direction;
-    //                 rotation = rotation - 90;
-    //             }
-    //         }
-    //     } else {
-    //         // Turning - determine when next turn is allowed
-    //         if (Time.fixedTime - turningStartTime > 1) {
-    //             turning = false;
-    //         }
-    //     }
+                } else {
+                    // Turning Left
+                    //ball.transform.Rotate(Vector2.up, -90);
+                    direction = Quaternion.AngleAxis(-90, Vector3.up) * direction;
+                    rotation = rotation - 90;
+                }
+            }
+        } else {
+            // Turning - determine when next turn is allowed
+            if (Time.fixedTime - turningStartTime > 1) {
+                turning = false;
+            }
+        }
 
-    //     // Move Head
-    //     head.transform.rotation = Quaternion.Euler(0, 0, 0);
-    //     head.transform.Translate(direction * speed * Time.smoothDeltaTime);
-    //     head.transform.Rotate(Vector2.up, rotation);
+        // Move Head
+        head.transform.rotation = Quaternion.Euler(0, 0, 0);
+        head.transform.Translate(direction * speed * Time.smoothDeltaTime);
+        head.transform.Rotate(Vector2.up, rotation);
 
-    //     // Move Tail
-    //     for (int i = 1; i < bodiesSize; i++) {
-    //         float distance = Vector3.Distance(bodies[i - 1].transform.position, bodies[i].transform.position);
+        // Move Tail
+        for (int i = 1; i < bodiesSize; i++) {
+            float distance = Vector3.Distance(bodies[i - 1].transform.position, bodies[i].transform.position);
 
-    //         float T = Time.deltaTime * distance / minDistance * speed;
+            float T = Time.deltaTime * distance / minDistance * speed;
 
-    //         Vector3 newPos = bodies[i-1].transform.position;
+            Vector3 newPos = bodies[i-1].transform.position;
 
-    //         if (T > 1) {
-    //             T = 1;
-    //         }
-    //         bodies[i].transform.position = Vector3.Lerp(bodies[i].transform.position, newPos, T);
-	// 	}
+            if (T > 1) {
+                T = 1;
+            }
+            bodies[i].transform.position = Vector3.Lerp(bodies[i].transform.position, newPos, T);
+		}
 
-    //     // Grow when 'G' pressed
-    //     if (Input.GetKeyDown(KeyCode.G)) {
-    //         Grow();
-    //     }
-    // }
+        // Grow when 'G' pressed
+        if (Input.GetKeyDown(KeyCode.G)) {
+            Grow();
+        }
+    }
 
     void Grow() {
         GameObject newPart = GameObject.Instantiate(tail);
