@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
+    GameObject player;
     GameObject head;
     GameObject tail;
     GameObject waypoint;
@@ -18,8 +19,8 @@ public class Main : MonoBehaviour
 
     private float minDistance = 20; //15;
     private float speed = 10F;
-    private float gridSpacing = 20F;
-    private float yPos = 4F;
+    private float gridSpacing = 10F;
+    private float yPos = 3F;
 
     private Vector3[] waypoints;
     private int waypointsSize;
@@ -33,64 +34,85 @@ public class Main : MonoBehaviour
     // TODO here for DEBUG
     private Vector3 relativePos;
 
+    private bool isShowWaypoints = false;
+
+    GameObject gridLines;
+
+    Color floorColor = new Color(255, 255, 255);
+    Color wallColor = new Color(0, 0, 200);
+    Color gridColor = new Color32(0, 0, 0, 255);
+    Color bodyColor = new Color(0, 200, 0);
+    Color antennaColor = new Color32(238,130,238, 255);
+    Color hatColor = new Color32(0, 0, 200, 255);
+    Color noseColor = new Color32(0, 100, 0, 255);
+    Color eyeColor = new Color32(255, 255, 255, 255);
+    Color pupilColor = new Color32(0, 0, 0, 255);
+    Color waypointColor = new Color(200, 200, 0);
+    Color mouthColor = new Color32(0, 0, 0, 255);
+    Color foodColor = new Color32(200, 0, 0, 255);
+
     // Start is called before the first frame update
     void Start()
     {
-        Color floorColor = new Color(255, 255, 255);
-        Color wallColor = new Color(0, 0, 200);
-        Color bodyColor = new Color(0, 200, 0);
-        Color antennaColor = new Color32(238,130,238, 255);
-        Color hatColor = new Color32(0, 0, 200, 255);
-        Color noseColor = new Color32(0, 100, 0, 255);
-        Color eyeColor = new Color32(255, 255, 255, 255);
-        Color pupilColor = new Color32(0, 0, 0, 255);
-        Color waypointColor = new Color(200, 200, 0);
-        Color mouthColor = new Color32(0, 0, 0, 255);
+
+        // -- Arena --
+        GameObject arena = new GameObject();
+        arena.name = "Arena";
 
         // Floor
         GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        floor.name = "Floor";
+        floor.transform.parent = arena.transform;    
         floor.transform.localScale = new Vector3(100, 1, 100);        
-        floor.transform.position = new Vector3(0, 0, 0);
+        floor.transform.position = new Vector3(0, -0.5f, 0);
         floor.GetComponent<Renderer>().material.color = floorColor;
 
-        // Wall 
+        // Wall 1
         GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.name = "Wall 1";
+        wall.transform.parent = arena.transform;    
         wall.transform.localScale = new Vector3(100, 5, 5);        
         wall.transform.position = new Vector3(0, 2.5f, 50);
         wall.GetComponent<Renderer>().material.color = wallColor;
 
-        // Wall 
+        // Wall 2
         GameObject wall2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall2.name = "Wall 2";
+        wall2.transform.parent = arena.transform;    
         wall2.transform.localScale = new Vector3(100, 5, 5);        
         wall2.transform.position = new Vector3(0, 2.5f, -50);
         wall2.GetComponent<Renderer>().material.color = wallColor;
 
-        // Wall 
+        // Wall 3
         GameObject wall3 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall3.name = "Wall 3";
+        wall3.transform.parent = arena.transform;    
         wall3.transform.localScale = new Vector3(5, 5, 100);        
         wall3.transform.position = new Vector3(50, 2.5f, 0);
         wall3.GetComponent<Renderer>().material.color = wallColor;
 
-        // Wall 
+        // Wall 4
         GameObject wall4 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall4.name = "Wall 4";
+        wall4.transform.parent = arena.transform;    
         wall4.transform.localScale = new Vector3(5, 5, 100);        
         wall4.transform.position = new Vector3(-50, 2.5f, 0);
         wall4.GetComponent<Renderer>().material.color = wallColor;
 
+        gridLines = new GameObject();
+        gridLines.name = "Grid Lines";
+
+        // -- Player --
+        player = new GameObject();
+        player.name = "Player";
+
         // Head
         head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        head.transform.localScale = new Vector3(5, 6, 5);        
+        head.name = "Head";
+        head.transform.parent = player.transform;    
+        head.transform.localScale = new Vector3(gridSpacing / 2, 6, gridSpacing / 2);        
         head.transform.position = new Vector3(0, yPos, 0);
         head.GetComponent<Renderer>().material.color = bodyColor;
-
-        // Waypoint
-        waypoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        waypoint.transform.localScale = new Vector3(5, 5, 5);        
-        waypoint.GetComponent<Renderer>().material.color = waypointColor;
-
-        waypoint2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        waypoint2.transform.localScale = new Vector3(5, 5, 5);        
-        waypoint2.GetComponent<Renderer>().material.color = waypointColor;
 
         // Hat
         // GameObject hat = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -127,6 +149,7 @@ public class Main : MonoBehaviour
 
         // Left Eye
         GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        leftEye.name = "Left Eye";
         leftEye.transform.localScale = new Vector3(2, 3, 2);
         leftEye.GetComponent<Renderer>().material.color = eyeColor;
         leftEye.transform.parent = head.transform;        
@@ -135,6 +158,7 @@ public class Main : MonoBehaviour
 
         // Left Pupil
         GameObject leftPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        leftPupil.name = "Left Pupil";
         leftPupil.transform.localScale = new Vector3(1, 2, 1);
         leftPupil.GetComponent<Renderer>().material.color = pupilColor;
         leftPupil.transform.parent = head.transform;        
@@ -143,6 +167,7 @@ public class Main : MonoBehaviour
 
         // Right Eye
         GameObject rightEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        rightEye.name = "Right Eye";
         rightEye.transform.localScale = new Vector3(2, 3, 2);
         rightEye.GetComponent<Renderer>().material.color = eyeColor;
         rightEye.transform.parent = head.transform;        
@@ -151,6 +176,7 @@ public class Main : MonoBehaviour
 
         // Right Pupil
         GameObject rightPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        rightPupil.name = "Right Pupil";
         rightPupil.transform.localScale = new Vector3(1, 2, 1);
         rightPupil.GetComponent<Renderer>().material.color = pupilColor;
         rightPupil.transform.parent = head.transform;        
@@ -159,6 +185,7 @@ public class Main : MonoBehaviour
 
         // Nose
         GameObject nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        nose.name = "Nose";
         nose.transform.localScale = new Vector3(3, 2, 2);
         nose.GetComponent<Renderer>().material.color = noseColor;
         nose.transform.parent = head.transform;        
@@ -167,6 +194,7 @@ public class Main : MonoBehaviour
 
         // Mouth
         GameObject mouth = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        mouth.name = "Mouth";
         mouth.transform.localScale = new Vector3(3, 0.5f, 2);
         mouth.GetComponent<Renderer>().material.color = mouthColor;
         mouth.transform.parent = head.transform;        
@@ -192,7 +220,9 @@ public class Main : MonoBehaviour
 
         // Tail
         tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        tail.transform.localScale = new Vector3(5, 6, 5);        
+        tail.name = "Tail";
+        tail.transform.parent = player.transform;    
+        tail.transform.localScale = new Vector3(gridSpacing / 2, 6, gridSpacing / 2);        
         tail.transform.position = new Vector3(0, yPos, 0);
         tail.GetComponent<Renderer>().material.color = bodyColor;
 
@@ -204,6 +234,33 @@ public class Main : MonoBehaviour
 
         // Direction
         direction = head.transform.forward;
+
+        // -- Food --
+        GameObject food = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        food.name = "Food";
+        food.transform.localScale = new Vector3(2, 2, 2);        
+        food.transform.position = new Vector3(0, 1, gridSpacing * 3);
+        food.GetComponent<Renderer>().material.color = foodColor;
+
+        // -- Waypoints --
+        GameObject waypointsContainer = new GameObject();
+        waypointsContainer.name = "Waypoints";
+
+        // Waypoint 1
+        waypoint = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        waypoint.name = "Waypoint 1";
+        waypoint.transform.parent = waypointsContainer.transform;    
+        waypoint.transform.localScale = new Vector3(3, 3, 3);        
+        waypoint.GetComponent<Renderer>().material.color = waypointColor;
+        waypoint.GetComponent<Renderer>().enabled = isShowWaypoints;
+
+        // Waypoint 2
+        waypoint2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        waypoint2.name = "Waypoint 2";
+        waypoint2.transform.parent = waypointsContainer.transform;    
+        waypoint2.transform.localScale = new Vector3(3, 3, 3);        
+        waypoint2.GetComponent<Renderer>().material.color = waypointColor;
+        waypoint2.GetComponent<Renderer>().enabled = isShowWaypoints;
 
         // Waypoints
         waypoints = new Vector3[100];
@@ -235,7 +292,7 @@ public class Main : MonoBehaviour
     }
 
     // Update - using waypoints to ensure the tail follows the exact same path as the head
-    void UpdateOther()
+    void Update()
     {
 
         // TODO consider using buffered input, so that multiple consecutive key presses can be acted upon while turning
@@ -245,6 +302,12 @@ public class Main : MonoBehaviour
         // {
         //     isKeyPressed = false;
         // }            
+
+        // Draw grid lines
+        for (float i=-(gridSpacing*4.5f); i < gridSpacing * 5; i=i+gridSpacing) {
+            DrawLine(gridLines, new Vector3(i, 0.4f, -50), new Vector3(i, 0.4f, 50), gridColor, 0.2f);
+            DrawLine(gridLines, new Vector3(-50, 0.4f, i), new Vector3(50, 0.4f, i), gridColor, 0.2f);
+        }
 
         if (!turning) {
         // if (!turning && !isKeyPressed) {
@@ -445,18 +508,18 @@ public class Main : MonoBehaviour
         head.transform.Rotate(Vector2.up, rotation);
 
         // Move Tail
-        // for (int i = 1; i < bodiesSize; i++) {
-        //     float distance = Vector3.Distance(bodies[i - 1].transform.position, bodies[i].transform.position);
+        for (int i = 1; i < bodiesSize; i++) {
+            float distance = Vector3.Distance(bodies[i - 1].transform.position, bodies[i].transform.position);
 
-        //     float T = Time.deltaTime * distance / minDistance * speed;
+            float T = Time.deltaTime * distance / minDistance * speed;
 
-        //     Vector3 newPos = bodies[i-1].transform.position;
+            Vector3 newPos = bodies[i-1].transform.position;
 
-        //     if (T > 1) {
-        //         T = 1;
-        //     }
-        //     bodies[i].transform.position = Vector3.Lerp(bodies[i].transform.position, newPos, T);
-		// }
+            if (T > 1) {
+                T = 1;
+            }
+            bodies[i].transform.position = Vector3.Lerp(bodies[i].transform.position, newPos, T);
+		}
 
         // Grow when 'G' pressed
         if (Input.GetKeyDown(KeyCode.G)) {
@@ -467,7 +530,7 @@ public class Main : MonoBehaviour
 
     // Update (OLD) - Each tail part is following the tail part ahead of it.
     // Note: The tail parts do not follow the exact same path as the head using this technique
-    void Update()
+    void UpdateOther()
     {
         if (!turning) {
             float horizontal = Input.GetAxisRaw("Horizontal");
@@ -521,9 +584,28 @@ public class Main : MonoBehaviour
 
     void Grow() {
         GameObject newPart = GameObject.Instantiate(tail);
+        newPart.transform.parent = player.transform;    
         newPart.transform.position = bodies[bodiesSize-1].transform.position;
 
         bodies[bodiesSize] = newPart;
         bodiesSize++;
+    }
+
+    void DrawLine(GameObject parent, Vector3 start, Vector3 end, Color color, float duration = 0.2f)
+    {
+        GameObject myLine = new GameObject();
+        myLine.name = "Line";
+        myLine.transform.parent = parent.transform;    
+        myLine.transform.position = start;
+        myLine.AddComponent<LineRenderer>();
+        LineRenderer lr = myLine.GetComponent<LineRenderer>();
+        lr.material = new Material(Shader.Find("Diffuse"));
+        lr.startColor = color;
+        lr.endColor = color;
+        lr.startWidth = 0.1f;
+        lr.endWidth = 0.1f;
+        lr.SetPosition(0, start);
+        lr.SetPosition(1, end);
+        GameObject.Destroy(myLine, duration);
     }
 }
