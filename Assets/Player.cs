@@ -4,9 +4,46 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    enum TurnCommand {Right, Left, None};
+    private class TurningPoint {
+        Vector3 position;
+        TurnCommand turnCommand;
+        float time;
+
+        public TurningPoint(Vector3 position, TurnCommand turnCommand, float time) {
+            this.position = position;
+            this.turnCommand = turnCommand;
+            this.time = time;
+        }
+
+        public Vector3 getPosition() {
+            return position;
+        }
+
+    }
+
+    public class TurningPoints {
+
+        List<TurningPoint> turningPoints = new List<TurningPoint>();
+
+        public void AddTurningPoint(Vector3 position, TurnCommand turnCommand, float time) {
+            turningPoints.Add(new TurningPoint(position, turnCommand, time));
+        }
+
+        public Vector3[] GetPositions() {
+            var positions = new Vector3[turningPoints.Count];
+            var i = 0;
+            foreach (var turningPoint in turningPoints) {
+                positions[i++] = turningPoint.getPosition();
+            }
+            return positions;
+        }
+    }
+
+    public enum TurnCommand {Right, Left, None};
 
     TurnCommand turnCommand;
+
+    TurningPoints turningPoints;
 
     GameObject head;
     GameObject tail;
@@ -66,6 +103,9 @@ public class Player : MonoBehaviour
 
         // Turn command
         turnCommand = TurnCommand.None;
+
+        // Turning points
+        turningPoints = new TurningPoints();
 
         // Head
         head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -207,6 +247,9 @@ public class Player : MonoBehaviour
                     startTime = Time.time;
                     turning = true;
 
+                    // Track turning point
+                    turningPoints.AddTurningPoint(head.transform.position, turnCommand, startTime);
+
                     // Reset turn command
                     turnCommand = TurnCommand.None;
                 }
@@ -315,6 +358,10 @@ public class Player : MonoBehaviour
     //     journeyLength = Vector3.Distance(head.transform.position, currentWaypoint);
     //     journeyTime = (journeyLength / speed);
     // }
+
+    public TurningPoints GetTurningPoints() {
+        return turningPoints;
+    }
 
     public void Grow() {
         GameObject newPart = GameObject.Instantiate(tail);

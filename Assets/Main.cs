@@ -84,6 +84,10 @@ public class Main : MonoBehaviour
         return PLAYER_HEIGHT;
     }
 
+    public Player.TurningPoints GetTurningPoints() {
+        return player.GetComponent<Player>().GetTurningPoints();
+    }
+    
     // public Vector3 GetCurrentWaypoint() 
     // {
     //     return waypoints.GetComponent<Waypoints>().GetCurrentWaypoint();

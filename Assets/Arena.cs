@@ -7,13 +7,16 @@ public class Arena : MonoBehaviour
     Color floorColor = new Color32(255, 255, 255, 255);
     Color wallColor = new Color32(0, 0, 200, 255);
     Color gridColor = new Color32(0, 0, 0, 255);
+    Color pathColor = new Color32(200, 0, 0, 255);
     GameObject gridLines;
     private float gridSpacing;
     private float wallWidth = 5f;
     private float arenaWidth;
     private float playerHeight;
     
+    private Main main;
     public void Init(Main main) {
+        this.main = main;
         arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
         playerHeight = main.GetPlayerHeight();
@@ -78,8 +81,17 @@ public class Arena : MonoBehaviour
         // Draw grid lines
         var yPos = 0.4f - playerHeight/2;
         for (float i = -(arenaWidth/2) + gridSpacing; i < (arenaWidth/2); i = i + gridSpacing) {
-            DrawLine(gridLines, new Vector3(i, yPos, -(arenaWidth/2)), new Vector3(i, yPos, (arenaWidth/2)), gridColor, 0.2f);
-            DrawLine(gridLines, new Vector3(-(arenaWidth/2), yPos, i), new Vector3((arenaWidth/2), yPos, i), gridColor, 0.2f);
+            DrawLine(gridLines, new Vector3(i, yPos, -(arenaWidth/2)), new Vector3(i, yPos, (arenaWidth/2)), gridColor, 0.1f, 0.2f);
+            DrawLine(gridLines, new Vector3(-(arenaWidth/2), yPos, i), new Vector3((arenaWidth/2), yPos, i), gridColor, 0.1f, 0.2f);
+        }
+
+        // Draw turning path
+        var turningPositions = main.GetTurningPoints().GetPositions();
+
+        for (var i = 0; i<turningPositions.Length-1; i++) {
+            var pos1 = new Vector3(turningPositions[i].x, yPos, turningPositions[i].z);
+            var pos2 = new Vector3(turningPositions[i+1].x, yPos, turningPositions[i+1].z);
+            DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
         }
     }
 
@@ -87,7 +99,7 @@ public class Arena : MonoBehaviour
         transform.position += new Vector3(0, -playerHeight/2, 0);
     }
 
-    void DrawLine(GameObject parent, Vector3 start, Vector3 end, Color color, float duration = 0.2f)
+    void DrawLine(GameObject parent, Vector3 start, Vector3 end, Color color, float width, float duration = 0.2f)
     {
         GameObject myLine = new GameObject();
         myLine.name = "Line";
@@ -95,11 +107,11 @@ public class Arena : MonoBehaviour
         myLine.transform.position = start;
         myLine.AddComponent<LineRenderer>();
         LineRenderer lr = myLine.GetComponent<LineRenderer>();
-        lr.material = new Material(Shader.Find("Diffuse"));
+        lr.material = new Material(Shader.Find("Sprites/Default"));
         lr.startColor = color;
         lr.endColor = color;
-        lr.startWidth = 0.1f;
-        lr.endWidth = 0.1f;
+        lr.startWidth = width;
+        lr.endWidth = width;
         lr.SetPosition(0, start);
         lr.SetPosition(1, end);
         GameObject.Destroy(myLine, duration);
