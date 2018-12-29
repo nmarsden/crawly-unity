@@ -32,8 +32,6 @@ public class Arena : MonoBehaviour
         floor.transform.position = new Vector3(0, -0.6f, 0);
         AdjustPositionForPlayerHeight(floor.transform);
         floor.GetComponent<Renderer>().material.color = floorColor;
-        // TODO remove when finished debugging
-        //floor.SetActive(false);
 
         // Wall 1
         GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);

@@ -4,46 +4,10 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private class TurningPoint {
-        Vector3 position;
-        TurnCommand turnCommand;
-        float time;
-
-        public TurningPoint(Vector3 position, TurnCommand turnCommand, float time) {
-            this.position = position;
-            this.turnCommand = turnCommand;
-            this.time = time;
-        }
-
-        public Vector3 getPosition() {
-            return position;
-        }
-
-    }
-
-    public class TurningPoints {
-
-        List<TurningPoint> turningPoints = new List<TurningPoint>();
-
-        public void AddTurningPoint(Vector3 position, TurnCommand turnCommand, float time) {
-            turningPoints.Add(new TurningPoint(position, turnCommand, time));
-        }
-
-        public Vector3[] GetPositions() {
-            var positions = new Vector3[turningPoints.Count];
-            var i = 0;
-            foreach (var turningPoint in turningPoints) {
-                positions[i++] = turningPoint.getPosition();
-            }
-            return positions;
-        }
-    }
 
     public enum TurnCommand {Right, Left, None};
 
     TurnCommand turnCommand;
-
-    TurningPoints turningPoints;
 
     GameObject head;
     GameObject tail;
@@ -55,8 +19,8 @@ public class Player : MonoBehaviour
     private GameObject[] bodies;
     private int bodiesSize;
 
-    private float minDistance = 30; //20; //15;
-    private float speed = 30F;
+    private float minDistance = 5; //20; //15;
+    private float speed = 5F; //30F;
     private float gridSpacing;
     private float arenaWidth;
     private float yPos = 0;
@@ -66,9 +30,6 @@ public class Player : MonoBehaviour
     private float journeyLength;
     private float journeyTime;
     private bool isKeyPressed;
-
-    // TODO here for DEBUG
-    private Vector3 relativePos;
 
     Color bodyColor = new Color32(0, 200, 0, 255);
     Color antennaColor = new Color32(238,130,238, 255);
@@ -104,9 +65,6 @@ public class Player : MonoBehaviour
         // Turn command
         turnCommand = TurnCommand.None;
 
-        // Turning points
-        turningPoints = new TurningPoints();
-
         // Head
         head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         head.name = "Head";
@@ -131,6 +89,7 @@ public class Player : MonoBehaviour
         leftEye.transform.parent = head.transform;        
         leftEye.transform.position = head.transform.position;
         leftEye.transform.Translate(1, 1, 1.5f);
+        leftEye.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Left Pupil
         GameObject leftPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -140,6 +99,7 @@ public class Player : MonoBehaviour
         leftPupil.transform.parent = head.transform;        
         leftPupil.transform.position = head.transform.position;
         leftPupil.transform.Translate(1, 1.5f, 2.25f);
+        leftPupil.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Right Eye
         GameObject rightEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -149,6 +109,7 @@ public class Player : MonoBehaviour
         rightEye.transform.parent = head.transform;        
         rightEye.transform.position = head.transform.position;
         rightEye.transform.Translate(-1, 1, 1.5f);
+        rightEye.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Right Pupil
         GameObject rightPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -158,6 +119,7 @@ public class Player : MonoBehaviour
         rightPupil.transform.parent = head.transform;        
         rightPupil.transform.position = head.transform.position;
         rightPupil.transform.Translate(-1, 1.5f, 2.25f);
+        rightPupil.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Nose
         GameObject nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -167,6 +129,7 @@ public class Player : MonoBehaviour
         nose.transform.parent = head.transform;        
         nose.transform.position = head.transform.position;
         nose.transform.Translate(0, 0, 2.5f);
+        nose.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Mouth
         GameObject mouth = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -177,17 +140,26 @@ public class Player : MonoBehaviour
         mouth.transform.position = head.transform.position;
         mouth.transform.Translate(0, -1.5f, 1f);
         mouth.transform.rotation = Quaternion.AngleAxis(90, Vector3.up);
+        mouth.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Tail
         tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         tail.name = "Tail";
         tail.transform.parent = transform;    
-        tail.transform.localScale = new Vector3(gridSpacing, gridSpacing, gridSpacing);        
-        tail.transform.position = new Vector3(0, yPos, 0);
+        tail.transform.localScale = new Vector3(gridSpacing, playerHeight, gridSpacing);        
+        tail.transform.position = new Vector3(0, yPos, -minDistance);
         tail.GetComponent<Renderer>().material.color = bodyColor;
-        tail.GetComponent<Collider>().isTrigger = true;
-        // TODO remove when finished debugging
-        // tail.SetActive(false);
+        tail.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid bumping the head while moving
+
+        tail.AddComponent<Rigidbody>();
+
+        var tailRigidbody = tail.GetComponent<Rigidbody>();
+        tailRigidbody.isKinematic = false;
+        tailRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+        tailRigidbody.velocity = direction * speed;
+
+        tail.AddComponent<Tail>();
+        tail.GetComponent<Tail>().Init(main.GetTurningPoints());
 
         // Bodies
         bodies = new GameObject[100];
@@ -230,6 +202,8 @@ public class Player : MonoBehaviour
                         head.transform.position = new Vector3(xPos, head.transform.position.y, head.transform.position.z);
                     }
 
+                    var incomingDirection = direction;
+
                     // Update direction
                     if (turnCommand == TurnCommand.Right)
                     {
@@ -248,7 +222,17 @@ public class Player : MonoBehaviour
                     turning = true;
 
                     // Track turning point
-                    turningPoints.AddTurningPoint(head.transform.position, turnCommand, startTime);
+                    var turningPointUID = main.AddTurningPoint(head.transform.position, startTime, incomingDirection, direction);
+
+                    // Ensure any tails without a turningPointUID are given the latest turningPointUID
+                    for (int i = 1; i < bodiesSize; i++) {
+                        Tail tail = bodies[i].GetComponent<Tail>();
+                        if (tail.GetTurningPointUID() == null) {
+                            tail.SetTurningPointUID(turningPointUID);
+                        }
+                    }
+                    // TODO cleanup any turning points which are no longer needed
+
 
                     // Reset turn command
                     turnCommand = TurnCommand.None;
@@ -266,18 +250,7 @@ public class Player : MonoBehaviour
         headRigidbody.velocity = direction * speed;
         head.transform.rotation = headRotation;
 
-        // Move Tail
-        for (int i = 1; i < bodiesSize; i++) {
-            float distance = Vector3.Distance(bodies[i - 1].transform.position, bodies[i].transform.position);
-            float T = Time.deltaTime * distance / minDistance * speed;
-            Vector3 newPos = bodies[i-1].transform.position;
-            if (T > 1) {
-                T = 1;
-            }
-            bodies[i].transform.position = Vector3.Lerp(bodies[i].transform.position, newPos, T);
-		}
-
-        Debug.Log("[head:" + head.transform.position + "]");
+        Debug.Log("[head:" + head.transform.position + "][tail:" + bodies[1].transform.position + "]");
 
         // Debug.Log("[head:" + head.transform.position + "][currentWaypoint:" + currentWaypoint + "]");
 
@@ -288,85 +261,13 @@ public class Player : MonoBehaviour
 
     }
 
-    // void Update()
-    // {
-    //     if (isAtWaypoint) {
-    //         return;
-    //     }
-
-    //     if (!turning) {
-
-    //         float horizontal = Input.GetAxisRaw("Horizontal");
-    //         if (horizontal != 0) {
-    //             turning = true;
-    //             turningStartTime = Time.fixedTime;
-
-    //             currentWaypoint = main.AddTurningWaypoint(head.transform.position, direction, horizontal == 1);
-
-    //             UpdateCurrentWaypoint(currentWaypoint);
-    //         }
-    //     }
-
-    //     // Move Head
-    //     head.transform.rotation = Quaternion.Euler(0, 0, 0);
-
-    //     float timePassed = (Time.time - startTime);
-    //     float fracTime = (timePassed / journeyTime);
-    //     head.transform.position = Vector3.Lerp(startPos, currentWaypoint, fracTime);
-
-    //     head.transform.Rotate(Vector2.up, rotation);
-
-    //     // Move Tail
-    //     for (int i = 1; i < bodiesSize; i++) {
-    //         float distance = Vector3.Distance(bodies[i - 1].transform.position, bodies[i].transform.position);
-    //         float T = Time.deltaTime * distance / minDistance * speed;
-    //         Vector3 newPos = bodies[i-1].transform.position;
-    //         if (T > 1) {
-    //             T = 1;
-    //         }
-    //         bodies[i].transform.position = Vector3.Lerp(bodies[i].transform.position, newPos, T);
-	// 	}
-
-    //     // Debug.Log("[head:" + head.transform.position + "][currentWaypoint:" + currentWaypoint + "]");
-
-    //     // Grow when 'G' pressed
-    //     if (Input.GetKeyDown(KeyCode.G)) {
-    //         Grow();
-    //     }
-    // }
-
-    // public void PerformTurn(Vector3 currentWaypoint) {
-    //     UpdateCurrentWaypoint(currentWaypoint);
-    //     turning = false;
-    // }
-
-    // void UpdateCurrentWaypoint(Vector3 currentWaypoint) {
-    //     this.currentWaypoint = currentWaypoint;
-
-    //     Debug.Log("UpdateCurrentWaypoint [head:" + head.transform.position + "][currentWaypoint:" + currentWaypoint + "]");
-
-    //     // TODO setting the head position to the currentWaypoint is no longer correct
-    //     //head.transform.position = currentWaypoint;
-
-    //     // Go to next way point
-    //     var heading = currentWaypoint - head.transform.position;
-    //     direction = heading / heading.magnitude;
-    //     rotation = -Vector3.SignedAngle(heading, Vector3.forward, Vector3.up);
-
-    //     startPos = head.transform.position;
-    //     startTime = Time.time;
-    //     journeyLength = Vector3.Distance(head.transform.position, currentWaypoint);
-    //     journeyTime = (journeyLength / speed);
-    // }
-
-    public TurningPoints GetTurningPoints() {
-        return turningPoints;
-    }
-
     public void Grow() {
         GameObject newPart = GameObject.Instantiate(tail);
+        newPart.name = "Tail";
         newPart.transform.parent = transform;    
-        newPart.transform.position = bodies[bodiesSize-1].transform.position;
+        newPart.transform.position = bodies[bodiesSize-1].transform.position - (direction * minDistance);
+        newPart.GetComponent<Rigidbody>().velocity = direction * speed;
+        newPart.GetComponent<Tail>().Init(main.GetTurningPoints());
 
         bodies[bodiesSize] = newPart;
         bodiesSize++;

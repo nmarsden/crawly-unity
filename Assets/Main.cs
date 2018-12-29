@@ -11,6 +11,7 @@ public class Main : MonoBehaviour
     GameObject arena;
     GameObject player;
     GameObject food;
+    GameObject turningPoints;
     // GameObject waypoints;
 
     // bool handlingHitWaypoint;
@@ -28,6 +29,11 @@ public class Main : MonoBehaviour
         arena.name = "Arena";
         arena.AddComponent<Arena>();
         arena.GetComponent<Arena>().Init(this);
+
+        // -- Turning Points --
+        turningPoints = new GameObject();
+        turningPoints.name = "Turning Points";
+        turningPoints.AddComponent<TurningPoints>();
 
         // -- Waypoints --
         // waypoints = new GameObject();
@@ -66,6 +72,7 @@ public class Main : MonoBehaviour
         Object.Destroy(food);
         Object.Destroy(player);
         // Object.Destroy(waypoints);
+        Object.Destroy(turningPoints);
         Object.Destroy(arena);
     }
 
@@ -84,8 +91,12 @@ public class Main : MonoBehaviour
         return PLAYER_HEIGHT;
     }
 
-    public Player.TurningPoints GetTurningPoints() {
-        return player.GetComponent<Player>().GetTurningPoints();
+    public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {
+        return turningPoints.GetComponent<TurningPoints>().AddTurningPoint(position, time, incomingDirection, outgoingDirection);
+    }
+
+    public TurningPoints GetTurningPoints() {
+        return turningPoints.GetComponent<TurningPoints>();
     }
     
     // public Vector3 GetCurrentWaypoint() 

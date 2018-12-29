@@ -16,21 +16,21 @@ public class Head : MonoBehaviour
         
     }
 
-    void OnCollisionEnter(Collision collision) 
-    {
-        Debug.Log("collided with:" + collision.gameObject.name);
+    // void OnCollisionEnter(Collision collision) 
+    // {
+    //     Debug.Log("collided with:" + collision.gameObject.name);
 
-        if (collision.gameObject.name == "Food") 
-        {
-            main.HandleHitFood();
-            return;
-        }
-        // if (collision.gameObject.name == "Waypoint") 
-        // {
-        //     main.HandleHitWaypoint();
-        //     return;
-        // }
-    }
+    //     if (collision.gameObject.name == "Food") 
+    //     {
+    //         main.HandleHitFood();
+    //         return;
+    //     }
+    //     // if (collision.gameObject.name == "Waypoint") 
+    //     // {
+    //     //     main.HandleHitWaypoint();
+    //     //     return;
+    //     // }
+    // }
 
     // Update is called once per frame
     void Update()
