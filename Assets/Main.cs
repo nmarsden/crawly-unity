@@ -8,8 +8,8 @@ public class Main : MonoBehaviour
     const float ARENA_WIDTH = GRID_SPACING * 11; //105f;
     const float PLAYER_HEIGHT = 5f;
     const float PLAYER_WIDTH = 5f;
-
     const float PLAYER_SPEED = 10f;
+    const float TAIL_MIN_DISTANCE = 3f;
 
     GameObject arena;
     GameObject player;
@@ -87,6 +87,10 @@ public class Main : MonoBehaviour
     public float GetPlayerSpeed() 
     {
         return PLAYER_SPEED;
+    }
+
+    public float GetTailMinDistance() {
+        return TAIL_MIN_DISTANCE;
     }
 
     public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {

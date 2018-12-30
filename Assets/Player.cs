@@ -19,7 +19,7 @@ public class Player : MonoBehaviour
     private GameObject[] bodies;
     private int bodiesSize;
 
-    private float minDistance = 5; //20; //15;
+    private float tailMinDistance;
     private float speed;
     private float gridSpacing;
     private float arenaWidth;
@@ -56,6 +56,7 @@ public class Player : MonoBehaviour
         playerHeight = main.GetPlayerHeight();
         playerWidth = main.GetPlayerWidth();
         speed = main.GetPlayerSpeed();
+        tailMinDistance = main.GetTailMinDistance();
     }
 
     void Start()
@@ -146,7 +147,7 @@ public class Player : MonoBehaviour
         tail.name = "Tail 1";
         tail.transform.parent = transform;    
         tail.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
-        tail.transform.position = new Vector3(0, yPos, -minDistance);
+        tail.transform.position = new Vector3(0, yPos, -tailMinDistance);
         tail.GetComponent<Renderer>().material.color = bodyColor;
         tail.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid bumping the head while moving
 
@@ -158,7 +159,7 @@ public class Player : MonoBehaviour
         tailRigidbody.velocity = direction * speed;
 
         tail.AddComponent<Tail>();
-        tail.GetComponent<Tail>().Init(main.GetTurningPoints(), speed);
+        tail.GetComponent<Tail>().Init(main.GetTurningPoints(), speed, direction, head, tailMinDistance);
 
         // Bodies
         // TODO Use a List instead of an array for the bodies
@@ -326,16 +327,15 @@ public class Player : MonoBehaviour
         // Mark the existing tail tip as no longer the tip
         GameObject previousTipOfTail = bodies[bodiesSize-1];
         previousTipOfTail.GetComponent<Tail>().ClearTip();
+        var tailDirection = Vector3.Normalize(previousTipOfTail.GetComponent<Rigidbody>().velocity);
 
         // Add new tail part as tip of the tail
         GameObject newPart = GameObject.Instantiate(tail);
         newPart.name = "Tail " + bodiesSize;
         newPart.transform.parent = transform;    
-        // TODO Currently this could potentially position the new part outside the arena
-        var tailDirection = previousTipOfTail.GetComponent<Rigidbody>().velocity / speed;
-        newPart.transform.position = previousTipOfTail.transform.position - (tailDirection * minDistance);
+        newPart.transform.position = previousTipOfTail.transform.position;
         newPart.GetComponent<Rigidbody>().velocity = tailDirection * speed;
-        newPart.GetComponent<Tail>().Init(main.GetTurningPoints(), speed);
+        newPart.GetComponent<Tail>().Init(main.GetTurningPoints(), speed, tailDirection, previousTipOfTail, tailMinDistance);
 
         bodies[bodiesSize] = newPart;
         bodiesSize++;
