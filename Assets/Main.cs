@@ -10,6 +10,7 @@ public class Main : MonoBehaviour
     const float PLAYER_WIDTH = 5f;
     const float PLAYER_SPEED = 10f;
     const float TAIL_MIN_DISTANCE = 3f;
+    const bool IS_SHOW_TURNING_POINTS = false;
 
     GameObject arena;
     GameObject player;
@@ -91,6 +92,10 @@ public class Main : MonoBehaviour
 
     public float GetTailMinDistance() {
         return TAIL_MIN_DISTANCE;
+    }
+
+    public bool IsShowTurningPoints() {
+        return IS_SHOW_TURNING_POINTS;
     }
 
     public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {

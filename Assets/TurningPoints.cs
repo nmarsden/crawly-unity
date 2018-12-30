@@ -40,10 +40,12 @@ public class TurningPoints : MonoBehaviour
     float gridSpacing;
     float playerWidth;
     int totalTurningPointsAdded;
+    bool isShowTurningPoints;
 
     public void Init(Main main) {
         gridSpacing = main.GetGridSpacing();
         playerWidth = main.GetPlayerWidth();
+        isShowTurningPoints = main.IsShowTurningPoints();
         totalTurningPointsAdded = 0;
     }
 
@@ -73,7 +75,12 @@ public class TurningPoints : MonoBehaviour
         var halfDistancePerTick = 0.3f; // <-- This magic number seems to work!!!
         trigger.transform.position = position + (incomingDirection * (halfPlayerWidth + halfTriggerWidth - halfDistancePerTick));
 
-        trigger.GetComponent<Renderer>().material.color = new Color32(0,0,200, 255);
+        if (isShowTurningPoints) {
+            trigger.GetComponent<Renderer>().material.color = new Color32(0,0,200, 255);
+        } else {
+            Object.Destroy(trigger.GetComponent<Renderer>());
+        }
+        
         trigger.GetComponent<Collider>().isTrigger = true;
         trigger.AddComponent<TurningPointTrigger>();
         trigger.GetComponent<TurningPointTrigger>().Init(turningPointUID);
