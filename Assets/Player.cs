@@ -40,11 +40,8 @@ public class Player : MonoBehaviour
     Color mouthColor = new Color32(0, 0, 0, 255);
 
     Main main;
-    // Vector3 currentWaypoint;
     private float playerHeight;
     private float playerWidth;
-
-    bool isAtWaypoint = false;
 
     Rigidbody headRigidbody;
 
@@ -59,7 +56,6 @@ public class Player : MonoBehaviour
         playerHeight = main.GetPlayerHeight();
         playerWidth = main.GetPlayerWidth();
         speed = main.GetPlayerSpeed();
-        // this.currentWaypoint = main.GetCurrentWaypoint();
     }
 
     void Start()
@@ -83,9 +79,6 @@ public class Player : MonoBehaviour
         headRigidbody.isKinematic = false;
         headRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
         headRigidbody.velocity = direction * speed;
-
-        head.AddComponent<Head>();
-        head.GetComponent<Head>().Init(main);
 
         // Left Eye
         GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -173,8 +166,6 @@ public class Player : MonoBehaviour
 		bodies[0] = head;
 		bodies[1] = tail;
 		bodiesSize = 2;
-
-        // UpdateCurrentWaypoint(currentWaypoint);
 
         // Grid Point 1
         // gp1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -348,15 +339,5 @@ public class Player : MonoBehaviour
 
         bodies[bodiesSize] = newPart;
         bodiesSize++;
-    }
-
-    public void beforeAtWaypoint()
-    {
-        isAtWaypoint = true;
-    }
-
-    public void afterAtWaypoint()
-    {
-        isAtWaypoint = false;
     }
 }
