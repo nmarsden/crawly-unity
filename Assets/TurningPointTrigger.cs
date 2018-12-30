@@ -13,10 +13,10 @@ public class TurningPointTrigger : MonoBehaviour
     void OnTriggerEnter(Collider collider) 
     {
         // Check if the colliding Tail's turningPointUID matches the trigger's turningPointUID
-        if (collider.gameObject.name == "Tail") {
+        if (collider.gameObject.name.StartsWith("Tail")) {
             Tail tail = collider.GetComponent<Tail>();
 
-            Debug.Log("TurningPointTrigger OnTriggerEnter called: [trigger's turningPointUID:" + turningPointUID + "][tail's turningPointUID: " + tail.GetTurningPointUID() + "]");
+            // Debug.Log("TurningPointTrigger OnTriggerEnter called: [trigger's turningPointUID:" + turningPointUID + "][tail's turningPointUID: " + tail.GetTurningPointUID() + "]");
 
             if (tail.GetTurningPointUID() == turningPointUID) {
                 tail.Turn();

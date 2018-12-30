@@ -20,7 +20,7 @@ public class Player : MonoBehaviour
     private int bodiesSize;
 
     private float minDistance = 5; //20; //15;
-    private float speed = 5F; //30F;
+    private float speed;
     private float gridSpacing;
     private float arenaWidth;
     private float yPos = 0;
@@ -42,18 +42,23 @@ public class Player : MonoBehaviour
     Main main;
     // Vector3 currentWaypoint;
     private float playerHeight;
+    private float playerWidth;
 
     bool isAtWaypoint = false;
 
     Rigidbody headRigidbody;
 
     Quaternion headRotation;
+    // GameObject gp1;
+    // GameObject gp2;
 
     public void Init(Main main) {
         this.main = main;
         arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
         playerHeight = main.GetPlayerHeight();
+        playerWidth = main.GetPlayerWidth();
+        speed = main.GetPlayerSpeed();
         // this.currentWaypoint = main.GetCurrentWaypoint();
     }
 
@@ -69,7 +74,7 @@ public class Player : MonoBehaviour
         head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         head.name = "Head";
         head.transform.parent = transform;    
-        head.transform.localScale = new Vector3(gridSpacing, playerHeight, gridSpacing);        
+        head.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
         head.transform.position = new Vector3(0, yPos, 0);
         head.GetComponent<Renderer>().material.color = bodyColor;
         head.AddComponent<Rigidbody>();
@@ -77,6 +82,7 @@ public class Player : MonoBehaviour
         headRigidbody = head.GetComponent<Rigidbody>();
         headRigidbody.isKinematic = false;
         headRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
+        headRigidbody.velocity = direction * speed;
 
         head.AddComponent<Head>();
         head.GetComponent<Head>().Init(main);
@@ -144,9 +150,9 @@ public class Player : MonoBehaviour
 
         // Tail
         tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        tail.name = "Tail";
+        tail.name = "Tail 1";
         tail.transform.parent = transform;    
-        tail.transform.localScale = new Vector3(gridSpacing, playerHeight, gridSpacing);        
+        tail.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
         tail.transform.position = new Vector3(0, yPos, -minDistance);
         tail.GetComponent<Renderer>().material.color = bodyColor;
         tail.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid bumping the head while moving
@@ -159,47 +165,110 @@ public class Player : MonoBehaviour
         tailRigidbody.velocity = direction * speed;
 
         tail.AddComponent<Tail>();
-        tail.GetComponent<Tail>().Init(main.GetTurningPoints());
+        tail.GetComponent<Tail>().Init(main.GetTurningPoints(), speed);
 
         // Bodies
+        // TODO Use a List instead of an array for the bodies
         bodies = new GameObject[100];
 		bodies[0] = head;
 		bodies[1] = tail;
 		bodiesSize = 2;
 
         // UpdateCurrentWaypoint(currentWaypoint);
+
+        // Grid Point 1
+        // gp1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        // gp1.name = "GP1";
+        // gp1.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        // gp1.GetComponent<Renderer>().material.color = new Color32(200, 0, 0, 255);
+        // gp1.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
+
+        // // Grid Point 2
+        // gp2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        // gp2.name = "GP2";
+        // gp2.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        // gp2.GetComponent<Renderer>().material.color = new Color32(200, 0, 0, 255);
+        // gp2.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
     }
 
     void Update() {
         if (!turning && turnCommand == TurnCommand.None) {
             float horizontal = Input.GetAxisRaw("Horizontal");
+
+            // Debug.Log("horizontal: " + horizontal);
+
             if (horizontal != 0) {
                 turnCommand = (horizontal == 1) ? TurnCommand.Right : TurnCommand.Left;
             }
         }
+    }
+    
+    void FixedUpdate() {
 
         if (!turning) {
 
             if (turnCommand != TurnCommand.None) {
                 float diff;
+                Vector3 gridPos1;
+                Vector3 gridPos2;
+
                 // Determine whether head is allowed to turn at its current position
                 if (direction == Vector3.forward || direction == Vector3.back) {
-                    diff = Mathf.Abs(head.transform.position.z % gridSpacing);
+                    //diff = Mathf.Abs(head.transform.position.z % gridSpacing);
+
+                    var zPos1 = Mathf.Floor(head.transform.position.z / gridSpacing) * gridSpacing;
+                    var zPos2 = zPos1 + gridSpacing;
+                    gridPos1 = new Vector3(head.transform.position.x, head.transform.position.y, zPos1);
+                    gridPos2 = new Vector3(head.transform.position.x, head.transform.position.y, zPos2);
+
+                    // Debug.Log("Checking for turn position: [direction:" + direction + "][head: " + head.transform.position + "][behind: " + zBehind + "][ahead:" + zAhead + "]");
+
                 } else {
-                    diff = Mathf.Abs(head.transform.position.x % gridSpacing);
+                    //diff = Mathf.Abs(head.transform.position.x % gridSpacing);
+
+                    var xPos1 = Mathf.Floor(head.transform.position.x / gridSpacing) * gridSpacing;
+                    var xPos2 = xPos1 + gridSpacing;
+                    gridPos1 = new Vector3(xPos1, head.transform.position.y, head.transform.position.z);
+                    gridPos2 = new Vector3(xPos2, head.transform.position.y, head.transform.position.z);
                 }
-                if (diff < 0.3) {
+                // Update gp1 & gp2
+                // gp1.transform.position = gridPos1 + (Vector3.down * playerHeight * 0.5f);
+                // gp2.transform.position = gridPos2 + (Vector3.down * playerHeight * 0.5f);
+
+                var distanceToGridPos1 = Vector3.Distance(head.transform.position, gridPos1);
+                var distanceToGridPos2 = Vector3.Distance(head.transform.position, gridPos2);
+                diff = Mathf.Min(distanceToGridPos1, distanceToGridPos2);
+
+                // Debug.Log("Checking for turn position: [diff: " + diff + "][head: " + head.transform.position + "][gp1: " + gridPos1 + "][gp2: " + gridPos2 + "]");
+
+                // TODO the threshold needs to take into account the velocity
+                var threshold = 0.01F;
+                if (diff < threshold) {
+                    turning = true;
+
+                    var headPositionBeforeSnap = head.transform.position;
+
                     // Snap head position to grid
-                    if (direction == Vector3.forward || direction == Vector3.back) {
-                        var zPos = (head.transform.position.z > 0) ? 
-                                        Mathf.FloorToInt(head.transform.position.z / gridSpacing) * gridSpacing : 
-                                        Mathf.CeilToInt(head.transform.position.z / gridSpacing) * gridSpacing;
-                        head.transform.position = new Vector3(head.transform.position.x, head.transform.position.y, zPos);
-                    } else {
-                        var xPos = (head.transform.position.x > 0) ? 
-                                        Mathf.FloorToInt(head.transform.position.x / gridSpacing) * gridSpacing : 
-                                        Mathf.CeilToInt(head.transform.position.x / gridSpacing) * gridSpacing;
-                        head.transform.position = new Vector3(xPos, head.transform.position.y, head.transform.position.z);
+                    var snapGridPos = (distanceToGridPos1 < distanceToGridPos2) ? gridPos1 : gridPos2;
+                    head.transform.position = snapGridPos;
+
+                    // if (direction == Vector3.forward || direction == Vector3.back) {
+                    //     var zPos = (head.transform.position.z > 0) ? 
+                    //                     Mathf.FloorToInt(head.transform.position.z / gridSpacing) * gridSpacing : 
+                    //                     Mathf.CeilToInt(head.transform.position.z / gridSpacing) * gridSpacing;
+                    //     head.transform.position = new Vector3(head.transform.position.x, head.transform.position.y, zPos);
+                    // } else {
+                    //     var xPos = (head.transform.position.x > 0) ? 
+                    //                     Mathf.FloorToInt(head.transform.position.x / gridSpacing) * gridSpacing : 
+                    //                     Mathf.CeilToInt(head.transform.position.x / gridSpacing) * gridSpacing;
+                    //     head.transform.position = new Vector3(xPos, head.transform.position.y, head.transform.position.z);
+                    // }
+
+                    // Debug.Log("Turning Head [head (pre-snap):" + headPositionBeforeSnap + "][head (post-snap):" + head.transform.position + "]");
+
+                    var snapDistance = Vector3.Distance(headPositionBeforeSnap, head.transform.position);
+                    if (Vector3.Distance(headPositionBeforeSnap, head.transform.position) != 0) {
+                        // Debug.Log("**** Turning Head [snap distance:" + snapDistance + "]");
                     }
 
                     var incomingDirection = direction;
@@ -219,7 +288,6 @@ public class Player : MonoBehaviour
 
                     // Prevent turning again for a short time
                     startTime = Time.time;
-                    turning = true;
 
                     // Track turning point
                     var turningPointUID = main.AddTurningPoint(head.transform.position, startTime, incomingDirection, direction);
@@ -231,8 +299,12 @@ public class Player : MonoBehaviour
                             tail.SetTurningPointUID(turningPointUID);
                         }
                     }
-                    // TODO cleanup any turning points which are no longer needed
 
+                    // Turn Head
+                    headRigidbody.velocity = direction * speed;
+                    head.transform.rotation = headRotation;
+
+                    // Debug.Log("******************* Turn Head [head:" + head.transform.position + "][tail:" + bodies[1].transform.position + "][distance: " + Vector3.Distance(head.transform.position, bodies[1].transform.position));
 
                     // Reset turn command
                     turnCommand = TurnCommand.None;
@@ -247,12 +319,10 @@ public class Player : MonoBehaviour
         }
 
         // Move Head
-        headRigidbody.velocity = direction * speed;
-        head.transform.rotation = headRotation;
+        // headRigidbody.velocity = direction * speed;
+        // head.transform.rotation = headRotation;
 
-        Debug.Log("[head:" + head.transform.position + "][tail:" + bodies[1].transform.position + "]");
-
-        // Debug.Log("[head:" + head.transform.position + "][currentWaypoint:" + currentWaypoint + "]");
+        // Debug.Log("[head:" + head.transform.position + "][tail:" + bodies[1].transform.position + "]");
 
         // Grow when 'G' pressed
         if (Input.GetKeyDown(KeyCode.G)) {
@@ -262,12 +332,19 @@ public class Player : MonoBehaviour
     }
 
     public void Grow() {
+        // Mark the existing tail tip as no longer the tip
+        GameObject previousTipOfTail = bodies[bodiesSize-1];
+        previousTipOfTail.GetComponent<Tail>().ClearTip();
+
+        // Add new tail part as tip of the tail
         GameObject newPart = GameObject.Instantiate(tail);
-        newPart.name = "Tail";
+        newPart.name = "Tail " + bodiesSize;
         newPart.transform.parent = transform;    
-        newPart.transform.position = bodies[bodiesSize-1].transform.position - (direction * minDistance);
-        newPart.GetComponent<Rigidbody>().velocity = direction * speed;
-        newPart.GetComponent<Tail>().Init(main.GetTurningPoints());
+        // TODO Currently this could potentially position the new part outside the arena
+        var tailDirection = previousTipOfTail.GetComponent<Rigidbody>().velocity / speed;
+        newPart.transform.position = previousTipOfTail.transform.position - (tailDirection * minDistance);
+        newPart.GetComponent<Rigidbody>().velocity = tailDirection * speed;
+        newPart.GetComponent<Tail>().Init(main.GetTurningPoints(), speed);
 
         bodies[bodiesSize] = newPart;
         bodiesSize++;

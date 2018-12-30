@@ -5,12 +5,18 @@ using UnityEngine;
 public class Tail : MonoBehaviour
 {
     TurningPoints turningPoints;
+    float speed;
+    bool isTip;
+    bool isTurn;
 
     public string turningPointUID;
 
-    public void Init(TurningPoints turningPoints) {
+    public void Init(TurningPoints turningPoints, float speed) {
         this.turningPoints = turningPoints;
+        this.speed = speed;
         turningPointUID = this.turningPoints.GetFirstTurningPointUID();
+        isTip = true;
+        isTurn = false;
     }
 
     void Start()
@@ -18,12 +24,37 @@ public class Tail : MonoBehaviour
         
     }
 
-    void Update()
+    void FixedUpdate()
     {
+        if (isTurn) {
+            isTurn = false;
+            // Debug.Log("Turn [turningPointUID: "  + turningPointUID + "]");
+
+            // Change velocity according to the turning point's direction
+            var direction = turningPoints.GetDirection(turningPointUID);
+            gameObject.GetComponent<Rigidbody>().velocity = speed * direction;
+
+            // Snap position to turning point
+            var position = turningPoints.GetPosition(turningPointUID);
+            // Debug.Log("[tail (pre-snap):" + gameObject.transform.position + "][tail (post-snap):" + position + "]");
+            gameObject.transform.position = position;
+
+            // Update the turningPointUID to be the next one
+            var nextTurningPointUID = turningPoints.GetNextTurningPointUID(turningPointUID);
+
+            // Debug.Log(gameObject.name + ": Turn [turningPointUID: "  + turningPointUID + "][nextTurningPointUID: "  + nextTurningPointUID + "]");
+
+            if (isTip) {
+                turningPoints.RemoveTurningPoint(turningPointUID);
+            }
+            turningPointUID = nextTurningPointUID;
+        }
         
     }
 
     public void SetTurningPointUID(string turningPointUID) {
+        // Debug.Log(gameObject.name + ": SetTurningPointUID [turningPointUID:" + turningPointUID + "]");
+
         this.turningPointUID = turningPointUID;
     }
 
@@ -31,13 +62,10 @@ public class Tail : MonoBehaviour
         return turningPointUID;
     }
 
+    public void ClearTip() {
+        isTip = false;
+    }
     public void Turn() {
-        // Change velocity according to the turning point's direction
-        var direction = turningPoints.GetDirection(turningPointUID);
-        // TODO pass in speed instead of hardcoded 5
-        gameObject.GetComponent<Rigidbody>().velocity = 5 * direction;
-
-        // Update the turningPointUID to be the next one
-        turningPointUID = turningPoints.GetNextTurningPointUID(turningPointUID);
+        isTurn = true;
     }
 }

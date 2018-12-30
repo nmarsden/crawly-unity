@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    const float ARENA_WIDTH = 105f;
-    const float GRID_SPACING = 5f;
+    const float GRID_SPACING = 7f; //20f; //5f;
+    const float ARENA_WIDTH = GRID_SPACING * 11; //105f;
     const float PLAYER_HEIGHT = 5f;
+    const float PLAYER_WIDTH = 5f;
+
+    const float PLAYER_SPEED = 10f;
 
     GameObject arena;
     GameObject player;
@@ -24,16 +27,17 @@ public class Main : MonoBehaviour
         // Turn off physics
         // Physics.autoSimulation = false;
 
+        // -- Turning Points --
+        turningPoints = new GameObject();
+        turningPoints.name = "Turning Points";
+        turningPoints.AddComponent<TurningPoints>();
+        turningPoints.GetComponent<TurningPoints>().Init(this);
+
         // -- Arena --
         arena = new GameObject();
         arena.name = "Arena";
         arena.AddComponent<Arena>();
         arena.GetComponent<Arena>().Init(this);
-
-        // -- Turning Points --
-        turningPoints = new GameObject();
-        turningPoints.name = "Turning Points";
-        turningPoints.AddComponent<TurningPoints>();
 
         // -- Waypoints --
         // waypoints = new GameObject();
@@ -72,8 +76,8 @@ public class Main : MonoBehaviour
         Object.Destroy(food);
         Object.Destroy(player);
         // Object.Destroy(waypoints);
-        Object.Destroy(turningPoints);
         Object.Destroy(arena);
+        Object.Destroy(turningPoints);
     }
 
     public float GetArenaWidth() 
@@ -89,6 +93,16 @@ public class Main : MonoBehaviour
     public float GetPlayerHeight() 
     {
         return PLAYER_HEIGHT;
+    }
+
+    public float GetPlayerWidth() 
+    {
+        return PLAYER_WIDTH;
+    }
+
+    public float GetPlayerSpeed() 
+    {
+        return PLAYER_SPEED;
     }
 
     public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {
