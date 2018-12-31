@@ -13,10 +13,11 @@ public class Main : MonoBehaviour
     const bool IS_SHOW_TURNING_POINTS = false;
     const bool IS_SHOW_CELL_TRIGGERS = false;
 
+    GameObject turningPoints;
     GameObject arena;
     GameObject player;
     GameObject food;
-    GameObject turningPoints;
+    GameObject hud;
 
     void Start()
     {
@@ -43,6 +44,12 @@ public class Main : MonoBehaviour
         food.name = "Food Container";
         food.AddComponent<Food>();
         food.GetComponent<Food>().Init(this);
+
+        // -- HUD --
+        hud = new GameObject();
+        hud.name = "HUD";
+        hud.AddComponent<HUD>();
+        hud.GetComponent<HUD>().Init(this);
     }
 
     void Update()
@@ -60,6 +67,7 @@ public class Main : MonoBehaviour
     }
 
     void DestroyAllCreatedObjects() {
+        Object.Destroy(hud);
         Object.Destroy(food);
         Object.Destroy(player);
         Object.Destroy(arena);
