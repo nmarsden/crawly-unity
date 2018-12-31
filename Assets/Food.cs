@@ -53,11 +53,8 @@ public class Food : MonoBehaviour
         
     }
 
-    public void Reposition() {
-        // TODO ensure food is not moved to where the player is positioned
-        var foodX = gridSpacing * Random.Range(-4, 5);
-        var foodZ = gridSpacing * Random.Range(-4, 5);
-        food.transform.position = new Vector3(foodX, yPos, foodZ);
+    public void Reposition(float xPos, float zPos) {
+        food.transform.position = new Vector3(xPos, yPos, zPos);
     }
 
 }

@@ -11,6 +11,7 @@ public class Main : MonoBehaviour
     const float PLAYER_SPEED = 10f;
     const float TAIL_MIN_DISTANCE = 3f;
     const bool IS_SHOW_TURNING_POINTS = false;
+    const bool IS_SHOW_CELL_TRIGGERS = false;
 
     GameObject arena;
     GameObject player;
@@ -98,6 +99,10 @@ public class Main : MonoBehaviour
         return IS_SHOW_TURNING_POINTS;
     }
 
+    public bool IsShowCellTriggers() {
+        return IS_SHOW_CELL_TRIGGERS;
+    }
+
     public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {
         return turningPoints.GetComponent<TurningPoints>().AddTurningPoint(position, time, incomingDirection, outgoingDirection);
     }
@@ -108,7 +113,12 @@ public class Main : MonoBehaviour
 
     public void HandleHitFood() 
     {
-        food.GetComponent<Food>().Reposition();
+        // Reposition food in an empty position
+        List<Vector3> emptyPositions = arena.GetComponent<Arena>().GetEmptyPositions();
+        var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
+        food.GetComponent<Food>().Reposition(position.x, position.z);
+
+        // Grow player
         player.GetComponent<Player>().Grow();
     }
 }

@@ -13,6 +13,10 @@ public class Arena : MonoBehaviour
     private float wallWidth = 5f;
     private float arenaWidth;
     private float playerHeight;
+    private bool isShowTurningPoints;
+    private bool isShowCellTriggers;
+    private int totalCellCount;
+    private GameObject cellsContainer;
     
     private Main main;
     public void Init(Main main) {
@@ -20,6 +24,9 @@ public class Arena : MonoBehaviour
         arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
         playerHeight = main.GetPlayerHeight();
+        isShowTurningPoints = main.IsShowTurningPoints();
+        isShowCellTriggers = main.IsShowCellTriggers();
+        totalCellCount = 0;
     }
 
     void Start()
@@ -69,6 +76,10 @@ public class Arena : MonoBehaviour
         AdjustPositionForPlayerHeight(wall4.transform);
         wall4.GetComponent<Renderer>().material.color = wallColor;
 
+        // Cells
+        AddCells();
+
+        // Grid Lines
         gridLines = new GameObject();
         gridLines.name = "Grid Lines";
         gridLines.transform.parent = transform;    
@@ -77,19 +88,21 @@ public class Arena : MonoBehaviour
     void Update()
     {
         // Draw grid lines
-        var yPos = 0.4f - playerHeight/2;
+        var yPos = 0.1f - playerHeight/2;
         for (float i = -(arenaWidth/2) + gridSpacing; i < (arenaWidth/2); i = i + gridSpacing) {
             DrawLine(gridLines, new Vector3(i, yPos, -(arenaWidth/2)), new Vector3(i, yPos, (arenaWidth/2)), gridColor, 0.1f, 0.2f);
             DrawLine(gridLines, new Vector3(-(arenaWidth/2), yPos, i), new Vector3((arenaWidth/2), yPos, i), gridColor, 0.1f, 0.2f);
         }
 
         // Draw turning path
-        var turningPositions = main.GetTurningPoints().GetPositions();
+        if (isShowTurningPoints) {
+            var turningPositions = main.GetTurningPoints().GetPositions();
 
-        for (var i = 0; i<turningPositions.Length-1; i++) {
-            var pos1 = new Vector3(turningPositions[i].x, yPos, turningPositions[i].z);
-            var pos2 = new Vector3(turningPositions[i+1].x, yPos, turningPositions[i+1].z);
-            DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
+            for (var i = 0; i<turningPositions.Length-1; i++) {
+                var pos1 = new Vector3(turningPositions[i].x, yPos, turningPositions[i].z);
+                var pos2 = new Vector3(turningPositions[i+1].x, yPos, turningPositions[i+1].z);
+                DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
+            }
         }
     }
 
@@ -113,5 +126,47 @@ public class Arena : MonoBehaviour
         lr.SetPosition(0, start);
         lr.SetPosition(1, end);
         GameObject.Destroy(myLine, duration);
+    }
+
+    void AddCells() {
+        cellsContainer = new GameObject();
+        cellsContainer.name = "Cells";
+        cellsContainer.transform.parent = transform;    
+
+        for (float x = -(arenaWidth/2) + (gridSpacing/2); x < (arenaWidth/2); x = x + gridSpacing) {
+            for (float z = -(arenaWidth/2) + (gridSpacing/2); z < (arenaWidth/2); z = z + gridSpacing) {
+                AddCell(cellsContainer, new Vector3(x, 0, z));
+            }
+        }
+    }
+
+    void AddCell(GameObject cellsContainer, Vector3 position) {
+
+        GameObject trigger = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        trigger.name = "Cell " + totalCellCount++;
+        trigger.transform.parent = cellsContainer.transform;    
+        trigger.transform.localScale = new Vector3(gridSpacing, playerHeight, gridSpacing);        
+        trigger.transform.position = position;
+
+        if (isShowCellTriggers) {
+            Material material = new Material(Shader.Find("Transparent/Diffuse"));
+            trigger.GetComponent<Renderer>().material = material;
+        } else {
+            Object.Destroy(trigger.GetComponent<Renderer>());
+        }
+        
+        trigger.GetComponent<Collider>().isTrigger = true;
+        trigger.AddComponent<CellTrigger>();
+    }
+
+    public List<Vector3> GetEmptyPositions() {
+        var cellTriggers = cellsContainer.GetComponentsInChildren<CellTrigger>();
+        var emptyPositions = new List<Vector3>();
+        foreach (CellTrigger cellTrigger in cellTriggers) {
+            if (!cellTrigger.IsTriggered()) {
+                emptyPositions.Add(cellTrigger.GetPosition());
+            }
+        }
+        return emptyPositions;
     }
 }
