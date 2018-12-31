@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
 
     public enum TurnCommand {Right, Left, None};
+    public enum HittableStatus {HITTABLE, UNHITTABLE};
 
     TurnCommand turnCommand;
 
@@ -159,7 +160,7 @@ public class Player : MonoBehaviour
         tailRigidbody.velocity = direction * speed;
 
         tail.AddComponent<Tail>();
-        tail.GetComponent<Tail>().Init(main.GetTurningPoints(), speed, direction, head, tailMinDistance);
+        tail.GetComponent<Tail>().Init(main, Player.HittableStatus.UNHITTABLE, speed, direction, head, tailMinDistance);
 
         // Bodies
         // TODO Use a List instead of an array for the bodies
@@ -330,12 +331,13 @@ public class Player : MonoBehaviour
         var tailDirection = Vector3.Normalize(previousTipOfTail.GetComponent<Rigidbody>().velocity);
 
         // Add new tail part as tip of the tail
+        var hittableStatus = bodiesSize > 4 ? Player.HittableStatus.HITTABLE : Player.HittableStatus.UNHITTABLE;
         GameObject newPart = GameObject.Instantiate(tail);
         newPart.name = "Tail " + bodiesSize;
         newPart.transform.parent = transform;    
         newPart.transform.position = previousTipOfTail.transform.position;
         newPart.GetComponent<Rigidbody>().velocity = tailDirection * speed;
-        newPart.GetComponent<Tail>().Init(main.GetTurningPoints(), speed, tailDirection, previousTipOfTail, tailMinDistance);
+        newPart.GetComponent<Tail>().Init(main, hittableStatus, speed, tailDirection, previousTipOfTail, tailMinDistance);
 
         bodies[bodiesSize] = newPart;
         bodiesSize++;

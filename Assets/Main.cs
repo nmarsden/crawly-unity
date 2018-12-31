@@ -19,8 +19,13 @@ public class Main : MonoBehaviour
     GameObject food;
     GameObject hud;
 
+    bool isGameOver;
+
     void Start()
     {
+        Time.timeScale = 1;
+        isGameOver = false;
+
         // -- Turning Points --
         turningPoints = new GameObject();
         turningPoints.name = "Turning Points";
@@ -54,10 +59,20 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        // Reset when 'R' pressed
-        if (Input.GetKeyDown(KeyCode.R)) 
-        {
-            Reset();
+        if (isGameOver) {
+            // -- Game Over --
+            // Wait for key press to Reset game
+            if (Input.anyKey) 
+            {
+                Reset();
+            }
+        } else {
+            // -- Game In Progress --
+            // Reset when 'R' pressed
+            if (Input.GetKeyDown(KeyCode.R)) 
+            {
+                Reset();
+            }
         }
     }
 
@@ -129,4 +144,24 @@ public class Main : MonoBehaviour
         // Grow player
         player.GetComponent<Player>().Grow();
     }
+
+    public void HandleHitWall() {
+        GameOver();
+    }
+
+    public void HandleHitTail() {
+        GameOver();
+    }
+
+    private void GameOver() {
+        // Switch to Game Over mode
+        isGameOver = true;
+
+        // Pause Game
+        Time.timeScale = 0;
+
+        // Display Game Over message
+        hud.GetComponent<HUD>().ShowGameOverMessage();
+    }
+
 }

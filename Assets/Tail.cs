@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Tail : MonoBehaviour
 {
+    Main main;
     TurningPoints turningPoints;
     float speed;
     Vector3 direction;
@@ -11,14 +12,18 @@ public class Tail : MonoBehaviour
     bool isTurn;
     GameObject leader;
     float tailMinDistance;
+    Player.HittableStatus hittableStatus;
+
     Rigidbody tailRigidbody;
     Rigidbody leaderRigidbody;
 
     public string turningPointUID;
 
 
-    public void Init(TurningPoints turningPoints, float speed, Vector3 direction, GameObject leader, float tailMinDistance) {
-        this.turningPoints = turningPoints;
+    public void Init(Main main, Player.HittableStatus hittableStatus, float speed, Vector3 direction, GameObject leader, float tailMinDistance) {
+        this.main = main;
+        this.hittableStatus = hittableStatus;
+        this.turningPoints = main.GetTurningPoints();
         this.speed = speed;
         this.direction = direction;
         turningPointUID = this.turningPoints.GetFirstTurningPointUID();
@@ -28,6 +33,13 @@ public class Tail : MonoBehaviour
         tailRigidbody = gameObject.GetComponent<Rigidbody>();
         leaderRigidbody = leader.GetComponent<Rigidbody>();
         this.tailMinDistance = tailMinDistance;
+    }
+
+    void OnTriggerEnter(Collider collider) 
+    {
+        if (hittableStatus.Equals(Player.HittableStatus.HITTABLE) && collider.gameObject.name == "Head") {
+            main.HandleHitTail();
+        }
     }
 
     void Start()

@@ -4,6 +4,21 @@ using UnityEngine;
 
 public class Arena : MonoBehaviour
 {
+        public class WallTrigger : MonoBehaviour
+    {
+        Main main;
+
+        public void Init(Main main) 
+        {
+            this.main = main;
+        }
+        void OnTriggerEnter(Collider collider) 
+        {
+            main.HandleHitWall();
+        }
+
+    }
+
     Color floorColor = new Color32(255, 255, 255, 255);
     Color wallColor = new Color32(0, 0, 200, 255);
     Color gridColor = new Color32(0, 0, 0, 255);
@@ -11,11 +26,13 @@ public class Arena : MonoBehaviour
     GameObject gridLines;
     private float gridSpacing;
     private float wallWidth = 5f;
+    private float wallHeight = 2.5f;
     private float arenaWidth;
     private float playerHeight;
     private bool isShowTurningPoints;
     private bool isShowCellTriggers;
     private int totalCellCount;
+    private int totalWallCount;
     private GameObject cellsContainer;
     
     private Main main;
@@ -40,41 +57,8 @@ public class Arena : MonoBehaviour
         AdjustPositionForPlayerHeight(floor.transform);
         floor.GetComponent<Renderer>().material.color = floorColor;
 
-        // Wall 1
-        GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wall.name = "Wall 1";
-        wall.transform.parent = transform;    
-        wall.transform.localScale = new Vector3(arenaWidth + (wallWidth*2), wallWidth, wallWidth);        
-        wall.transform.position = new Vector3(0, (wallWidth/2), (arenaWidth/2) + (wallWidth/2));
-        AdjustPositionForPlayerHeight(wall.transform);
-        wall.GetComponent<Renderer>().material.color = wallColor;
-
-        // Wall 2
-        GameObject wall2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wall2.name = "Wall 2";
-        wall2.transform.parent = transform;    
-        wall2.transform.localScale = new Vector3(arenaWidth + (wallWidth*2), wallWidth, wallWidth);        
-        wall2.transform.position = new Vector3(0, (wallWidth/2), -((arenaWidth/2) + (wallWidth/2)));
-        AdjustPositionForPlayerHeight(wall2.transform);
-        wall2.GetComponent<Renderer>().material.color = wallColor;
-
-        // Wall 3
-        GameObject wall3 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wall3.name = "Wall 3";
-        wall3.transform.parent = transform;    
-        wall3.transform.localScale = new Vector3(wallWidth, wallWidth, arenaWidth + (wallWidth*2));         
-        wall3.transform.position = new Vector3((arenaWidth/2) + (wallWidth/2), (wallWidth/2), 0);
-        AdjustPositionForPlayerHeight(wall3.transform);
-        wall3.GetComponent<Renderer>().material.color = wallColor;
-
-        // Wall 4
-        GameObject wall4 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        wall4.name = "Wall 4";
-        wall4.transform.parent = transform;    
-        wall4.transform.localScale = new Vector3(wallWidth, wallWidth, arenaWidth + (wallWidth*2));         
-        wall4.transform.position = new Vector3(-((arenaWidth/2) + (wallWidth/2)), (wallWidth/2), 0);
-        AdjustPositionForPlayerHeight(wall4.transform);
-        wall4.GetComponent<Renderer>().material.color = wallColor;
+        // Walls
+        AddWalls();
 
         // Cells
         AddCells();
@@ -126,6 +110,32 @@ public class Arena : MonoBehaviour
         lr.SetPosition(0, start);
         lr.SetPosition(1, end);
         GameObject.Destroy(myLine, duration);
+    }
+
+    void AddWalls() {
+        var yPos = (wallHeight/2);
+        var wallLength = arenaWidth + (wallWidth*2);
+        var halfWallWidth = (wallWidth/2);
+        var halfArenaWidth = (arenaWidth/2);
+        var offset = halfArenaWidth + halfWallWidth + 0.5f; // <- extra 0.5f gap so that the wall is not hit when turning next to it.
+
+        AddWall(new Vector3(      0, yPos,  offset), new Vector3(wallLength, wallHeight,  wallWidth));
+        AddWall(new Vector3(      0, yPos, -offset), new Vector3(wallLength, wallHeight,  wallWidth));        
+        AddWall(new Vector3( offset, yPos,       0), new Vector3(wallWidth,  wallHeight, wallLength));         
+        AddWall(new Vector3(-offset, yPos,       0), new Vector3(wallWidth,  wallHeight, wallLength));         
+    }
+
+    void AddWall(Vector3 position, Vector3 scale) {
+        GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wall.name = "Wall " + totalWallCount++;
+        wall.transform.parent = transform;    
+        wall.transform.localScale = scale;        
+        wall.transform.position = position;
+        AdjustPositionForPlayerHeight(wall.transform);
+        wall.GetComponent<Renderer>().material.color = wallColor;
+        wall.GetComponent<Collider>().isTrigger = true;
+        wall.AddComponent<WallTrigger>();
+        wall.GetComponent<WallTrigger>().Init(main);
     }
 
     void AddCells() {

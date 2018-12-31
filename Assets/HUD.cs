@@ -7,6 +7,7 @@ public class HUD : MonoBehaviour
 {
     Main main;
     Font font;
+    GameObject gameOverText;
 
     public void Init(Main main) 
     {
@@ -29,18 +30,36 @@ public class HUD : MonoBehaviour
         // Setup font
         font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
 
-        // Title Text
+        // Title text
+        var titleText = AddText("crawly", TextAnchor.LowerLeft, new Color32(0, 255, 0, 100));
+        titleText.name = "Title";
+
+        // Game Over text
+        gameOverText = AddText("GAME OVER", TextAnchor.MiddleCenter, new Color32(200, 0, 0, 255));
+        gameOverText.name = "Game Over";
+        gameOverText.SetActive(false);
+    }
+
+    void Update()
+    {
+        
+    }
+
+    public void ShowGameOverMessage() {
+        gameOverText.SetActive(true);
+    }
+
+    public GameObject AddText(string textContent, TextAnchor allignment, Color32 color) {
         var myText = new GameObject();
         myText.transform.parent = gameObject.transform;
-        myText.name = "Title";
 
         var text = myText.AddComponent<Text>();
         text.font = font;
-        text.text = "crawly";
+        text.text = textContent;
         text.fontSize = 140;
         text.fontStyle = FontStyle.Bold;
-        text.color = new Color32(0, 255, 0, 100);
-        text.alignment = TextAnchor.LowerLeft;
+        text.color = color;
+        text.alignment = allignment;
 
         // Title text position
         var rectTransform = text.GetComponent<RectTransform>();
@@ -48,10 +67,7 @@ public class HUD : MonoBehaviour
         var hudRectTransform = gameObject.GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(hudRectTransform.rect.width, hudRectTransform.rect.height);
         rectTransform.localScale = new Vector3(1, 1, 1);
-    }
 
-    void Update()
-    {
-        
+        return myText;
     }
 }
