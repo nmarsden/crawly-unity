@@ -281,6 +281,7 @@ public class Player : MonoBehaviour
 
         // Add new tail part as tip of the tail
         GameObject newPart = GameObject.Instantiate(lastTail);
+        newPart.transform.parent = transform;
         newPart.GetComponent<Tail>().Init(main, tailLength++, speed, lastTail, tailMinDistance);
         lastTail = newPart;
     }
