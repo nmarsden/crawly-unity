@@ -82,6 +82,12 @@ public class Main : MonoBehaviour
     }
 
     void DestroyAllCreatedObjects() {
+
+        // TODO Fix error sometimes occurring when 'Reset' 
+        //      Error -> MissingReferenceException: The object of type 'Rigidbody' has been destroyed but you are still trying to access it.
+        //               Tail.FixedUpdate () (at Assets/Tail.cs:77)
+        //      Possible Solution:
+        //               1. Do the Reset() during Main's FixedUpdate instead of Update & set Time.timeScale = 0;
         Object.Destroy(hud);
         Object.Destroy(food);
         Object.Destroy(player);

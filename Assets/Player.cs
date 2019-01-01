@@ -11,12 +11,11 @@ public class Player : MonoBehaviour
     TurnCommand turnCommand;
 
     GameObject head;
-    GameObject tail;
+    GameObject lastTail;
     bool turning = false;
     float rotation = 0;
 
-    private GameObject[] bodies;
-    private int bodiesSize;
+    private int tailLength;
 
     private float tailMinDistance;
     private float speed;
@@ -138,30 +137,20 @@ public class Player : MonoBehaviour
         mouth.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Tail
-        tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        tail.name = "Tail 1";
+        GameObject tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         tail.transform.parent = transform;    
         tail.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
-        tail.transform.position = new Vector3(0, yPos, -tailMinDistance);
         tail.GetComponent<Renderer>().material.color = bodyColor;
         tail.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid bumping the head while moving
-
         tail.AddComponent<Rigidbody>();
-
+        tail.AddComponent<Tail>();
         var tailRigidbody = tail.GetComponent<Rigidbody>();
         tailRigidbody.isKinematic = false;
         tailRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
-        tailRigidbody.velocity = initialHeadDirection * speed;
 
-        tail.AddComponent<Tail>();
-        tail.GetComponent<Tail>().Init(main, Player.HittableStatus.UNHITTABLE, speed, initialHeadDirection, head, tailMinDistance);
+        tail.GetComponent<Tail>().Init(main, tailLength++, speed, head, tailMinDistance);
 
-        // Bodies
-        // TODO Use a List instead of an array for the bodies
-        bodies = new GameObject[100];
-		bodies[0] = head;
-		bodies[1] = tail;
-		bodiesSize = 2;
+        lastTail = tail;
 
         // Grid Point 1
         // gp1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -255,12 +244,12 @@ public class Player : MonoBehaviour
                     var turningPointUID = main.AddTurningPoint(head.transform.position, incomingDirection, direction);
 
                     // Ensure any tails without a turningPointUID are given the latest turningPointUID
-                    // TODO instead of looping through all tails, could keep a list of trails without a turningPointUID
-                    for (int i = 1; i < bodiesSize; i++) {
-                        Tail tail = bodies[i].GetComponent<Tail>();
+                    var tail = lastTail.GetComponent<Tail>();
+                    while(tail != null) {
                         if (tail.GetTurningPointUID() == null) {
                             tail.SetTurningPointUID(turningPointUID);
                         }
+                        tail = tail.GetLeader().GetComponent<Tail>();
                     }
 
                     // Turn Head
@@ -288,20 +277,12 @@ public class Player : MonoBehaviour
 
     public void Grow() {
         // Mark the existing tail tip as no longer the tip
-        GameObject previousTipOfTail = bodies[bodiesSize-1];
-        previousTipOfTail.GetComponent<Tail>().ClearTip();
-        var tailDirection = Vector3.Normalize(previousTipOfTail.GetComponent<Rigidbody>().velocity);
+        lastTail.GetComponent<Tail>().ClearTip();
 
         // Add new tail part as tip of the tail
-        var hittableStatus = bodiesSize > 4 ? Player.HittableStatus.HITTABLE : Player.HittableStatus.UNHITTABLE;
-        GameObject newPart = GameObject.Instantiate(tail);
-        newPart.name = "Tail " + bodiesSize;
-        newPart.transform.parent = transform;    
-        newPart.transform.position = previousTipOfTail.transform.position;
-        newPart.GetComponent<Rigidbody>().velocity = tailDirection * speed;
-        newPart.GetComponent<Tail>().Init(main, hittableStatus, speed, tailDirection, previousTipOfTail, tailMinDistance);
-
-        bodies[bodiesSize] = newPart;
-        bodiesSize++;
+        GameObject newPart = GameObject.Instantiate(lastTail);
+        newPart.GetComponent<Tail>().Init(main, tailLength++, speed, lastTail, tailMinDistance);
+        lastTail = newPart;
     }
+
 }

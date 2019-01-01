@@ -20,18 +20,24 @@ public class Tail : MonoBehaviour
     public string turningPointUID;
 
 
-    public void Init(Main main, Player.HittableStatus hittableStatus, float speed, Vector3 direction, GameObject leader, float tailMinDistance) {
+    public void Init(Main main, float tailLength, float speed, GameObject leader, float tailMinDistance) {
         this.main = main;
-        this.hittableStatus = hittableStatus;
-        this.turningPoints = main.GetTurningPoints();
-        this.speed = speed;
-        this.direction = direction;
-        turningPointUID = this.turningPoints.GetFirstTurningPointUID();
-        isTip = true;
-        isTurn = false;
         this.leader = leader;
         tailRigidbody = gameObject.GetComponent<Rigidbody>();
         leaderRigidbody = leader.GetComponent<Rigidbody>();
+
+        direction = Vector3.Normalize(leaderRigidbody.velocity);
+
+        hittableStatus = tailLength > 4 ? Player.HittableStatus.HITTABLE : Player.HittableStatus.UNHITTABLE;
+        gameObject.name = "Tail " + tailLength;
+        gameObject.transform.position = leader.transform.position;
+        gameObject.GetComponent<Rigidbody>().velocity = direction * speed;
+
+        this.turningPoints = main.GetTurningPoints();
+        this.speed = speed;
+        turningPointUID = this.turningPoints.GetFirstTurningPointUID();
+        isTip = true;
+        isTurn = false;
         this.tailMinDistance = tailMinDistance;
     }
 
@@ -90,6 +96,10 @@ public class Tail : MonoBehaviour
         return turningPointUID;
     }
 
+    public GameObject GetLeader() {
+        return leader;
+    }
+    
     public void ClearTip() {
         isTip = false;
     }
