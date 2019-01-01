@@ -19,7 +19,7 @@ public class Food : MonoBehaviour
 
     }
 
-    Color foodColor = new Color32(200, 0, 0, 255);
+    Color foodColor = new Color32(18, 140, 30, 255); // dark green
 
     GameObject food;
 

@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    Color activeColor = new Color32(200, 0, 0, 255);
-    Color nonActiveColor = new Color32(255, 255, 255, 255);
+    Color basicColor = new Color32(102, 255, 41, 255); // green
+    Color activeColor = new Color32(134, 255, 94, 255); // lighter green
+    Color nonActiveColor = new Color32(255, 255, 255, 255); // white
 
     bool isActivated;
     float activatedTime;
@@ -21,7 +22,7 @@ public class Cell : MonoBehaviour
     {
         isActivated = cellType.Equals(Arena.CellType.BASIC);    
         cellMaterial = gameObject.GetComponent<Renderer>().material;
-        cellMaterial.color = isActivated ? activeColor : nonActiveColor;
+        cellMaterial.color = GetInitialColor();
     }
 
     void Update()
@@ -54,4 +55,11 @@ public class Cell : MonoBehaviour
         return isActivated;
     }
 
+    Color32 GetInitialColor() {
+        if (cellType.Equals(Arena.CellType.ACTIVATABLE)) {
+            return isActivated ? activeColor : nonActiveColor;
+        } else {
+            return basicColor;
+        }
+    }
 }

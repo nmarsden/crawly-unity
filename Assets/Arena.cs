@@ -20,9 +20,9 @@ public class Arena : MonoBehaviour
     }
 
     public enum CellType { BASIC, ACTIVATABLE };
-
-    Color floorColor = new Color32(255, 255, 255, 255);
-    Color wallColor = new Color32(0, 0, 200, 255);
+    Color floorColor = new Color32(0, 0, 0, 255); // black
+    Color wallColor = new Color32(239, 27, 33, 255); // red
+    //Color wallColor = new Color32(67, 67, 191, 255); // blue
     Color gridColor = new Color32(0, 0, 0, 255);
     Color pathColor = new Color32(200, 0, 0, 255);
     GameObject gridLines;
@@ -63,7 +63,7 @@ public class Arena : MonoBehaviour
         floor.transform.localScale = new Vector3(arenaWidth + wallWidth, 1, arenaWidth + wallWidth);        
         floor.transform.position = new Vector3(0, -0.6f, 0);
         AdjustPositionForPlayerHeight(floor.transform);
-        floor.GetComponent<Renderer>().material.color = new Color32(200, 0, 0, 255);
+        floor.GetComponent<Renderer>().material.color = floorColor;
 
         // Walls
         AddWalls();
@@ -185,7 +185,6 @@ public class Arena : MonoBehaviour
         cell.transform.parent = cellsContainer.transform;    
         cell.transform.localScale = new Vector3(gridSpacing, 1, gridSpacing);        
         cell.transform.position = position;
-        cell.GetComponent<Renderer>().material.color = floorColor;
         cell.GetComponent<Collider>().isTrigger = true;
         cell.AddComponent<Cell>();
         cell.GetComponent<Cell>().Init(cellType);
