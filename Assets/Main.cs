@@ -126,8 +126,8 @@ public class Main : MonoBehaviour
         return IS_SHOW_CELL_TRIGGERS;
     }
 
-    public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {
-        return turningPoints.GetComponent<TurningPoints>().AddTurningPoint(position, time, incomingDirection, outgoingDirection);
+    public string AddTurningPoint(Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
+        return turningPoints.GetComponent<TurningPoints>().AddTurningPoint(position, incomingDirection, outgoingDirection);
     }
 
     public TurningPoints GetTurningPoints() {

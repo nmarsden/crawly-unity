@@ -29,6 +29,7 @@ public class CellTrigger : MonoBehaviour
     void Update()
     {
         if (isTriggered) {
+            // Stay triggered for the 'stayDuration'
             if (Time.time - triggerTime > stayDuration) {
                 isTriggered = false;
             }

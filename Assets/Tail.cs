@@ -51,21 +51,16 @@ public class Tail : MonoBehaviour
     {
         if (isTurn) {
             isTurn = false;
-            // Debug.Log("Turn [turningPointUID: "  + turningPointUID + "]");
 
             // Change velocity according to the turning point's direction
             direction = turningPoints.GetDirection(turningPointUID);
             tailRigidbody.velocity = speed * direction;
 
             // Snap position to turning point
-            var position = turningPoints.GetPosition(turningPointUID);
-            // Debug.Log("[tail (pre-snap):" + gameObject.transform.position + "][tail (post-snap):" + position + "]");
-            gameObject.transform.position = position;
+            gameObject.transform.position = turningPoints.GetPosition(turningPointUID);;
 
             // Update the turningPointUID to be the next one
             var nextTurningPointUID = turningPoints.GetNextTurningPointUID(turningPointUID);
-
-            // Debug.Log(gameObject.name + ": Turn [turningPointUID: "  + turningPointUID + "][nextTurningPointUID: "  + nextTurningPointUID + "]");
 
             if (isTip) {
                 turningPoints.RemoveTurningPoint(turningPointUID);
@@ -88,8 +83,6 @@ public class Tail : MonoBehaviour
     }
 
     public void SetTurningPointUID(string turningPointUID) {
-        // Debug.Log(gameObject.name + ": SetTurningPointUID [turningPointUID:" + turningPointUID + "]");
-
         this.turningPointUID = turningPointUID;
     }
 

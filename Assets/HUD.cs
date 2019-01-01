@@ -50,10 +50,11 @@ public class HUD : MonoBehaviour
     }
 
     public GameObject AddText(string textContent, TextAnchor allignment, Color32 color) {
-        var myText = new GameObject();
-        myText.transform.parent = gameObject.transform;
+        var textObject = new GameObject();
+        textObject.transform.parent = gameObject.transform;
 
-        var text = myText.AddComponent<Text>();
+        // Setup Text component
+        var text = textObject.AddComponent<Text>();
         text.font = font;
         text.text = textContent;
         text.fontSize = 140;
@@ -61,13 +62,13 @@ public class HUD : MonoBehaviour
         text.color = color;
         text.alignment = allignment;
 
-        // Title text position
+        // Setup Text's RectTransform component
         var rectTransform = text.GetComponent<RectTransform>();
         rectTransform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
         var hudRectTransform = gameObject.GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(hudRectTransform.rect.width, hudRectTransform.rect.height);
         rectTransform.localScale = new Vector3(1, 1, 1);
 
-        return myText;
+        return textObject;
     }
 }

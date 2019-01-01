@@ -13,8 +13,6 @@ public class Player : MonoBehaviour
     GameObject head;
     GameObject tail;
     bool turning = false;
-    float turningStartTime;
-    Vector3 direction;
     float rotation = 0;
 
     private GameObject[] bodies;
@@ -26,15 +24,9 @@ public class Player : MonoBehaviour
     private float arenaWidth;
     private float yPos = 0;
 
-    private Vector3 startPos;
-    private float startTime;
-    private float journeyLength;
-    private float journeyTime;
-    private bool isKeyPressed;
+    private float turningStartTime;
 
     Color bodyColor = new Color32(0, 200, 0, 255);
-    Color antennaColor = new Color32(238,130,238, 255);
-    Color hatColor = new Color32(0, 0, 200, 255);
     Color noseColor = new Color32(0, 100, 0, 255);
     Color eyeColor = new Color32(255, 255, 255, 255);
     Color pupilColor = new Color32(0, 0, 0, 255);
@@ -62,8 +54,10 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        // TODO Extract a Head object
+
         // Direction
-        direction = Vector3.forward;
+        var initialHeadDirection = Vector3.forward;
 
         // Turn command
         turnCommand = TurnCommand.None;
@@ -80,7 +74,7 @@ public class Player : MonoBehaviour
         headRigidbody = head.GetComponent<Rigidbody>();
         headRigidbody.isKinematic = false;
         headRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
-        headRigidbody.velocity = direction * speed;
+        headRigidbody.velocity = initialHeadDirection * speed;
 
         // Left Eye
         GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -157,10 +151,10 @@ public class Player : MonoBehaviour
         var tailRigidbody = tail.GetComponent<Rigidbody>();
         tailRigidbody.isKinematic = false;
         tailRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
-        tailRigidbody.velocity = direction * speed;
+        tailRigidbody.velocity = initialHeadDirection * speed;
 
         tail.AddComponent<Tail>();
-        tail.GetComponent<Tail>().Init(main, Player.HittableStatus.UNHITTABLE, speed, direction, head, tailMinDistance);
+        tail.GetComponent<Tail>().Init(main, Player.HittableStatus.UNHITTABLE, speed, initialHeadDirection, head, tailMinDistance);
 
         // Bodies
         // TODO Use a List instead of an array for the bodies
@@ -188,8 +182,6 @@ public class Player : MonoBehaviour
         if (!turning && turnCommand == TurnCommand.None) {
             float horizontal = Input.GetAxisRaw("Horizontal");
 
-            // Debug.Log("horizontal: " + horizontal);
-
             if (horizontal != 0) {
                 turnCommand = (horizontal == 1) ? TurnCommand.Right : TurnCommand.Left;
             }
@@ -205,19 +197,19 @@ public class Player : MonoBehaviour
                 Vector3 gridPos1;
                 Vector3 gridPos2;
 
+                // TODO Extract method getSnappedGridPositionWithinThreshold(Vector3 position, Vector3 direction, float threshold)
+
+                Vector3 direction = Vector3.Normalize(headRigidbody.velocity);
+
                 // Determine whether head is allowed to turn at its current position
                 if (direction == Vector3.forward || direction == Vector3.back) {
-                    //diff = Mathf.Abs(head.transform.position.z % gridSpacing);
 
                     var zPos1 = Mathf.Floor(head.transform.position.z / gridSpacing) * gridSpacing;
                     var zPos2 = zPos1 + gridSpacing;
                     gridPos1 = new Vector3(head.transform.position.x, head.transform.position.y, zPos1);
                     gridPos2 = new Vector3(head.transform.position.x, head.transform.position.y, zPos2);
 
-                    // Debug.Log("Checking for turn position: [direction:" + direction + "][head: " + head.transform.position + "][behind: " + zBehind + "][ahead:" + zAhead + "]");
-
                 } else {
-                    //diff = Mathf.Abs(head.transform.position.x % gridSpacing);
 
                     var xPos1 = Mathf.Floor(head.transform.position.x / gridSpacing) * gridSpacing;
                     var xPos2 = xPos1 + gridSpacing;
@@ -232,37 +224,14 @@ public class Player : MonoBehaviour
                 var distanceToGridPos2 = Vector3.Distance(head.transform.position, gridPos2);
                 diff = Mathf.Min(distanceToGridPos1, distanceToGridPos2);
 
-                // Debug.Log("Checking for turn position: [diff: " + diff + "][head: " + head.transform.position + "][gp1: " + gridPos1 + "][gp2: " + gridPos2 + "]");
-
                 // TODO the threshold needs to take into account the velocity
                 var threshold = 0.01F;
                 if (diff < threshold) {
                     turning = true;
 
-                    var headPositionBeforeSnap = head.transform.position;
-
                     // Snap head position to grid
                     var snapGridPos = (distanceToGridPos1 < distanceToGridPos2) ? gridPos1 : gridPos2;
                     head.transform.position = snapGridPos;
-
-                    // if (direction == Vector3.forward || direction == Vector3.back) {
-                    //     var zPos = (head.transform.position.z > 0) ? 
-                    //                     Mathf.FloorToInt(head.transform.position.z / gridSpacing) * gridSpacing : 
-                    //                     Mathf.CeilToInt(head.transform.position.z / gridSpacing) * gridSpacing;
-                    //     head.transform.position = new Vector3(head.transform.position.x, head.transform.position.y, zPos);
-                    // } else {
-                    //     var xPos = (head.transform.position.x > 0) ? 
-                    //                     Mathf.FloorToInt(head.transform.position.x / gridSpacing) * gridSpacing : 
-                    //                     Mathf.CeilToInt(head.transform.position.x / gridSpacing) * gridSpacing;
-                    //     head.transform.position = new Vector3(xPos, head.transform.position.y, head.transform.position.z);
-                    // }
-
-                    // Debug.Log("Turning Head [head (pre-snap):" + headPositionBeforeSnap + "][head (post-snap):" + head.transform.position + "]");
-
-                    var snapDistance = Vector3.Distance(headPositionBeforeSnap, head.transform.position);
-                    if (Vector3.Distance(headPositionBeforeSnap, head.transform.position) != 0) {
-                        // Debug.Log("**** Turning Head [snap distance:" + snapDistance + "]");
-                    }
 
                     var incomingDirection = direction;
 
@@ -280,12 +249,13 @@ public class Player : MonoBehaviour
                     headRotation = Quaternion.LookRotation(direction);
 
                     // Prevent turning again for a short time
-                    startTime = Time.time;
+                    turningStartTime = Time.time;
 
                     // Track turning point
-                    var turningPointUID = main.AddTurningPoint(head.transform.position, startTime, incomingDirection, direction);
+                    var turningPointUID = main.AddTurningPoint(head.transform.position, incomingDirection, direction);
 
                     // Ensure any tails without a turningPointUID are given the latest turningPointUID
+                    // TODO instead of looping through all tails, could keep a list of trails without a turningPointUID
                     for (int i = 1; i < bodiesSize; i++) {
                         Tail tail = bodies[i].GetComponent<Tail>();
                         if (tail.GetTurningPointUID() == null) {
@@ -297,25 +267,17 @@ public class Player : MonoBehaviour
                     headRigidbody.velocity = direction * speed;
                     head.transform.rotation = headRotation;
 
-                    // Debug.Log("******************* Turn Head [head:" + head.transform.position + "][tail:" + bodies[1].transform.position + "][distance: " + Vector3.Distance(head.transform.position, bodies[1].transform.position));
-
                     // Reset turn command
                     turnCommand = TurnCommand.None;
                 }
             }
         } else {
             // Prevent turning again for a short time
-            float timePassed = (Time.time - startTime);
+            float timePassed = (Time.time - turningStartTime);
             if (timePassed > 0.1) {
                 turning = false;
             }
         }
-
-        // Move Head
-        // headRigidbody.velocity = direction * speed;
-        // head.transform.rotation = headRotation;
-
-        // Debug.Log("[head:" + head.transform.position + "][tail:" + bodies[1].transform.position + "]");
 
         // Grow when 'G' pressed
         if (Input.GetKeyDown(KeyCode.G)) {

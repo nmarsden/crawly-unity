@@ -6,14 +6,12 @@ public class TurningPoints : MonoBehaviour
 {
     public class TurningPoint {
         Vector3 position;
-        float time;
         GameObject trigger;
         Vector3 outgoingDirection;
         string turningPointUID;
 
-        public TurningPoint(Vector3 position, float time, GameObject trigger, Vector3 outgoingDirection, string turningPointUID) {
+        public TurningPoint(Vector3 position, GameObject trigger, Vector3 outgoingDirection, string turningPointUID) {
             this.position = position;
-            this.time = time;
             this.trigger = trigger;
             this.outgoingDirection = outgoingDirection;
             this.turningPointUID = turningPointUID;
@@ -59,7 +57,7 @@ public class TurningPoints : MonoBehaviour
         
     }
 
-    public string AddTurningPoint(Vector3 position, float time, Vector3 incomingDirection, Vector3 outgoingDirection) {
+    public string AddTurningPoint(Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
         var turningPointUID = totalTurningPointsAdded.ToString();
         totalTurningPointsAdded++;
 
@@ -85,9 +83,7 @@ public class TurningPoints : MonoBehaviour
         trigger.AddComponent<TurningPointTrigger>();
         trigger.GetComponent<TurningPointTrigger>().Init(turningPointUID);
 
-        turningPoints.Add(int.Parse(turningPointUID), new TurningPoint(position, time, trigger, outgoingDirection, turningPointUID));
-
-        // Debug.Log("Added Turning Point [turningPointUID: " + turningPointUID);
+        turningPoints.Add(int.Parse(turningPointUID), new TurningPoint(position, trigger, outgoingDirection, turningPointUID));
 
         return turningPointUID;
     }
@@ -125,8 +121,6 @@ public class TurningPoints : MonoBehaviour
     }
 
     public void RemoveTurningPoint(string turningPointUID) {
-        // Debug.Log("Removing Turning Point [turningPointUID: " + turningPointUID);
-
         turningPoints[int.Parse(turningPointUID)].Cleanup();
         turningPoints.Remove(int.Parse(turningPointUID));
     }

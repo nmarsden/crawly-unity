@@ -16,8 +16,6 @@ public class TurningPointTrigger : MonoBehaviour
         if (collider.gameObject.name.StartsWith("Tail")) {
             Tail tail = collider.GetComponent<Tail>();
 
-            // Debug.Log("TurningPointTrigger OnTriggerEnter called: [trigger's turningPointUID:" + turningPointUID + "][tail's turningPointUID: " + tail.GetTurningPointUID() + "]");
-
             if (tail.GetTurningPointUID() == turningPointUID) {
                 tail.Turn();
             }
