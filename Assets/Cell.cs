@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    Color basicColor = new Color32(102, 255, 41, 255); // green
-    Color activeColor = new Color32(134, 255, 94, 255); // lighter green
+    Color basicColor = new Color32(42, 255, 42, 255); // green
+    Color activeColor = new Color32(74, 255, 0, 255); // lighter green
     Color nonActiveColor = new Color32(255, 255, 255, 255); // white
 
     bool isActivated;
@@ -38,8 +38,8 @@ public class Cell : MonoBehaviour
             // Update color
             var color = nonActiveColor;
             if (isActivated) {
-                // Over time, change the active color to be 50% non active color
-                color = Color32.Lerp(activeColor, nonActiveColor, 0.5f * (Time.time - activatedTime) / activatedDuration);
+                // Over time, change the active color to be 40% non active color
+                color = Color32.Lerp(activeColor, nonActiveColor, 0.4f * (Time.time - activatedTime) / activatedDuration);
             }
             cellMaterial.color = color;
         }
