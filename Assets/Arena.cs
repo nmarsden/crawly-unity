@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Arena : MonoBehaviour
 {
-        public class WallTrigger : MonoBehaviour
+    public class WallTrigger : MonoBehaviour
     {
         Main main;
 
@@ -19,12 +19,15 @@ public class Arena : MonoBehaviour
 
     }
 
+    public enum CellType { BASIC, ACTIVATABLE };
+
     Color floorColor = new Color32(255, 255, 255, 255);
     Color wallColor = new Color32(0, 0, 200, 255);
     Color gridColor = new Color32(0, 0, 0, 255);
     Color pathColor = new Color32(200, 0, 0, 255);
     GameObject gridLines;
     private float gridSpacing;
+    private float numberOfCells;
     private float wallWidth = 5f;
     private float wallHeight = 2.5f;
     private float arenaWidth;
@@ -40,6 +43,7 @@ public class Arena : MonoBehaviour
         this.main = main;
         arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
+        numberOfCells = (arenaWidth / gridSpacing) * (arenaWidth / gridSpacing);
         playerHeight = main.GetPlayerHeight();
         isShowTurningPoints = main.IsShowTurningPoints();
         isShowCellTriggers = main.IsShowCellTriggers();
@@ -55,7 +59,7 @@ public class Arena : MonoBehaviour
         floor.transform.localScale = new Vector3(arenaWidth + wallWidth, 1, arenaWidth + wallWidth);        
         floor.transform.position = new Vector3(0, -0.6f, 0);
         AdjustPositionForPlayerHeight(floor.transform);
-        floor.GetComponent<Renderer>().material.color = floorColor;
+        floor.GetComponent<Renderer>().material.color = new Color32(200, 0, 0, 255);
 
         // Walls
         AddWalls();
@@ -87,6 +91,11 @@ public class Arena : MonoBehaviour
                 var pos2 = new Vector3(turningPositions[i+1].x, yPos, turningPositions[i+1].z);
                 DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
             }
+        }
+
+        // Check if all cells are activated
+        if (GetNumberOfActivatedCells() == numberOfCells) {
+            main.HandleAllCellsActivated();
         }
     }
 
@@ -145,17 +154,34 @@ public class Arena : MonoBehaviour
 
         for (float x = -(arenaWidth/2) + (gridSpacing/2); x < (arenaWidth/2); x = x + gridSpacing) {
             for (float z = -(arenaWidth/2) + (gridSpacing/2); z < (arenaWidth/2); z = z + gridSpacing) {
-                AddCell(cellsContainer, new Vector3(x, 0, z));
+                GameObject cell = AddCell(cellsContainer, new Vector3(x, -0.4f, z));
+                AdjustPositionForPlayerHeight(cell.transform);
+
+                AddCellTrigger(cell, new Vector3(x, 0, z));
             }
         }
     }
 
-    void AddCell(GameObject cellsContainer, Vector3 position) {
+    GameObject AddCell(GameObject cellsContainer, Vector3 position) {
+        GameObject cell = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cell.name = "Cell " + totalCellCount++;
+        cell.transform.parent = cellsContainer.transform;    
+        cell.transform.localScale = new Vector3(gridSpacing, 1, gridSpacing);        
+        cell.transform.position = position;
+        cell.GetComponent<Renderer>().material.color = floorColor;
+        cell.GetComponent<Collider>().isTrigger = true;
+        cell.AddComponent<Cell>();
+        // TODO pass in CellType
+        cell.GetComponent<Cell>().Init(position.z > 0 || position.x > 0 ? CellType.BASIC : CellType.ACTIVATABLE);
 
+        return cell;
+    }
+
+    void AddCellTrigger(GameObject cell, Vector3 position) {
         GameObject trigger = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        trigger.name = "Cell " + totalCellCount++;
-        trigger.transform.parent = cellsContainer.transform;    
-        trigger.transform.localScale = new Vector3(gridSpacing, playerHeight, gridSpacing);        
+        trigger.name = "Cell Trigger" + totalCellCount++;
+        trigger.transform.parent = cell.transform;    
+        trigger.transform.localScale = new Vector3(1, playerHeight, 1);        
         trigger.transform.position = position;
 
         if (isShowCellTriggers) {
@@ -179,4 +205,16 @@ public class Arena : MonoBehaviour
         }
         return emptyPositions;
     }
+    
+    public int GetNumberOfActivatedCells() {
+        var cells = cellsContainer.GetComponentsInChildren<Cell>();
+        var numberOfActiveCells = 0;
+        foreach (Cell cell in cells) {
+            if (cell.IsActivated()) {
+                numberOfActiveCells++;
+            }
+        }
+        return numberOfActiveCells;
+    }
+
 }

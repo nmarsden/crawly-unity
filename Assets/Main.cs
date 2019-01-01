@@ -6,6 +6,7 @@ public class Main : MonoBehaviour
 {
     const float GRID_SPACING = 7f;
     const float ARENA_WIDTH_IN_CELLS = 5;
+    const float NUMBER_OF_CELLS = ARENA_WIDTH_IN_CELLS * ARENA_WIDTH_IN_CELLS;
     const float ARENA_WIDTH = GRID_SPACING * ARENA_WIDTH_IN_CELLS;
     const float PLAYER_HEIGHT = 5f;
     const float PLAYER_WIDTH = 5f;
@@ -21,11 +22,13 @@ public class Main : MonoBehaviour
     GameObject hud;
 
     bool isGameOver;
+    bool isGameCompleted;
 
     void Start()
     {
         Time.timeScale = 1;
         isGameOver = false;
+        isGameCompleted = false;
 
         // -- Turning Points --
         turningPoints = new GameObject();
@@ -60,8 +63,8 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (isGameOver) {
-            // -- Game Over --
+        if (isGameCompleted || isGameOver) {
+            // -- Game Completed OR Game Over --
             // Wait for key press to Reset game
             if (Input.anyKey) 
             {
@@ -153,6 +156,21 @@ public class Main : MonoBehaviour
         GameOver();
     }
 
+    public void HandleAllCellsActivated() {
+        GameCompleted();    
+    }
+    
+    private void GameCompleted() {
+        // Switch to Game Completed mode
+        isGameCompleted = true;
+
+        // Pause Game
+        Time.timeScale = 0;
+
+        // Display Game Completed message
+        hud.GetComponent<HUD>().ShowGameCompletedMessage();
+    }
+
     private void GameOver() {
         // Switch to Game Over mode
         isGameOver = true;
@@ -166,5 +184,9 @@ public class Main : MonoBehaviour
 
     public List<Vector3> GetEmptyPositions() {
         return arena.GetComponent<Arena>().GetEmptyPositions();
+    }
+
+    public int GetFilledPercentage() {
+        return (int) Mathf.Floor((arena.GetComponent<Arena>().GetNumberOfActivatedCells() / NUMBER_OF_CELLS) * 100);
     }
 }

@@ -8,19 +8,24 @@ public class CellTrigger : MonoBehaviour
     Color nonTriggeredColor = new Color32(100, 0, 0, 50);
 
     bool isTriggered = false;
-    Material material;
+    Material triggerMaterial;
     float triggerTime;
     float stayDuration = 0.3f;
+    Cell cell;
 
     void Start()
     {
-        material = gameObject.GetComponent<Renderer>().material;
+        cell = gameObject.transform.parent.GetComponent<Cell>();
+        triggerMaterial = gameObject.GetComponent<Renderer>().material;
         triggerTime = 0;
     }
 
     void OnTriggerStay(Collider collider) {
 
         if (collider.gameObject.name == "Head" || collider.gameObject.name.StartsWith("Tail")) {
+
+            cell.Activate();
+
             isTriggered = true;
             triggerTime = Time.time;
         }
@@ -34,7 +39,7 @@ public class CellTrigger : MonoBehaviour
                 isTriggered = false;
             }
         }
-        material.color = isTriggered ? triggeredColor : nonTriggeredColor;
+        triggerMaterial.color = isTriggered ? triggeredColor : nonTriggeredColor;
     }
 
     public bool IsTriggered() {

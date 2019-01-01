@@ -7,6 +7,8 @@ public class HUD : MonoBehaviour
 {
     Main main;
     Font font;
+    GameObject fillText;
+    GameObject gameCompletedText;
     GameObject gameOverText;
 
     public void Init(Main main) 
@@ -34,19 +36,32 @@ public class HUD : MonoBehaviour
         var titleText = AddText("crawly", TextAnchor.LowerLeft, new Color32(0, 255, 0, 100));
         titleText.name = "Title";
 
+        // Fill text
+        fillText = AddText("Fill", TextAnchor.LowerRight, new Color32(0, 255, 0, 100));
+        titleText.name = "Fill";
+
+        // Game Completed text
+        gameCompletedText = AddText("COMPLETE", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200));
+        gameCompletedText.name = "Game Completed";
+        gameCompletedText.SetActive(false);
+
         // Game Over text
-        gameOverText = AddText("GAME OVER", TextAnchor.MiddleCenter, new Color32(200, 0, 0, 255));
+        gameOverText = AddText("GAME OVER", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200));
         gameOverText.name = "Game Over";
         gameOverText.SetActive(false);
     }
 
     void Update()
     {
-        
+        fillText.GetComponent<Text>().text = "filled: " + main.GetFilledPercentage() + "%";
     }
 
     public void ShowGameOverMessage() {
         gameOverText.SetActive(true);
+    }
+
+    public void ShowGameCompletedMessage() {
+        gameCompletedText.SetActive(true);
     }
 
     public GameObject AddText(string textContent, TextAnchor allignment, Color32 color) {
