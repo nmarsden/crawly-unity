@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    const float GRID_SPACING = 7f; //20f; //5f;
-    const float ARENA_WIDTH = GRID_SPACING * 11; //105f;
+    const float GRID_SPACING = 7f;
+    const float ARENA_WIDTH_IN_CELLS = 5;
+    const float ARENA_WIDTH = GRID_SPACING * ARENA_WIDTH_IN_CELLS;
     const float PLAYER_HEIGHT = 5f;
     const float PLAYER_WIDTH = 5f;
     const float PLAYER_SPEED = 10f;
@@ -137,10 +138,8 @@ public class Main : MonoBehaviour
 
     public void HandleHitFood() 
     {
-        // Reposition food in an empty position
-        List<Vector3> emptyPositions = arena.GetComponent<Arena>().GetEmptyPositions();
-        var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
-        food.GetComponent<Food>().Reposition(position.x, position.z);
+        // Reposition food
+        food.GetComponent<Food>().Reposition();
 
         // Grow player
         player.GetComponent<Player>().Grow();
@@ -165,4 +164,7 @@ public class Main : MonoBehaviour
         hud.GetComponent<HUD>().ShowGameOverMessage();
     }
 
+    public List<Vector3> GetEmptyPositions() {
+        return arena.GetComponent<Arena>().GetEmptyPositions();
+    }
 }

@@ -41,11 +41,12 @@ public class Food : MonoBehaviour
         food.name = "Food";
         food.transform.parent = transform;    
         food.transform.localScale = new Vector3(2, 2, 2);        
-        food.transform.position = new Vector3(gridSpacing * 3, yPos, gridSpacing * 3);
         food.GetComponent<Renderer>().material.color = foodColor;
         food.GetComponent<Collider>().isTrigger = true;
         food.AddComponent<FoodTrigger>();
         food.GetComponent<FoodTrigger>().Init(main);
+
+        Reposition();
     }
 
     void Update()
@@ -53,8 +54,11 @@ public class Food : MonoBehaviour
         
     }
 
-    public void Reposition(float xPos, float zPos) {
-        food.transform.position = new Vector3(xPos, yPos, zPos);
+    public void Reposition() {
+        List<Vector3> emptyPositions = main.GetEmptyPositions();
+        var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
+
+        food.transform.position = new Vector3(position.x, yPos, position.z);
     }
 
 }
