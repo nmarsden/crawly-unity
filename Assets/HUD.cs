@@ -10,10 +10,12 @@ public class HUD : MonoBehaviour
     GameObject fillText;
     GameObject gameCompletedText;
     GameObject gameOverText;
+    int currentLevelNum;
 
     public void Init(Main main) 
     {
         this.main = main;
+        currentLevelNum = main.GetCurrentLevelNum();
     }
 
     void Start()
@@ -35,6 +37,10 @@ public class HUD : MonoBehaviour
         // Title text
         var titleText = AddText("crawly", TextAnchor.LowerLeft, new Color32(0, 255, 0, 100));
         titleText.name = "Title";
+
+        // Level Number text
+        var levelNumText = AddText("Level " + currentLevelNum, TextAnchor.UpperRight, new Color32(255, 255, 255, 100));
+        levelNumText.name = "Level Number";
 
         // Fill text
         fillText = AddText("Fill", TextAnchor.LowerRight, new Color32(0, 255, 0, 100));

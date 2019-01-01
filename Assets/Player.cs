@@ -20,7 +20,6 @@ public class Player : MonoBehaviour
     private float tailMinDistance;
     private float speed;
     private float gridSpacing;
-    private float arenaWidth;
     private float yPos = 0;
 
     private float turningStartTime;
@@ -43,7 +42,6 @@ public class Player : MonoBehaviour
 
     public void Init(Main main) {
         this.main = main;
-        arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
         playerHeight = main.GetPlayerHeight();
         playerWidth = main.GetPlayerWidth();

@@ -27,7 +27,7 @@ public class Arena : MonoBehaviour
     Color pathColor = new Color32(200, 0, 0, 255);
     GameObject gridLines;
     private float gridSpacing;
-    private float numberOfCells;
+    private int numberOfCells;
     private float wallWidth = 5f;
     private float wallHeight = 2.5f;
     private float arenaWidth;
@@ -35,19 +35,23 @@ public class Arena : MonoBehaviour
     private bool isShowTurningPoints;
     private bool isShowCellTriggers;
     private int totalCellCount;
+    private int totalCellTriggerCount;
     private int totalWallCount;
     private GameObject cellsContainer;
+    private int currentLevelNum;
     
     private Main main;
     public void Init(Main main) {
         this.main = main;
         arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
-        numberOfCells = (arenaWidth / gridSpacing) * (arenaWidth / gridSpacing);
+        numberOfCells = (int) Mathf.Floor((arenaWidth / gridSpacing) * (arenaWidth / gridSpacing));
         playerHeight = main.GetPlayerHeight();
         isShowTurningPoints = main.IsShowTurningPoints();
         isShowCellTriggers = main.IsShowCellTriggers();
+        currentLevelNum = main.GetCurrentLevelNum();
         totalCellCount = 0;
+        totalCellTriggerCount = 0;
     }
 
     void Start()
@@ -122,11 +126,12 @@ public class Arena : MonoBehaviour
     }
 
     void AddWalls() {
+        var arenaPadding = 0.5f; // <- padding between arena and wall so that the wall is not hit when turning next to it.
         var yPos = (wallHeight/2);
-        var wallLength = arenaWidth + (wallWidth*2);
+        var wallLength = arenaWidth + (arenaPadding*2) + (wallWidth*2);
         var halfWallWidth = (wallWidth/2);
         var halfArenaWidth = (arenaWidth/2);
-        var offset = halfArenaWidth + halfWallWidth + 0.5f; // <- extra 0.5f gap so that the wall is not hit when turning next to it.
+        var offset = halfArenaWidth + halfWallWidth + arenaPadding; 
 
         AddWall(new Vector3(      0, yPos,  offset), new Vector3(wallLength, wallHeight,  wallWidth));
         AddWall(new Vector3(      0, yPos, -offset), new Vector3(wallLength, wallHeight,  wallWidth));        
@@ -152,17 +157,29 @@ public class Arena : MonoBehaviour
         cellsContainer.name = "Cells";
         cellsContainer.transform.parent = transform;    
 
-        for (float x = -(arenaWidth/2) + (gridSpacing/2); x < (arenaWidth/2); x = x + gridSpacing) {
-            for (float z = -(arenaWidth/2) + (gridSpacing/2); z < (arenaWidth/2); z = z + gridSpacing) {
-                GameObject cell = AddCell(cellsContainer, new Vector3(x, -0.4f, z));
-                AdjustPositionForPlayerHeight(cell.transform);
+        var cellTypes = main.GetLevelCellTypes();
 
-                AddCellTrigger(cell, new Vector3(x, 0, z));
-            }
+        int cellsPerRow = (int) Mathf.Floor(arenaWidth / gridSpacing);
+        for (int cellNum = 0; cellNum < numberOfCells; cellNum++) {
+            int cellRow = cellNum / cellsPerRow;
+            int cellCol = cellNum % cellsPerRow;
+
+            var cellType = cellTypes[cellRow, cellCol];
+            var cellPos = ToCellPosition(cellRow, cellCol);
+
+            GameObject cell = AddCell(cellsContainer, cellPos, cellType);
+            AddCellTrigger(cell, new Vector3(cellPos.x, 0, cellPos.z));
         }
     }
 
-    GameObject AddCell(GameObject cellsContainer, Vector3 position) {
+    Vector3 ToCellPosition(int cellRow, int cellCol) {
+        float x = -(arenaWidth/2) + (gridSpacing/2) + (cellRow * gridSpacing);
+        float y = -(0.4f + (playerHeight/2));
+        float z = -(arenaWidth/2) + (gridSpacing/2) + (cellCol * gridSpacing);
+        return new Vector3(x, y, z);
+    }
+
+    GameObject AddCell(GameObject cellsContainer, Vector3 position, CellType cellType) {
         GameObject cell = GameObject.CreatePrimitive(PrimitiveType.Cube);
         cell.name = "Cell " + totalCellCount++;
         cell.transform.parent = cellsContainer.transform;    
@@ -171,15 +188,13 @@ public class Arena : MonoBehaviour
         cell.GetComponent<Renderer>().material.color = floorColor;
         cell.GetComponent<Collider>().isTrigger = true;
         cell.AddComponent<Cell>();
-        // TODO pass in CellType
-        cell.GetComponent<Cell>().Init(position.z > 0 || position.x > 0 ? CellType.BASIC : CellType.ACTIVATABLE);
-
+        cell.GetComponent<Cell>().Init(cellType);
         return cell;
     }
 
     void AddCellTrigger(GameObject cell, Vector3 position) {
         GameObject trigger = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        trigger.name = "Cell Trigger" + totalCellCount++;
+        trigger.name = "Cell Trigger" + totalCellTriggerCount++;
         trigger.transform.parent = cell.transform;    
         trigger.transform.localScale = new Vector3(1, playerHeight, 1);        
         trigger.transform.position = position;

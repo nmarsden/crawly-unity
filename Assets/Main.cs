@@ -5,9 +5,6 @@ using UnityEngine;
 public class Main : MonoBehaviour
 {
     const float GRID_SPACING = 7f;
-    const float ARENA_WIDTH_IN_CELLS = 5;
-    const float NUMBER_OF_CELLS = ARENA_WIDTH_IN_CELLS * ARENA_WIDTH_IN_CELLS;
-    const float ARENA_WIDTH = GRID_SPACING * ARENA_WIDTH_IN_CELLS;
     const float PLAYER_HEIGHT = 5f;
     const float PLAYER_WIDTH = 5f;
     const float PLAYER_SPEED = 10f;
@@ -15,6 +12,7 @@ public class Main : MonoBehaviour
     const bool IS_SHOW_TURNING_POINTS = false;
     const bool IS_SHOW_CELL_TRIGGERS = false;
 
+    GameObject levels;
     GameObject turningPoints;
     GameObject arena;
     GameObject player;
@@ -24,11 +22,19 @@ public class Main : MonoBehaviour
     bool isGameOver;
     bool isGameCompleted;
 
+    int currentLevelNum = 1;
+
     void Start()
     {
         Time.timeScale = 1;
         isGameOver = false;
         isGameCompleted = false;
+
+        // -- Levels --
+        levels = new GameObject();
+        levels.name = "Levels";
+        levels.AddComponent<Levels>();
+        levels.GetComponent<Levels>().Init(currentLevelNum);
 
         // -- Turning Points --
         turningPoints = new GameObject();
@@ -63,11 +69,19 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (isGameCompleted || isGameOver) {
-            // -- Game Completed OR Game Over --
+        if (isGameOver) {
+            // -- Game Over --
             // Wait for key press to Reset game
             if (Input.anyKey) 
             {
+                Reset();
+            }
+        } else if (isGameCompleted) {
+            // -- Game Completed --
+            // Wait for key press to Reset game
+            if (Input.anyKey) 
+            {
+                currentLevelNum++;
                 Reset();
             }
         } else {
@@ -92,11 +106,12 @@ public class Main : MonoBehaviour
         Object.Destroy(player);
         Object.Destroy(arena);
         Object.Destroy(turningPoints);
+        Object.Destroy(levels);
     }
 
     public float GetArenaWidth() 
     {
-        return ARENA_WIDTH;
+        return GRID_SPACING * levels.GetComponent<Levels>().GetLevelWidthInCells();
     }
 
     public float GetGridSpacing() 
@@ -131,6 +146,9 @@ public class Main : MonoBehaviour
         return IS_SHOW_CELL_TRIGGERS;
     }
 
+    public int GetCurrentLevelNum() {
+        return currentLevelNum;
+    }
     public string AddTurningPoint(Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
         return turningPoints.GetComponent<TurningPoints>().AddTurningPoint(position, incomingDirection, outgoingDirection);
     }
@@ -187,6 +205,11 @@ public class Main : MonoBehaviour
     }
 
     public int GetFilledPercentage() {
-        return (int) Mathf.Floor((arena.GetComponent<Arena>().GetNumberOfActivatedCells() / NUMBER_OF_CELLS) * 100);
+        var numberOfCells = levels.GetComponent<Levels>().GetNumberOfCells();
+        return (int) Mathf.Floor((arena.GetComponent<Arena>().GetNumberOfActivatedCells() / numberOfCells) * 100);
+    }
+
+    public Arena.CellType[,] GetLevelCellTypes() {
+        return levels.GetComponent<Levels>().GetLevelCellTypes();
     }
 }
