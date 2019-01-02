@@ -44,7 +44,7 @@ public class HUD : MonoBehaviour
 
         // Fill text
         fillText = AddText("Fill", TextAnchor.LowerRight, new Color32(0, 255, 0, 100));
-        titleText.name = "Fill";
+        fillText.name = "Fill";
 
         // Game Completed text
         gameCompletedText = AddText("COMPLETE", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200));
@@ -73,6 +73,10 @@ public class HUD : MonoBehaviour
     public GameObject AddText(string textContent, TextAnchor allignment, Color32 color) {
         var textObject = new GameObject();
         textObject.transform.parent = gameObject.transform;
+
+        // Setup Shadow
+        var shadow = textObject.AddComponent<Shadow>();
+        shadow.effectDistance = new Vector2(-2, -2);
 
         // Setup Text component
         var text = textObject.AddComponent<Text>();
