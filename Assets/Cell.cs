@@ -55,8 +55,14 @@ public class Cell : MonoBehaviour
     }
 
     public void Activate() {
-        isActivated = true;
         activatedTime = Time.time;
+
+        if (!isActivated) {
+            isActivated = true;
+            if (cellType.Equals(Arena.CellType.ACTIVATABLE) || cellType.Equals(Arena.CellType.TOUCH)) {
+                main.HandleCellActivated();
+            }
+        }
     }
 
     public bool IsActivated() {

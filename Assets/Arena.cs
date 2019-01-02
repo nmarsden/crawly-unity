@@ -34,6 +34,7 @@ public class Arena : MonoBehaviour
     private float playerHeight;
     private bool isShowTurningPoints;
     private bool isShowCellTriggers;
+    private bool isAllCellsActivated;
     private int totalCellCount;
     private int totalCellTriggerCount;
     private int totalWallCount;
@@ -52,6 +53,7 @@ public class Arena : MonoBehaviour
         currentLevelNum = main.GetCurrentLevelNum();
         totalCellCount = 0;
         totalCellTriggerCount = 0;
+        isAllCellsActivated = false;
     }
 
     void Start()
@@ -99,6 +101,13 @@ public class Arena : MonoBehaviour
 
         // Check if all cells are activated
         if (GetNumberOfActivatedCells() == numberOfFillableCells) {
+            AllCellsActivated();
+        }
+    }
+
+    void AllCellsActivated() {
+        if (!isAllCellsActivated) {
+            isAllCellsActivated = true;
             main.HandleAllCellsActivated();
         }
     }

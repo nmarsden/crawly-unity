@@ -82,7 +82,7 @@ public class HUD : MonoBehaviour
         var text = textObject.AddComponent<Text>();
         text.font = font;
         text.text = textContent;
-        text.fontSize = 140;
+        text.fontSize = 80;
         text.fontStyle = FontStyle.Bold;
         text.color = color;
         text.alignment = allignment;

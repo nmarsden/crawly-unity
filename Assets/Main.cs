@@ -13,6 +13,7 @@ public class Main : MonoBehaviour
     const bool IS_SHOW_TURNING_POINTS = false;
     const bool IS_SHOW_CELL_TRIGGERS = false;
 
+    GameObject audio;
     GameObject levels;
     GameObject turningPoints;
     GameObject arena;
@@ -24,12 +25,38 @@ public class Main : MonoBehaviour
     bool isGameCompleted;
 
     int currentLevelNum = 1;
+    AudioClip music;
+    AudioClip pickUp;
+    AudioClip activate;
+    AudioClip gameOver;
+    AudioClip complete;
+    AudioSource audioSource;
+
+    void Awake() {
+        music = Resources.Load<AudioClip>("Audio/happy_light_loop");        
+        pickUp = Resources.Load<AudioClip>("Audio/ClipsAccept1");        
+        activate = Resources.Load<AudioClip>("Audio/Clicks_13");
+        gameOver = Resources.Load<AudioClip>("Audio/Xylo_13");
+        complete = Resources.Load<AudioClip>("Audio/Coin_Pick_Up_03");
+    }
 
     void Start()
     {
         Time.timeScale = 1;
         isGameOver = false;
         isGameCompleted = false;
+
+        // -- Audio --
+        audio = new GameObject();
+        audio.name = "Audio";
+        audio.AddComponent<AudioSource>();
+        audioSource = audio.GetComponent<AudioSource>();
+        audioSource.bypassEffects = true;
+        audioSource.bypassListenerEffects = true;
+        audioSource.bypassReverbZones = true;
+        audioSource.clip = music;
+        audioSource.loop = true;
+        audioSource.Play();
 
         // -- Levels --
         levels = new GameObject();
@@ -108,6 +135,7 @@ public class Main : MonoBehaviour
         Object.Destroy(arena);
         Object.Destroy(turningPoints);
         Object.Destroy(levels);
+        Object.Destroy(audio);
     }
 
     public float GetArenaWidth() 
@@ -164,6 +192,8 @@ public class Main : MonoBehaviour
 
     public void HandleHitFood() 
     {
+        audioSource.PlayOneShot(pickUp);
+
         // Reposition food
         food.GetComponent<Food>().Reposition();
 
@@ -179,11 +209,18 @@ public class Main : MonoBehaviour
         GameOver();
     }
 
+    public void HandleCellActivated() {
+        audioSource.PlayOneShot(activate);
+    }
+
     public void HandleAllCellsActivated() {
         GameCompleted();    
     }
     
     private void GameCompleted() {
+        audioSource.Stop();
+        audioSource.PlayOneShot(complete);
+
         // Switch to Game Completed mode
         isGameCompleted = true;
 
@@ -195,6 +232,9 @@ public class Main : MonoBehaviour
     }
 
     private void GameOver() {
+        audioSource.Stop();
+        audioSource.PlayOneShot(gameOver);
+
         // Switch to Game Over mode
         isGameOver = true;
 
