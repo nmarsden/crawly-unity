@@ -5,13 +5,13 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     Color basicColor = new Color32(42, 255, 42, 255); // green
+    Color activatableColor = new Color32(255, 255, 255, 255); // white
+    Color touchColor = new Color32(85, 107, 47, 255); // olive green
     Color activeColor = new Color32(74, 255, 0, 255); // lighter green
-    Color nonActiveColor = new Color32(255, 255, 255, 255); // white
     Color wallColor = new Color32(239, 27, 33, 255); // red
 
     bool isActivated;
     float activatedTime;
-    float activatedDuration = 3;
     Material cellMaterial;
     Main main;
     Arena.CellType cellType;
@@ -36,23 +36,18 @@ public class Cell : MonoBehaviour
 
     void Update()
     {
-        // -- Update 'Activatable' cell
-        if (cellType.Equals(Arena.CellType.ACTIVATABLE)) {
-            // Make non-activated after a while
-            if (isActivated) {
-                if (Time.time - activatedTime > activatedDuration) {
-                    isActivated = false;
-                }
-            }
-            // Update color
-            var color = nonActiveColor;
-            if (isActivated) {
-                // Over time, change the active color to be 40% non active color
-                color = Color32.Lerp(activeColor, nonActiveColor, 0.4f * (Time.time - activatedTime) / activatedDuration);
-            }
-            cellMaterial.color = color;
-        } else if (cellType.Equals(Arena.CellType.WALL)) {
-            if (isActivated) {
+        if (cellType.Equals(Arena.CellType.ACTIVATABLE)) 
+        {
+            UpdateColor(activatableColor, 3);
+        } 
+        else if (cellType.Equals(Arena.CellType.TOUCH)) 
+        {
+            UpdateColor(touchColor, 0.1f);
+        } 
+        else if (cellType.Equals(Arena.CellType.WALL)) 
+        {
+            if (isActivated) 
+            {
                 isActivated = false;
                 main.HandleHitWall();
             }
@@ -72,11 +67,28 @@ public class Cell : MonoBehaviour
         return cellType.Equals(Arena.CellType.WALL);
     }
 
+    void UpdateColor(Color32 nonActiveColor, float activatedDuration) {
+        if (isActivated) {
+            if (Time.time - activatedTime > activatedDuration) {
+                isActivated = false;
+            }
+        }
+        // Update color
+        var color = nonActiveColor;
+        if (isActivated) {
+            // Over time, change the active color to be 40% non active color
+            color = Color32.Lerp(activeColor, nonActiveColor, 0.4f * (Time.time - activatedTime) / activatedDuration);
+        }
+        cellMaterial.color = color;
+    }
+
     Color32 GetInitialColor() {
         if (cellType.Equals(Arena.CellType.ACTIVATABLE)) {
-            return isActivated ? activeColor : nonActiveColor;
+            return activatableColor;
         } else if (cellType.Equals(Arena.CellType.WALL)) {
             return wallColor;
+        } else if (cellType.Equals(Arena.CellType.TOUCH)) {
+            return touchColor;
         } else {
             return basicColor;
         }

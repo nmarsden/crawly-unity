@@ -14,7 +14,7 @@ public class Levels : MonoBehaviour
             "X####",
             "#___#",
             "#___#",
-            "#___#",
+            "#T__#",
             "####X",
         },
         new string[] {
@@ -83,6 +83,8 @@ public class Levels : MonoBehaviour
             return Arena.CellType.WALL;
         } else if (cellChar == '_') {
             return Arena.CellType.ACTIVATABLE;
+        } else if (cellChar == 'T') {
+            return Arena.CellType.TOUCH;
         } else { // '#'
             return Arena.CellType.BASIC;
         }

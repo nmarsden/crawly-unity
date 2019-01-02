@@ -19,7 +19,7 @@ public class Arena : MonoBehaviour
 
     }
 
-    public enum CellType { BASIC, WALL, ACTIVATABLE };
+    public enum CellType { BASIC, WALL, ACTIVATABLE, TOUCH };
     Color floorColor = new Color32(0, 0, 0, 255); // black
     Color wallColor = new Color32(239, 27, 33, 255); // red
     //Color wallColor = new Color32(67, 67, 191, 255); // blue
