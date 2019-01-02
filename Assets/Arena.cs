@@ -19,7 +19,7 @@ public class Arena : MonoBehaviour
 
     }
 
-    public enum CellType { BASIC, ACTIVATABLE };
+    public enum CellType { BASIC, WALL, ACTIVATABLE };
     Color floorColor = new Color32(0, 0, 0, 255); // black
     Color wallColor = new Color32(239, 27, 33, 255); // red
     //Color wallColor = new Color32(67, 67, 191, 255); // blue
@@ -27,7 +27,7 @@ public class Arena : MonoBehaviour
     Color pathColor = new Color32(200, 0, 0, 255);
     GameObject gridLines;
     private float gridSpacing;
-    private int numberOfCells;
+    private int numberOfFillableCells;
     private float wallWidth = 5f;
     private float wallHeight = 2.5f;
     private float arenaWidth;
@@ -45,7 +45,7 @@ public class Arena : MonoBehaviour
         this.main = main;
         arenaWidth = main.GetArenaWidth();
         gridSpacing = main.GetGridSpacing();
-        numberOfCells = (int) Mathf.Floor((arenaWidth / gridSpacing) * (arenaWidth / gridSpacing));
+        numberOfFillableCells = main.GetNumberOfFillableCells();
         playerHeight = main.GetPlayerHeight();
         isShowTurningPoints = main.IsShowTurningPoints();
         isShowCellTriggers = main.IsShowCellTriggers();
@@ -98,7 +98,7 @@ public class Arena : MonoBehaviour
         }
 
         // Check if all cells are activated
-        if (GetNumberOfActivatedCells() == numberOfCells) {
+        if (GetNumberOfActivatedCells() == numberOfFillableCells) {
             main.HandleAllCellsActivated();
         }
     }
@@ -157,18 +157,17 @@ public class Arena : MonoBehaviour
         cellsContainer.name = "Cells";
         cellsContainer.transform.parent = transform;    
 
+        var levelWidthInCells = (int) Mathf.Floor(arenaWidth / gridSpacing);
         var cellTypes = main.GetLevelCellTypes();
 
-        int cellsPerRow = (int) Mathf.Floor(arenaWidth / gridSpacing);
-        for (int cellNum = 0; cellNum < numberOfCells; cellNum++) {
-            int cellRow = cellNum / cellsPerRow;
-            int cellCol = cellNum % cellsPerRow;
+        for (var row = 0; row < levelWidthInCells; row++) {
+            for (var col = 0; col < levelWidthInCells; col++) {
+                var cellType = cellTypes[row, col];
+                var cellPos = ToCellPosition(row, col);
 
-            var cellType = cellTypes[cellRow, cellCol];
-            var cellPos = ToCellPosition(cellRow, cellCol);
-
-            GameObject cell = AddCell(cellsContainer, cellPos, cellType);
-            AddCellTrigger(cell, new Vector3(cellPos.x, 0, cellPos.z));
+                GameObject cell = AddCell(cellsContainer, cellPos, cellType);
+                AddCellTrigger(cell, new Vector3(cellPos.x, 0, cellPos.z));
+            }
         }
     }
 
@@ -187,7 +186,7 @@ public class Arena : MonoBehaviour
         cell.transform.position = position;
         cell.GetComponent<Collider>().isTrigger = true;
         cell.AddComponent<Cell>();
-        cell.GetComponent<Cell>().Init(cellType);
+        cell.GetComponent<Cell>().Init(main, cellType);
         return cell;
     }
 
@@ -213,7 +212,8 @@ public class Arena : MonoBehaviour
         var cellTriggers = cellsContainer.GetComponentsInChildren<CellTrigger>();
         var emptyPositions = new List<Vector3>();
         foreach (CellTrigger cellTrigger in cellTriggers) {
-            if (!cellTrigger.IsTriggered()) {
+            var cell = cellTrigger.transform.parent.GetComponent<Cell>();
+            if (!cell.IsWall() && !cellTrigger.IsTriggered()) {
                 emptyPositions.Add(cellTrigger.GetPosition());
             }
         }

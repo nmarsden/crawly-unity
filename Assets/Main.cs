@@ -9,6 +9,7 @@ public class Main : MonoBehaviour
     const float PLAYER_WIDTH = 5f;
     const float PLAYER_SPEED = 10f;
     const float TAIL_MIN_DISTANCE = 3f;
+    const float WALL_HEIGHT = 2.5f;
     const bool IS_SHOW_TURNING_POINTS = false;
     const bool IS_SHOW_CELL_TRIGGERS = false;
 
@@ -138,6 +139,10 @@ public class Main : MonoBehaviour
         return TAIL_MIN_DISTANCE;
     }
 
+    public float GetWallHeight() {
+        return WALL_HEIGHT;
+    }
+
     public bool IsShowTurningPoints() {
         return IS_SHOW_TURNING_POINTS;
     }
@@ -204,9 +209,12 @@ public class Main : MonoBehaviour
         return arena.GetComponent<Arena>().GetEmptyPositions();
     }
 
+    public int GetNumberOfFillableCells() {
+        return levels.GetComponent<Levels>().GetNumberOfFillableCells();
+    }
+
     public int GetFilledPercentage() {
-        var numberOfCells = levels.GetComponent<Levels>().GetNumberOfCells();
-        return (int) Mathf.Floor((arena.GetComponent<Arena>().GetNumberOfActivatedCells() / numberOfCells) * 100);
+        return (int) Mathf.Floor((arena.GetComponent<Arena>().GetNumberOfActivatedCells() / (float) GetNumberOfFillableCells()) * 100);
     }
 
     public Arena.CellType[,] GetLevelCellTypes() {

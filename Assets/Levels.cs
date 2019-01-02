@@ -4,24 +4,18 @@ using UnityEngine;
 
 public class Levels : MonoBehaviour
 {
-    int currentLevelNum;
+    int currentLevelWidthInCells;
+
+    Arena.CellType[,] currentLevelCellTypes;
+    int numberOfFillableCells;
 
     string[][] levelMaps = {
         new string[] {
-            "#######",
-            "#___###",
-            "#___###",
-            "#___###",
-            "#######",
-            "#######",
-            "#######",
-        },
-        new string[] {
-            "#####",
+            "X####",
             "#___#",
             "#___#",
             "#___#",
-            "#####",
+            "####X",
         },
         new string[] {
             "#___#",
@@ -29,11 +23,23 @@ public class Levels : MonoBehaviour
             "#####",
             "#___#",
             "#___#",
-        }
+        },
+        new string[] {
+            "#######",
+            "#___###",
+            "#___###",
+            "#___###",
+            "XXXX###",
+            "#######",
+            "#######",
+        },
     };
 
     public void Init(int currentLevelNum) {
-        this.currentLevelNum = currentLevelNum;
+        var currentLevelMap = GetLevelMap(currentLevelNum);
+        currentLevelWidthInCells = currentLevelMap[0].Length;
+        currentLevelCellTypes = GetLevelCellTypes(currentLevelMap);
+        numberOfFillableCells = CountNumberOfFillableCells(currentLevelMap);
     }
 
     void Start()
@@ -47,26 +53,52 @@ public class Levels : MonoBehaviour
     }
 
     public float GetLevelWidthInCells() {
-        return GetCurrentLevelMap()[0].Length;
+        return currentLevelWidthInCells;
     }
 
     public Arena.CellType[,] GetLevelCellTypes() {
-        var levelMap = GetCurrentLevelMap();
+        return currentLevelCellTypes;
+    }
+
+    public int GetNumberOfFillableCells() {
+        return numberOfFillableCells;
+    }
+    
+    string[] GetLevelMap(int currentLevelNum) {
+        return levelMaps[currentLevelNum - 1];
+    }
+
+    Arena.CellType[,] GetLevelCellTypes(string[] levelMap) {
         Arena.CellType[,] cellTypes = new Arena.CellType[levelMap.Length, levelMap.Length];
         for (var row = 0; row < levelMap.Length; row++) {
             for (var col = 0; col < levelMap.Length; col++) {
-                cellTypes[row, col] = (levelMap[row][col] == '#') ? Arena.CellType.BASIC : Arena.CellType.ACTIVATABLE;
+                cellTypes[row, col] = GetCellType(levelMap[row][col]);
             }
         }
         return cellTypes;
     }
 
-    public float GetNumberOfCells() {
-        return GetLevelWidthInCells() * GetLevelWidthInCells();
+    Arena.CellType GetCellType(char cellChar) {
+        if (cellChar == 'X') {
+            return Arena.CellType.WALL;
+        } else if (cellChar == '_') {
+            return Arena.CellType.ACTIVATABLE;
+        } else { // '#'
+            return Arena.CellType.BASIC;
+        }
     }
-    
-    string[] GetCurrentLevelMap() {
-        return levelMaps[currentLevelNum - 1];
+
+    int CountNumberOfFillableCells(string[] levelMap) {
+        var count=0;
+        var cellTypes = GetLevelCellTypes(levelMap);
+        for (var row = 0; row < levelMap.Length; row++) {
+            for (var col = 0; col < levelMap.Length; col++) {
+                if (!GetCellType(levelMap[row][col]).Equals(Arena.CellType.WALL)) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
 }

@@ -7,14 +7,17 @@ public class Cell : MonoBehaviour
     Color basicColor = new Color32(42, 255, 42, 255); // green
     Color activeColor = new Color32(74, 255, 0, 255); // lighter green
     Color nonActiveColor = new Color32(255, 255, 255, 255); // white
+    Color wallColor = new Color32(239, 27, 33, 255); // red
 
     bool isActivated;
     float activatedTime;
     float activatedDuration = 3;
     Material cellMaterial;
+    Main main;
     Arena.CellType cellType;
 
-    public void Init(Arena.CellType cellType) {
+    public void Init(Main main, Arena.CellType cellType) {
+        this.main = main;
         this.cellType = cellType;
     }
 
@@ -23,6 +26,12 @@ public class Cell : MonoBehaviour
         isActivated = cellType.Equals(Arena.CellType.BASIC);    
         cellMaterial = gameObject.GetComponent<Renderer>().material;
         cellMaterial.color = GetInitialColor();
+
+        if (cellType.Equals(Arena.CellType.WALL)) {
+            var wallHeight = main.GetWallHeight();
+            gameObject.transform.localScale = Vector3.Scale(gameObject.transform.localScale, new Vector3(1, wallHeight, 1));
+            gameObject.transform.position += new Vector3(0, wallHeight/2 + 0.5f, 0);
+        }
     }
 
     void Update()
@@ -42,8 +51,12 @@ public class Cell : MonoBehaviour
                 color = Color32.Lerp(activeColor, nonActiveColor, 0.4f * (Time.time - activatedTime) / activatedDuration);
             }
             cellMaterial.color = color;
+        } else if (cellType.Equals(Arena.CellType.WALL)) {
+            if (isActivated) {
+                isActivated = false;
+                main.HandleHitWall();
+            }
         }
-
     }
 
     public void Activate() {
@@ -55,9 +68,15 @@ public class Cell : MonoBehaviour
         return isActivated;
     }
 
+    public bool IsWall() {
+        return cellType.Equals(Arena.CellType.WALL);
+    }
+
     Color32 GetInitialColor() {
         if (cellType.Equals(Arena.CellType.ACTIVATABLE)) {
             return isActivated ? activeColor : nonActiveColor;
+        } else if (cellType.Equals(Arena.CellType.WALL)) {
+            return wallColor;
         } else {
             return basicColor;
         }
