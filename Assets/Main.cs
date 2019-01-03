@@ -13,7 +13,7 @@ public class Main : MonoBehaviour
     const bool IS_SHOW_TURNING_POINTS = false;
     const bool IS_SHOW_CELL_TRIGGERS = false;
 
-    GameObject audio;
+    AudioController audioController;
     GameObject levels;
     GameObject turningPoints;
     GameObject arena;
@@ -24,39 +24,28 @@ public class Main : MonoBehaviour
     bool isGameOver;
     bool isGameCompleted;
 
-    int currentLevelNum = 1;
-    AudioClip music;
-    AudioClip pickUp;
-    AudioClip activate;
-    AudioClip gameOver;
-    AudioClip complete;
-    AudioSource audioSource;
+    int currentLevelNum;
 
-    void Awake() {
-        music = Resources.Load<AudioClip>("Audio/happy_light_loop");        
-        pickUp = Resources.Load<AudioClip>("Audio/ClipsAccept1");        
-        activate = Resources.Load<AudioClip>("Audio/Clicks_13");
-        gameOver = Resources.Load<AudioClip>("Audio/Xylo_13");
-        complete = Resources.Load<AudioClip>("Audio/Coin_Pick_Up_03");
+    void Start() {
+        currentLevelNum = 1;
+
+        // -- Audio Controller --
+        var audio = new GameObject();
+        audio.name = "Audio Controller";
+        audio.AddComponent<AudioController>();
+        audioController = audio.GetComponent<AudioController>();
+
+        StartLevel();
     }
 
-    void Start()
+    void StartLevel()
     {
         Time.timeScale = 1;
         isGameOver = false;
         isGameCompleted = false;
 
-        // -- Audio --
-        audio = new GameObject();
-        audio.name = "Audio";
-        audio.AddComponent<AudioSource>();
-        audioSource = audio.GetComponent<AudioSource>();
-        audioSource.bypassEffects = true;
-        audioSource.bypassListenerEffects = true;
-        audioSource.bypassReverbZones = true;
-        audioSource.clip = music;
-        audioSource.loop = true;
-        audioSource.Play();
+        // Play Music
+        audioController.PlayMusic();
 
         // -- Levels --
         levels = new GameObject();
@@ -124,18 +113,17 @@ public class Main : MonoBehaviour
 
     void Reset() {
         DestroyAllCreatedObjects();
-        Start();
+        StartLevel();
     }
 
-    void DestroyAllCreatedObjects() {
-
+    void DestroyAllCreatedObjects() 
+    {
         Object.Destroy(hud);
         Object.Destroy(food);
         Object.Destroy(player);
         Object.Destroy(arena);
         Object.Destroy(turningPoints);
         Object.Destroy(levels);
-        Object.Destroy(audio);
     }
 
     public float GetArenaWidth() 
@@ -192,7 +180,7 @@ public class Main : MonoBehaviour
 
     public void HandleHitFood() 
     {
-        audioSource.PlayOneShot(pickUp);
+        audioController.PlayPickupFX();
 
         // Reposition food
         food.GetComponent<Food>().Reposition();
@@ -210,7 +198,7 @@ public class Main : MonoBehaviour
     }
 
     public void HandleCellActivated() {
-        audioSource.PlayOneShot(activate);
+        audioController.PlayActivateFX();
     }
 
     public void HandleAllCellsActivated() {
@@ -218,8 +206,8 @@ public class Main : MonoBehaviour
     }
     
     private void GameCompleted() {
-        audioSource.Stop();
-        audioSource.PlayOneShot(complete);
+        audioController.StopMusic();
+        audioController.PlayCompleteFX();
 
         // Switch to Game Completed mode
         isGameCompleted = true;
@@ -232,8 +220,8 @@ public class Main : MonoBehaviour
     }
 
     private void GameOver() {
-        audioSource.Stop();
-        audioSource.PlayOneShot(gameOver);
+        audioController.StopMusic();
+        audioController.PlayGameOverFX();
 
         // Switch to Game Over mode
         isGameOver = true;
