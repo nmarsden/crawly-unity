@@ -38,36 +38,10 @@ public class TitleScreen : MonoBehaviour
         titleText.GetComponent<RectTransform>().Translate(new Vector3(0, 7, 0));
 
         // Play Button
-        var playButton = Instantiate(menuButtonPrefab);
+        var playButton = AddButton("PLAY");
         playButton.name = "Play Button";
-        playButton.transform.SetParent(gameObject.transform, false);
-
-        var playButtonRectTransform = playButton.GetComponent<RectTransform>();
-        playButtonRectTransform.sizeDelta = new Vector2 (320, 120);
-
-        var txt = playButton.GetComponentInChildren<Text>();
-        txt.text = "";
-
-        Button btn = playButton.GetComponent<Button>();
-        btn.onClick.AddListener(PlayButtonOnClick);
-
-        var btnColorBlock = ColorBlock.defaultColorBlock;
-        btnColorBlock.normalColor = ConvertColor(49, 77, 121);
-        btnColorBlock.highlightedColor = ConvertColor(0, 150, 0);
-        btnColorBlock.pressedColor = ConvertColor(0, 100, 0);
-        btn.colors = btnColorBlock;
-
-        // Test TextMeshPro
-        var txtMeshPro = new GameObject();
-        txtMeshPro.name = "Play Text";
-        txtMeshPro.transform.SetParent(gameObject.transform, false);
-        txtMeshPro.transform.localScale = new Vector3(5, 5, 5);
-        var tm = txtMeshPro.AddComponent<TextMesh>();
-        tm.text = "PLAY";
-        tm.fontSize = 200;
-        tm.fontStyle = FontStyle.Bold;
-        tm.offsetZ = -10;
-        tm.anchor = TextAnchor.MiddleCenter;
+        playButton.transform.Translate(new Vector3(0, -5, 0));
+        playButton.GetComponent<Button>().onClick.AddListener(PlayButtonOnClick);
     }
 
     Color ConvertColor (int r, int g, int b) {
@@ -110,5 +84,41 @@ public class TitleScreen : MonoBehaviour
         rectTransform.localScale = new Vector3(1, 1, 1);
 
         return textObject;
+    }
+
+    public GameObject AddButton(string textContent) {
+        // Create button & set parent
+        var button = Instantiate(menuButtonPrefab);
+        button.transform.SetParent(gameObject.transform, false);
+
+        // Setup button width & height
+        var playButtonRectTransform = button.GetComponent<RectTransform>();
+        playButtonRectTransform.sizeDelta = new Vector2 (320, 120);
+
+        // Setup button colors
+        var btnColorBlock = ColorBlock.defaultColorBlock;
+        btnColorBlock.normalColor = ConvertColor(49, 77, 121);
+        btnColorBlock.highlightedColor = ConvertColor(0, 150, 0);
+        btnColorBlock.pressedColor = ConvertColor(0, 100, 0);
+        button.GetComponent<Button>().colors = btnColorBlock;
+
+        // Hide existing Text
+        var txt = button.GetComponentInChildren<Text>();
+        txt.text = "";
+
+        // Add TextMesh
+        // Note: TextMesh scales better than regular Text
+        var txtMeshPro = new GameObject();
+        txtMeshPro.name = "TextMesh";
+        txtMeshPro.transform.SetParent(button.transform, false);
+        txtMeshPro.transform.localScale = new Vector3(5, 5, 5);
+        var tm = txtMeshPro.AddComponent<TextMesh>();
+        tm.text = textContent;
+        tm.fontSize = 200;
+        tm.fontStyle = FontStyle.Bold;
+        tm.offsetZ = -10;
+        tm.anchor = TextAnchor.MiddleCenter;
+
+        return button;
     }
 }
