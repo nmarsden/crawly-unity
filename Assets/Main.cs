@@ -201,8 +201,12 @@ public class Main : MonoBehaviour
 
     public void HandleHeadCreated(GameObject head) 
     {
-        // Uncomment to Setup the CameraController to follow the head
+        // -- Experimental camera views --
+        // 1. Camera follow
         //cameraController.SetToFollow(head);
+
+        // 2. First person view
+        //cameraController.SetFirstPersonView(head);
     }
 
     public void HandlePlayButtonPressed() {
