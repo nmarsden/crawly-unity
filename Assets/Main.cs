@@ -14,6 +14,7 @@ public class Main : MonoBehaviour
     const bool IS_SHOW_CELL_TRIGGERS = false;
 
     AudioController audioController;
+    CameraController cameraController;
     GameObject levels;
     GameObject turningPoints;
     GameObject arena;
@@ -36,6 +37,13 @@ public class Main : MonoBehaviour
         audio.name = "Audio Controller";
         audio.AddComponent<AudioController>();
         audioController = audio.GetComponent<AudioController>();
+
+        // -- Camera Controller
+        Camera camera = Camera.main;
+        cameraController = camera.gameObject.AddComponent<CameraController>();
+
+        // Uncomment this to Zoom in
+        // camera.orthographicSize = 15;
 
         // -- Show Title Screen --
         ShowTitleScreen();
@@ -189,6 +197,12 @@ public class Main : MonoBehaviour
 
     public TurningPoints GetTurningPoints() {
         return turningPoints.GetComponent<TurningPoints>();
+    }
+
+    public void HandleHeadCreated(GameObject head) 
+    {
+        // Uncomment to Setup the CameraController to follow the head
+        //cameraController.SetToFollow(head);
     }
 
     public void HandlePlayButtonPressed() {

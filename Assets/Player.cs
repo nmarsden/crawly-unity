@@ -59,8 +59,12 @@ public class Player : MonoBehaviour
         // Turn command
         turnCommand = TurnCommand.None;
 
+        // TODO Use a low poly sphere instead of the standard Unity primitive sphere which adds 1K vertices for every tail piece
+        // var bodyPrimitiveType = PrimitiveType.Cube;
+        var bodyPrimitiveType = PrimitiveType.Sphere;
+
         // Head
-        head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        head = GameObject.CreatePrimitive(bodyPrimitiveType);
         head.name = "Head";
         head.transform.parent = transform;    
         head.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
@@ -74,7 +78,7 @@ public class Player : MonoBehaviour
         headRigidbody.velocity = initialHeadDirection * speed;
 
         // Left Eye
-        GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject leftEye = GameObject.CreatePrimitive(bodyPrimitiveType);
         leftEye.name = "Left Eye";
         leftEye.transform.localScale = new Vector3(2, 3, 2);
         leftEye.GetComponent<Renderer>().material.color = eyeColor;
@@ -84,7 +88,7 @@ public class Player : MonoBehaviour
         leftEye.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Left Pupil
-        GameObject leftPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject leftPupil = GameObject.CreatePrimitive(bodyPrimitiveType);
         leftPupil.name = "Left Pupil";
         leftPupil.transform.localScale = new Vector3(1, 2, 1);
         leftPupil.GetComponent<Renderer>().material.color = pupilColor;
@@ -94,7 +98,7 @@ public class Player : MonoBehaviour
         leftPupil.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Right Eye
-        GameObject rightEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject rightEye = GameObject.CreatePrimitive(bodyPrimitiveType);
         rightEye.name = "Right Eye";
         rightEye.transform.localScale = new Vector3(2, 3, 2);
         rightEye.GetComponent<Renderer>().material.color = eyeColor;
@@ -104,7 +108,7 @@ public class Player : MonoBehaviour
         rightEye.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Right Pupil
-        GameObject rightPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject rightPupil = GameObject.CreatePrimitive(bodyPrimitiveType);
         rightPupil.name = "Right Pupil";
         rightPupil.transform.localScale = new Vector3(1, 2, 1);
         rightPupil.GetComponent<Renderer>().material.color = pupilColor;
@@ -114,7 +118,7 @@ public class Player : MonoBehaviour
         rightPupil.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Nose
-        GameObject nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject nose = GameObject.CreatePrimitive(bodyPrimitiveType);
         nose.name = "Nose";
         nose.transform.localScale = new Vector3(3, 2, 2);
         nose.GetComponent<Renderer>().material.color = noseColor;
@@ -134,8 +138,11 @@ public class Player : MonoBehaviour
         mouth.transform.rotation = Quaternion.AngleAxis(90, Vector3.up);
         mouth.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
+        // Trigger head created event
+        main.HandleHeadCreated(head);
+
         // Tail
-        GameObject tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject tail = GameObject.CreatePrimitive(bodyPrimitiveType);
         tail.transform.parent = transform;    
         tail.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
         tail.GetComponent<Renderer>().material.color = bodyColor;
