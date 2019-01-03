@@ -46,11 +46,7 @@ public class TitleScreen : MonoBehaviour
         playButtonRectTransform.sizeDelta = new Vector2 (320, 120);
 
         var txt = playButton.GetComponentInChildren<Text>();
-        txt.text = "PLAY";
-        txt.font = font;
-        txt.fontSize = 300;
-        txt.fontStyle = FontStyle.Bold;
-        txt.color = new Color32(0, 0, 0, 255);
+        txt.text = "";
 
         Button btn = playButton.GetComponent<Button>();
         btn.onClick.AddListener(PlayButtonOnClick);
@@ -61,12 +57,17 @@ public class TitleScreen : MonoBehaviour
         btnColorBlock.pressedColor = ConvertColor(0, 100, 0);
         btn.colors = btnColorBlock;
 
-        // Setup Text's RectTransform component
-        var rectTransform = txt.GetComponent<RectTransform>();
-        rectTransform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
-        var hudRectTransform = gameObject.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(hudRectTransform.rect.width, hudRectTransform.rect.height);
-        rectTransform.localScale = new Vector3(0.15f, 0.15f, 0.15f);
+        // Test TextMeshPro
+        var txtMeshPro = new GameObject();
+        txtMeshPro.name = "Play Text";
+        txtMeshPro.transform.SetParent(gameObject.transform, false);
+        txtMeshPro.transform.localScale = new Vector3(5, 5, 5);
+        var tm = txtMeshPro.AddComponent<TextMesh>();
+        tm.text = "PLAY";
+        tm.fontSize = 200;
+        tm.fontStyle = FontStyle.Bold;
+        tm.offsetZ = -10;
+        tm.anchor = TextAnchor.MiddleCenter;
     }
 
     Color ConvertColor (int r, int g, int b) {
