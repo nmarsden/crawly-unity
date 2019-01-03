@@ -26,6 +26,8 @@ public class Main : MonoBehaviour
 
     int currentLevelNum;
 
+    GameObject titleScreen;
+
     void Start() {
         currentLevelNum = 1;
 
@@ -35,7 +37,18 @@ public class Main : MonoBehaviour
         audio.AddComponent<AudioController>();
         audioController = audio.GetComponent<AudioController>();
 
-        StartLevel();
+        // -- Show Title Screen --
+        ShowTitleScreen();
+    }
+
+    void ShowTitleScreen()
+    {
+        titleScreen = new GameObject();
+        titleScreen.name = "Title Screen";
+        titleScreen.AddComponent<TitleScreen>();
+        titleScreen.GetComponent<TitleScreen>().Init(this);
+
+        audioController.PlayMusic();
     }
 
     void StartLevel()
@@ -176,6 +189,12 @@ public class Main : MonoBehaviour
 
     public TurningPoints GetTurningPoints() {
         return turningPoints.GetComponent<TurningPoints>();
+    }
+
+    public void HandlePlayButtonPressed() {
+        Object.Destroy(titleScreen);
+
+        StartLevel();
     }
 
     public void HandleHitFood() 
