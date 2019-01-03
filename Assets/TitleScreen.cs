@@ -33,9 +33,9 @@ public class TitleScreen : MonoBehaviour
         font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
 
         // Title text
-        var titleText = AddText(gameObject, "crawly", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100));
+        var titleText = AddTextMesh(gameObject, "crawly", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 12);
         titleText.name = "Title";
-        titleText.GetComponent<RectTransform>().Translate(new Vector3(0, 7, 0));
+        titleText.transform.Translate(new Vector3(0, 7, 0));
 
         // Play Button
         var playButton = AddButton("PLAY");
@@ -44,9 +44,6 @@ public class TitleScreen : MonoBehaviour
         playButton.GetComponent<Button>().onClick.AddListener(PlayButtonOnClick);
     }
 
-    Color ConvertColor (int r, int g, int b) {
-        return new Color(r/255f, g/255f, b/255f);
-    }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space)) 
@@ -59,31 +56,20 @@ public class TitleScreen : MonoBehaviour
         main.HandlePlayButtonPressed();
     }
 
-    public GameObject AddText(GameObject parent, string textContent, TextAnchor allignment, Color32 color) {
-        var textObject = new GameObject();
-        textObject.transform.parent = parent.transform;
+    public GameObject AddTextMesh(GameObject parent, string textContent, TextAnchor alignment, Color32 color, float scale) {
+        // Note: TextMesh scales better than regular Text
+        var txtMesh = new GameObject();
+        txtMesh.transform.SetParent(parent.transform, false);
+        txtMesh.transform.localScale = new Vector3(scale, scale, scale);
+        var tm = txtMesh.AddComponent<TextMesh>();
+        tm.text = textContent;
+        tm.fontSize = 200;
+        tm.fontStyle = FontStyle.Bold;
+        tm.color = color;
+        tm.offsetZ = -10;
+        tm.anchor = alignment;
 
-        // Setup Shadow
-        var shadow = textObject.AddComponent<Shadow>();
-        shadow.effectDistance = new Vector2(-2, -2);
-
-        // Setup Text component
-        var text = textObject.AddComponent<Text>();
-        text.font = font;
-        text.text = textContent;
-        text.fontSize = 240;
-        text.fontStyle = FontStyle.Bold;
-        text.color = color;
-        text.alignment = allignment;
-
-        // Setup Text's RectTransform component
-        var rectTransform = text.GetComponent<RectTransform>();
-        rectTransform.SetPositionAndRotation(parent.transform.position, parent.transform.rotation);
-        var hudRectTransform = parent.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(hudRectTransform.rect.width, hudRectTransform.rect.height);
-        rectTransform.localScale = new Vector3(1, 1, 1);
-
-        return textObject;
+        return txtMesh;
     }
 
     public GameObject AddButton(string textContent) {
@@ -107,18 +93,14 @@ public class TitleScreen : MonoBehaviour
         txt.text = "";
 
         // Add TextMesh
-        // Note: TextMesh scales better than regular Text
-        var txtMeshPro = new GameObject();
-        txtMeshPro.name = "TextMesh";
-        txtMeshPro.transform.SetParent(button.transform, false);
-        txtMeshPro.transform.localScale = new Vector3(5, 5, 5);
-        var tm = txtMeshPro.AddComponent<TextMesh>();
-        tm.text = textContent;
-        tm.fontSize = 200;
-        tm.fontStyle = FontStyle.Bold;
-        tm.offsetZ = -10;
-        tm.anchor = TextAnchor.MiddleCenter;
+        var txtMesh = AddTextMesh(button, textContent, TextAnchor.MiddleCenter, new Color32(255, 255, 255, 255), 5);
+        txtMesh.name = "TextMesh";
 
         return button;
     }
+
+    Color ConvertColor (int r, int g, int b) {
+        return new Color(r/255f, g/255f, b/255f);
+    }
+
 }
