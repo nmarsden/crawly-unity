@@ -10,14 +10,14 @@ public class TitleScreen : MonoBehaviour
     Font font;
     GameObject menuButtonPrefab;
 
-    public void Init(Main main) 
+    void Awake()
     {
-        this.main = main;
-        menuButtonPrefab = Resources.Load<GameObject>("UI/MenuButton");
-    }
+        // Initially not active
+        gameObject.SetActive(false);
 
-    void Start()
-    {
+        // Load menuButton prefab
+        menuButtonPrefab = Resources.Load<GameObject>("UI/MenuButton");
+
         // Add components
         gameObject.AddComponent<Canvas>();
         gameObject.AddComponent<CanvasScaler>();
@@ -42,6 +42,19 @@ public class TitleScreen : MonoBehaviour
         playButton.name = "Play Button";
         playButton.transform.Translate(new Vector3(0, -5, 0));
         playButton.GetComponent<Button>().onClick.AddListener(PlayButtonOnClick);
+    }
+
+    public void Init(Main main) 
+    {
+        this.main = main;
+    }
+
+    public void Show() {
+        gameObject.SetActive(true);
+    }
+
+    public void Hide() {
+        gameObject.SetActive(false);
     }
 
     void Update()

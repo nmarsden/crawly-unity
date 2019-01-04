@@ -22,15 +22,18 @@ public class Main : MonoBehaviour
     GameObject food;
     GameObject hud;
 
+    bool isShowTitleScreen;
     bool isGameOver;
     bool isGameCompleted;
 
     int currentLevelNum;
+    bool isPaused;
 
     GameObject titleScreen;
 
     void Start() {
         currentLevelNum = 1;
+        isPaused = false;
 
         // -- Audio Controller --
         var audio = new GameObject();
@@ -45,18 +48,28 @@ public class Main : MonoBehaviour
         // Uncomment this to Zoom in
         // camera.orthographicSize = 15;
 
+        // -- Setup Title Screen --
+        titleScreen = new GameObject();
+        titleScreen.name = "Title Screen";
+        titleScreen.AddComponent<TitleScreen>();
+        titleScreen.GetComponent<TitleScreen>().Init(this);
+
         // -- Show Title Screen --
         ShowTitleScreen();
     }
 
     void ShowTitleScreen()
     {
-        titleScreen = new GameObject();
-        titleScreen.name = "Title Screen";
-        titleScreen.AddComponent<TitleScreen>();
-        titleScreen.GetComponent<TitleScreen>().Init(this);
+        isShowTitleScreen = true;
+        titleScreen.GetComponent<TitleScreen>().Show();
 
+        // Play Music
         audioController.PlayMusic();
+    }
+
+    void HideTitleScreen() {
+        isShowTitleScreen = false;
+        titleScreen.GetComponent<TitleScreen>().Hide();
     }
 
     void StartLevel()
@@ -64,6 +77,7 @@ public class Main : MonoBehaviour
         Time.timeScale = 1;
         isGameOver = false;
         isGameCompleted = false;
+        isPaused = false;
 
         // Play Music
         audioController.PlayMusic();
@@ -107,29 +121,47 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (isGameOver) {
-            // -- Game Over --
-            // Wait for key press to Reset game
-            if (Input.anyKey) 
+        if (!isShowTitleScreen) {
+            // Toggle View when 'V' pressed
+            if (Input.GetKeyDown(KeyCode.V)) 
             {
-                Reset();
+                ToggleView();
             }
-        } else if (isGameCompleted) {
-            // -- Game Completed --
-            // Wait for key press to Reset game
-            if (Input.anyKey) 
+            // Quit Game when 'ESC' pressed
+            if (Input.GetKeyDown(KeyCode.Escape)) 
             {
-                currentLevelNum++;
-                Reset();
+                QuitGame();
             }
-        } else {
-            // -- Game In Progress --
-            // Reset when 'R' pressed
-            if (Input.GetKeyDown(KeyCode.R)) 
-            {
-                Reset();
+            if (isGameOver) {
+                // -- Game Over --
+                // Reset when 'Space' pressed
+                if (Input.GetKeyDown(KeyCode.Space)) 
+                {
+                    Reset();
+                }
+            } else if (isGameCompleted) {
+                // -- Game Completed --
+                // Reset when 'Space' pressed
+                if (Input.GetKeyDown(KeyCode.Space)) 
+                {
+                    currentLevelNum++;
+                    Reset();
+                }
+            } else {
+                // -- Game In Progress --
+                // Reset when 'R' pressed
+                if (Input.GetKeyDown(KeyCode.R)) 
+                {
+                    Reset();
+                } 
+                // Toggle Pause when 'P' pressed
+                else if (Input.GetKeyDown(KeyCode.P)) 
+                {
+                    TogglePause();
+                }
             }
         }
+
     }
 
     void Reset() {
@@ -145,6 +177,24 @@ public class Main : MonoBehaviour
         Object.Destroy(arena);
         Object.Destroy(turningPoints);
         Object.Destroy(levels);
+    }
+
+    void QuitGame() {
+        DestroyAllCreatedObjects();
+        ShowTitleScreen();
+    }
+
+    void ToggleView() {
+        cameraController.ToggleView();
+    }
+
+    void TogglePause() {
+        isPaused = !isPaused;
+        if (isPaused) {
+            Time.timeScale = 0;
+        } else {
+            Time.timeScale = 1;
+        }
     }
 
     public float GetArenaWidth() 
@@ -201,16 +251,11 @@ public class Main : MonoBehaviour
 
     public void HandleHeadCreated(GameObject head) 
     {
-        // -- Experimental camera views --
-        // 1. Camera follow
-        //cameraController.SetToFollow(head);
-
-        // 2. First person view
-        //cameraController.SetFirstPersonView(head);
+        cameraController.Init(head);
     }
 
     public void HandlePlayButtonPressed() {
-        Object.Destroy(titleScreen);
+        HideTitleScreen();
 
         StartLevel();
     }
