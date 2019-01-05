@@ -46,7 +46,10 @@ public class Main : MonoBehaviour
         cameraController = camera.gameObject.AddComponent<CameraController>();
 
         // Uncomment this to Zoom in
-        // camera.orthographicSize = 15;
+        //camera.orthographicSize = 15;
+
+        // Uncomment this to Zoom out
+        // camera.orthographicSize = 40;
 
         // -- Setup Title Screen --
         titleScreen = new GameObject();

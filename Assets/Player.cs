@@ -59,12 +59,12 @@ public class Player : MonoBehaviour
         // Turn command
         turnCommand = TurnCommand.None;
 
-        // TODO Use a low poly sphere instead of the standard Unity primitive sphere which adds 1K vertices for every tail piece
-        // var bodyPrimitiveType = PrimitiveType.Cube;
-        var bodyPrimitiveType = PrimitiveType.Sphere;
+        var lowPolySphereMesh = gameObject.AddComponent<LowPolySphere>().GetLowPolySphereMesh();
 
         // Head
-        head = GameObject.CreatePrimitive(bodyPrimitiveType);
+        head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(head.GetComponent<MeshFilter>().mesh);
+        head.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         head.name = "Head";
         head.transform.parent = transform;    
         head.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
@@ -78,7 +78,9 @@ public class Player : MonoBehaviour
         headRigidbody.velocity = initialHeadDirection * speed;
 
         // Left Eye
-        GameObject leftEye = GameObject.CreatePrimitive(bodyPrimitiveType);
+        GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(leftEye.GetComponent<MeshFilter>().mesh);
+        leftEye.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         leftEye.name = "Left Eye";
         leftEye.transform.localScale = new Vector3(2, 3, 2);
         leftEye.GetComponent<Renderer>().material.color = eyeColor;
@@ -88,7 +90,9 @@ public class Player : MonoBehaviour
         leftEye.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Left Pupil
-        GameObject leftPupil = GameObject.CreatePrimitive(bodyPrimitiveType);
+        GameObject leftPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(leftPupil.GetComponent<MeshFilter>().mesh);
+        leftPupil.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         leftPupil.name = "Left Pupil";
         leftPupil.transform.localScale = new Vector3(1, 2, 1);
         leftPupil.GetComponent<Renderer>().material.color = pupilColor;
@@ -98,7 +102,9 @@ public class Player : MonoBehaviour
         leftPupil.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Right Eye
-        GameObject rightEye = GameObject.CreatePrimitive(bodyPrimitiveType);
+        GameObject rightEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(rightEye.GetComponent<MeshFilter>().mesh);
+        rightEye.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         rightEye.name = "Right Eye";
         rightEye.transform.localScale = new Vector3(2, 3, 2);
         rightEye.GetComponent<Renderer>().material.color = eyeColor;
@@ -108,7 +114,9 @@ public class Player : MonoBehaviour
         rightEye.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Right Pupil
-        GameObject rightPupil = GameObject.CreatePrimitive(bodyPrimitiveType);
+        GameObject rightPupil = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(rightPupil.GetComponent<MeshFilter>().mesh);
+        rightPupil.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         rightPupil.name = "Right Pupil";
         rightPupil.transform.localScale = new Vector3(1, 2, 1);
         rightPupil.GetComponent<Renderer>().material.color = pupilColor;
@@ -118,7 +126,9 @@ public class Player : MonoBehaviour
         rightPupil.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Nose
-        GameObject nose = GameObject.CreatePrimitive(bodyPrimitiveType);
+        GameObject nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(nose.GetComponent<MeshFilter>().mesh);
+        nose.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         nose.name = "Nose";
         nose.transform.localScale = new Vector3(3, 2, 2);
         nose.GetComponent<Renderer>().material.color = noseColor;
@@ -128,7 +138,9 @@ public class Player : MonoBehaviour
         nose.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
         // Mouth
-        GameObject mouth = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        GameObject mouth = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(mouth.GetComponent<MeshFilter>().mesh);
+        mouth.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         mouth.name = "Mouth";
         mouth.transform.localScale = new Vector3(3, 0.5f, 2);
         mouth.GetComponent<Renderer>().material.color = mouthColor;
@@ -142,7 +154,9 @@ public class Player : MonoBehaviour
         main.HandleHeadCreated(head);
 
         // Tail
-        GameObject tail = GameObject.CreatePrimitive(bodyPrimitiveType);
+        GameObject tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        Destroy(tail.GetComponent<MeshFilter>().mesh);
+        tail.GetComponent<MeshFilter>().mesh = lowPolySphereMesh;
         tail.transform.parent = transform;    
         tail.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
         tail.GetComponent<Renderer>().material.color = bodyColor;
