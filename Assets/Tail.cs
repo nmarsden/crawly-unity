@@ -18,6 +18,11 @@ public class Tail : MonoBehaviour
     Rigidbody leaderRigidbody;
 
     public string turningPointUID;
+    bool isGrowing;
+    float growDuration = 2f;
+    Color32 growColor = new Color32(50, 200, 200, 255);
+    Color tailColor = new Color32(0, 200, 0, 255);
+    float growStartTime;
 
 
     public void Init(Main main, float tailLength, float speed, GameObject leader, float tailMinDistance) {
@@ -39,6 +44,12 @@ public class Tail : MonoBehaviour
         isTip = true;
         isTurn = false;
         this.tailMinDistance = tailMinDistance;
+
+        if (leader.name != "Head") {
+            // Growing
+            isGrowing = true;
+            growStartTime = Time.time;
+        }
     }
 
     void OnTriggerEnter(Collider collider) 
@@ -55,6 +66,15 @@ public class Tail : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isGrowing) {
+            var material = gameObject.GetComponent<Renderer>().material;
+            if (Time.time - growStartTime > growDuration) {
+                isGrowing = false;
+                material.color = tailColor;
+            } else {
+                material.color = Color32.Lerp(growColor, tailColor, (Time.time - growStartTime) / growDuration);
+            }
+        }
         if (isTurn) {
             isTurn = false;
 
