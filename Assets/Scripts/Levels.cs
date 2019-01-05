@@ -87,6 +87,10 @@ public class Levels : MonoBehaviour
         
     }
 
+    public int GetNumberOfLevels() {
+        return levelMaps.Length;
+    }
+    
     public float GetLevelWidthInCells() {
         return currentLevelWidthInCells;
     }

@@ -26,6 +26,7 @@ public class Main : MonoBehaviour
     bool isGameOver;
     bool isGameCompleted;
 
+    int numberOfLevels;
     int currentLevelNum;
     bool isPaused;
 
@@ -51,11 +52,16 @@ public class Main : MonoBehaviour
         // Uncomment this to Zoom out
         // camera.orthographicSize = 40;
 
+        // -- Levels --
+        levels = new GameObject();
+        levels.name = "Levels";
+        numberOfLevels = levels.AddComponent<Levels>().GetNumberOfLevels();
+
         // -- Setup Title Screen --
         titleScreen = new GameObject();
         titleScreen.name = "Title Screen";
         titleScreen.AddComponent<TitleScreen>();
-        titleScreen.GetComponent<TitleScreen>().Init(this);
+        titleScreen.GetComponent<TitleScreen>().Init(this, numberOfLevels);
 
         // -- Show Title Screen --
         ShowTitleScreen();
@@ -64,7 +70,7 @@ public class Main : MonoBehaviour
     void ShowTitleScreen()
     {
         isShowTitleScreen = true;
-        titleScreen.GetComponent<TitleScreen>().Show();
+        titleScreen.GetComponent<TitleScreen>().Show(currentLevelNum);
 
         // Play Music
         audioController.PlayMusic();
@@ -75,8 +81,9 @@ public class Main : MonoBehaviour
         titleScreen.GetComponent<TitleScreen>().Hide();
     }
 
-    void StartLevel()
+    void StartLevel(int selectedLevelNumber)
     {
+        currentLevelNum = selectedLevelNumber;
         Time.timeScale = 1;
         isGameOver = false;
         isGameCompleted = false;
@@ -86,9 +93,6 @@ public class Main : MonoBehaviour
         audioController.PlayMusic();
 
         // -- Levels --
-        levels = new GameObject();
-        levels.name = "Levels";
-        levels.AddComponent<Levels>();
         levels.GetComponent<Levels>().Init(currentLevelNum);
 
         // -- Turning Points --
@@ -144,11 +148,10 @@ public class Main : MonoBehaviour
                 }
             } else if (isGameCompleted) {
                 // -- Game Completed --
-                // Reset when 'Space' pressed
+                // Start Next Level when 'Space' pressed
                 if (Input.GetKeyDown(KeyCode.Space)) 
                 {
-                    currentLevelNum++;
-                    Reset();
+                    StartNextLevel();
                 }
             } else {
                 // -- Game In Progress --
@@ -167,9 +170,17 @@ public class Main : MonoBehaviour
 
     }
 
+    void StartNextLevel() {
+        currentLevelNum++;
+        if (currentLevelNum > numberOfLevels) {
+            currentLevelNum = 1;
+        }
+        Reset();
+    }
+    
     void Reset() {
         DestroyAllCreatedObjects();
-        StartLevel();
+        StartLevel(currentLevelNum);
     }
 
     void DestroyAllCreatedObjects() 
@@ -179,7 +190,6 @@ public class Main : MonoBehaviour
         Object.Destroy(player);
         Object.Destroy(arena);
         Object.Destroy(turningPoints);
-        Object.Destroy(levels);
     }
 
     void QuitGame() {
@@ -257,10 +267,10 @@ public class Main : MonoBehaviour
         cameraController.Init(head);
     }
 
-    public void HandlePlayButtonPressed() {
+    public void HandlePlayButtonPressed(int selectedLevelNumber) {
         HideTitleScreen();
 
-        StartLevel();
+        StartLevel(selectedLevelNumber);
     }
 
     public void HandleHitFood() 
@@ -280,6 +290,10 @@ public class Main : MonoBehaviour
 
     public void HandleHitTail() {
         GameOver();
+    }
+
+    public void HandleButtonPressedFX() {
+        audioController.PlayActivateFX();
     }
 
     public void HandleCellActivated() {
