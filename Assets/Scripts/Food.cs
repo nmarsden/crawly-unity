@@ -64,29 +64,40 @@ public class Food : MonoBehaviour
     {
         if (isActive) {
             if (Time.time - activeStartTime > activeDuration) {
-                Hide();
+                Disappear();
             } else {
                 Decay();
             }
         } else {
             if (Time.time - inactiveStartTime > inactiveDuration) {
-                Respawn();
+                Appear();
             }
         }
     }
 
-    void Respawn() 
+    void Disappear() 
     {
+        main.HandleFoodDisappear();
+
+        Hide();
+    }
+
+    void Appear() 
+    {
+        main.HandleFoodAppear();        
+
         Reposition();
         Show();
     }
 
-    void Decay() {
+    void Decay() 
+    {
         // Over time change the food color to the decay color
         food.GetComponent<Renderer>().material.color = Color32.Lerp(foodColor, decayColor, (Time.time - activeStartTime) / activeDuration);
     }
 
-    void Reposition() {
+    void Reposition() 
+    {
         List<Vector3> emptyPositions = main.GetEmptyPositions();
         var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
 

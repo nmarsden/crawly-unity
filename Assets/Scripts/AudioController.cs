@@ -11,6 +11,8 @@ public class AudioController : MonoBehaviour
     AudioClip activate;
     AudioClip gameOver;
     AudioClip complete;
+    AudioClip foodAppear;
+    AudioClip foodDisappear;
 
     void Awake() 
     {
@@ -19,6 +21,8 @@ public class AudioController : MonoBehaviour
         activate = Resources.Load<AudioClip>("Audio/Clicks_13");
         gameOver = Resources.Load<AudioClip>("Audio/Xylo_13");
         complete = Resources.Load<AudioClip>("Audio/Coin_Pick_Up_03");
+        foodAppear = Resources.Load<AudioClip>("Audio/BellishAccept6");
+        foodDisappear = Resources.Load<AudioClip>("Audio/Blips_14");
 
         gameObject.AddComponent<AudioSource>();
         audioSource = gameObject.GetComponent<AudioSource>();
@@ -57,6 +61,16 @@ public class AudioController : MonoBehaviour
     public void PlayGameOverFX() 
     {
         audioSource.PlayOneShot(gameOver);
+    }
+
+    public void PlayFoodAppearFX() 
+    {
+        audioSource.PlayOneShot(foodAppear);
+    }
+
+    public void PlayFoodDisappearFX() 
+    {
+        audioSource.PlayOneShot(foodDisappear);
     }
 
 }

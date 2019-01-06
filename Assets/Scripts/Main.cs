@@ -284,6 +284,16 @@ public class Main : MonoBehaviour
         player.GetComponent<Player>().Grow();
     }
 
+    public void HandleFoodAppear() 
+    {
+        audioController.PlayFoodAppearFX();
+    }
+
+    public void HandleFoodDisappear() 
+    {
+        audioController.PlayFoodDisappearFX();
+    }
+
     public void HandleHitWall() {
         GameOver();
     }
