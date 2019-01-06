@@ -198,7 +198,7 @@ public class Main : MonoBehaviour
     }
 
     void ToggleView() {
-        cameraController.ToggleView();
+        cameraController.ToggleCameraMode();
     }
 
     void TogglePause() {

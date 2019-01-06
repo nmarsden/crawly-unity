@@ -70,6 +70,7 @@ public class TitleScreen : MonoBehaviour
     }
 
     public void Show(int selectedLevelNumber) {
+        InitCamera();
         UpdateSelectedLevel(selectedLevelNumber);
         gameObject.SetActive(true);
     }
@@ -92,6 +93,12 @@ public class TitleScreen : MonoBehaviour
         {
             SelectPreviousLevel();
         }
+    }
+
+    void InitCamera() {
+        Camera.main.orthographic = true;
+        Camera.main.transform.position = new Vector3(55.6f, 45.5f, -56.5f);
+        Camera.main.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
 
     void SelectNextLevel() {
