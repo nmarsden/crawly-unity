@@ -20,6 +20,7 @@ public class Food : MonoBehaviour
     }
 
     Color foodColor = new Color32(18, 140, 30, 255); // dark green
+    Color decayColor = new Color32(0, 0, 0, 255); // black
 
     GameObject food;
 
@@ -27,6 +28,12 @@ public class Food : MonoBehaviour
 
     float gridSpacing;
     float yPos;
+    float activeDuration = 15;
+    float activeStartTime;
+    bool isActive;
+
+    float inactiveDuration = 5;
+    float inactiveStartTime;
 
     public void Init(Main main) 
     {
@@ -46,19 +53,57 @@ public class Food : MonoBehaviour
         food.AddComponent<FoodTrigger>();
         food.GetComponent<FoodTrigger>().Init(main);
 
-        Reposition();
+        Hide();
     }
 
-    void Update()
+    public void Eat() {
+        Hide();
+    }
+
+    void FixedUpdate()
     {
-        
+        if (isActive) {
+            if (Time.time - activeStartTime > activeDuration) {
+                Hide();
+            } else {
+                Decay();
+            }
+        } else {
+            if (Time.time - inactiveStartTime > inactiveDuration) {
+                Respawn();
+            }
+        }
     }
 
-    public void Reposition() {
+    void Respawn() 
+    {
+        Reposition();
+        Show();
+    }
+
+    void Decay() {
+        // Over time change the food color to the decay color
+        food.GetComponent<Renderer>().material.color = Color32.Lerp(foodColor, decayColor, (Time.time - activeStartTime) / activeDuration);
+    }
+
+    void Reposition() {
         List<Vector3> emptyPositions = main.GetEmptyPositions();
         var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
 
         food.transform.position = new Vector3(position.x, yPos, position.z);
     }
 
+    void Hide() 
+    {
+        inactiveStartTime = Time.time;
+        isActive = false;
+        food.SetActive(false);
+    }
+
+    void Show() 
+    {
+        activeStartTime = Time.time;
+        isActive = true;
+        food.SetActive(true);
+    }
 }

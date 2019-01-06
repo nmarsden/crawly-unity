@@ -277,8 +277,8 @@ public class Main : MonoBehaviour
     {
         audioController.PlayPickupFX();
 
-        // Reposition food
-        food.GetComponent<Food>().Reposition();
+        // Eat food
+        food.GetComponent<Food>().Eat();
 
         // Grow player
         player.GetComponent<Player>().Grow();

@@ -98,7 +98,9 @@ public class Arena : MonoBehaviour
                 DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
             }
         }
+    }
 
+    void LateUpdate() {
         // Check if all cells are activated
         if (GetNumberOfActivatedCells() == numberOfFillableCells) {
             AllCellsActivated();

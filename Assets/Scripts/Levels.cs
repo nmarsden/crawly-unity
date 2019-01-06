@@ -73,7 +73,7 @@ public class Levels : MonoBehaviour
             "#X#X#",
             "##T#T",
         },
-        new string[] { // Level 10:
+        new string[] { // Level 10: Food 35
             "T#X#T",
             "#####",
             "#XTX#",
