@@ -32,7 +32,7 @@ public class HUD : MonoBehaviour
         canvas.planeDistance = 20;
 
         // Setup font
-        font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        font = Resources.Load<Font>("Font/FiraMono-Bold");
 
         // Title text
         var titleText = AddText("crawly", TextAnchor.LowerLeft, new Color32(0, 255, 0, 100));
@@ -59,7 +59,7 @@ public class HUD : MonoBehaviour
 
     void Update()
     {
-        fillText.GetComponent<Text>().text = "filled: " + main.GetFilledPercentage() + "%";
+        fillText.GetComponent<Text>().text = "filled " + main.GetFilledPercentage() + "%";
     }
 
     public void ShowGameOverMessage() {

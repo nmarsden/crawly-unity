@@ -33,27 +33,27 @@ public class TitleScreen : MonoBehaviour
         canvas.planeDistance = 20;
 
         // Setup font
-        font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+        font = Resources.Load<Font>("Font/FiraMono-Bold");
 
         // Title text
-        var titleText = AddTextMesh(gameObject, "crawly", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 12);
+        var titleText = AddTextMesh(gameObject, "crawly", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 10);
         titleText.name = "Title";
-        titleText.transform.Translate(new Vector3(0, 15, 0));
+        titleText.transform.Translate(new Vector3(0, 20, 0));
 
         // Level text
-        levelText = AddTextMesh(gameObject, "Level 1", TextAnchor.MiddleCenter, new Color32(12, 46, 18, 100), 8);
+        levelText = AddTextMesh(gameObject, "Level 1", TextAnchor.MiddleCenter, new Color32(12, 46, 18, 100), 5);
         levelText.name = "Level";
 
         // Previous Level Button
         var prevLevelButton = AddButton('\u2B05'.ToString(), 160);
         prevLevelButton.name = "Previous Level Button";
-        prevLevelButton.transform.Translate(new Vector3(-25, 0, 0));
+        prevLevelButton.transform.Translate(new Vector3(-35, 0, 0));
         prevLevelButton.GetComponent<Button>().onClick.AddListener(SelectPreviousLevel);
 
         // Next Level Button
         var nextLevelButton = AddButton('\u27A1'.ToString(), 160);
         nextLevelButton.name = "Next Level Button";
-        nextLevelButton.transform.Translate(new Vector3(25, 0, 0));
+        nextLevelButton.transform.Translate(new Vector3(35, 0, 0));
         nextLevelButton.GetComponent<Button>().onClick.AddListener(SelectNextLevel);
 
         // Play Button
@@ -129,6 +129,7 @@ public class TitleScreen : MonoBehaviour
         txtMesh.transform.localScale = new Vector3(scale, scale, scale);
         var tm = txtMesh.AddComponent<TextMesh>();
         tm.text = textContent;
+        tm.font = font;
         tm.fontSize = 200;
         tm.fontStyle = FontStyle.Bold;
         tm.color = color;
