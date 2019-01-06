@@ -10,63 +10,75 @@ public class Levels : MonoBehaviour
     int numberOfFillableCells;
 
     string[][] levelMaps = {
-        // new string[] {
-        //     "_______",
-        //     "_______",
-        //     "_______",
-        //     "_______",
-        //     "_______",
-        //     "_______",
-        //     "_______",
-        // },
-        // new string[] {
-        //     "______",
-        //     "______",
-        //     "______",
-        //     "______",
-        //     "______",
-        //     "______",
-        // },
-        new string[] {
-            "_____",
-            "_____",
-            "_____",
-            "_____",
-            "_____",
-        },
-        // new string[] {
-        //     "____",
-        //     "____",
-        //     "____",
-        //     "____",
-        // },
-        // new string[] {
-        //     "___",
-        //     "___",
-        //     "___",
-        // },
-        new string[] {
-            "X####",
+        new string[] { // Level 1: Food 0
+            "#####",
+            "#####",
+            "#_#_#",
             "#___#",
-            "#___#",
-            "#T__#",
-            "####X",
+            "#####",
         },
-        new string[] {
+        new string[] { // Level 2: Food 2
+            "#####",
+            "##__#",
             "#___#",
             "#___#",
             "#####",
-            "#___#",
-            "#___#",
         },
-        new string[] {
-            "#######",
-            "#___###",
-            "#___###",
-            "#___###",
-            "XXXX###",
-            "#######",
-            "#######",
+        new string[] { // Level 3: Food 5
+            "#_###",
+            "#___#",
+            "#___#",
+            "#___#",
+            "#####",
+        },
+        new string[] { // Level 4: Food 10
+            "#___#",
+            "#___#",
+            "#___#",
+            "#___#",
+            "#####",
+        },
+        new string[] { // Level 5: Food 13
+            "_____",
+            "_X#X_",
+            "_X#X_",
+            "_X#X_",
+            "_###_",
+        },
+        new string[] { // Level 6: Food 16
+            "_____",
+            "_X#X_",
+            "_X#X_",
+            "_X_X_",
+            "##___",
+        },
+        new string[] { // Level 7: Food 19
+            "_____",
+            "_X#X_",
+            "_#_#_",
+            "_X_X_",
+            "##___",
+        },
+        new string[] { // Level 8: Food 23
+            "T____",
+            "#X#X_",
+            "##T#_",
+            "#X_X_",
+            "##___",
+        },
+        new string[] { // Level 9: Food 26
+            "T###T",
+            "#X#X#",
+            "T#T#T",
+            "#X#X#",
+            "##T#T",
+        },
+        new string[] { // Level 10:
+            "T#X#T",
+            "#####",
+            "#XTX#",
+            "#####",
+            "T#X#T",
         },
     };
 
@@ -90,7 +102,7 @@ public class Levels : MonoBehaviour
     public int GetNumberOfLevels() {
         return levelMaps.Length;
     }
-    
+
     public float GetLevelWidthInCells() {
         return currentLevelWidthInCells;
     }

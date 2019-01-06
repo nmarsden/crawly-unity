@@ -13,7 +13,6 @@ public class Player : MonoBehaviour
     GameObject head;
     GameObject lastTail;
     bool turning = false;
-    float rotation = 0;
 
     private int tailLength;
 
@@ -36,7 +35,6 @@ public class Player : MonoBehaviour
 
     Rigidbody headRigidbody;
 
-    Quaternion headRotation;
     // GameObject gp1;
     // GameObject gp2;
 
@@ -54,7 +52,7 @@ public class Player : MonoBehaviour
         // TODO Extract a Head object
 
         // Direction
-        var initialHeadDirection = Vector3.forward;
+        var initialHeadDirection = Vector3.left;
 
         // Turn command
         turnCommand = TurnCommand.None;
@@ -149,6 +147,9 @@ public class Player : MonoBehaviour
         mouth.transform.Translate(0, -1.5f, 1f);
         mouth.transform.rotation = Quaternion.AngleAxis(90, Vector3.up);
         mouth.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
+
+        // Rotate Head (Note: Doing this AFTER adding children)
+        head.transform.rotation = Quaternion.LookRotation(initialHeadDirection);
 
         // Trigger head created event
         main.HandleHeadCreated(head);
@@ -253,8 +254,6 @@ public class Player : MonoBehaviour
                         // Turn Left;
                         direction = Quaternion.Euler(0, -90, 0) * direction;
                     }
-                    // Update head rotation
-                    headRotation = Quaternion.LookRotation(direction);
 
                     // Prevent turning again for a short time
                     turningStartTime = Time.time;
@@ -273,7 +272,7 @@ public class Player : MonoBehaviour
 
                     // Turn Head
                     headRigidbody.velocity = direction * speed;
-                    head.transform.rotation = headRotation;
+                    head.transform.rotation = Quaternion.LookRotation(direction);;
 
                     // Reset turn command
                     turnCommand = TurnCommand.None;
