@@ -4,14 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class TitleScreen : MonoBehaviour
+public class HelpScreen : MonoBehaviour
 {
     Main main;
-    int numberOfLevels;
     Font font;
     GameObject menuButtonPrefab;
-    GameObject levelText;
-    int selectedLevelNumber;
 
     void Awake()
     {
@@ -36,49 +33,43 @@ public class TitleScreen : MonoBehaviour
         font = Resources.Load<Font>("Font/FiraMono-Bold");
 
         // Title text
-        var titleText = AddTextMesh(gameObject, "crawly", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 10);
+        var titleText = AddTextMesh(gameObject, "help", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 10);
         titleText.name = "Title";
         titleText.transform.Translate(new Vector3(0, 20, 0));
 
-        // Level text
-        levelText = AddTextMesh(gameObject, "Level 1", TextAnchor.MiddleCenter, new Color32(12, 46, 18, 100), 5);
-        levelText.name = "Level";
+        // Info Text
+        var infoColor = new Color32(12, 46, 18, 100);
 
-        // Previous Level Button
-        var prevLevelButton = AddButton('\u2B05'.ToString(), 160);
-        prevLevelButton.name = "Previous Level Button";
-        prevLevelButton.transform.Translate(new Vector3(-35, 0, 0));
-        prevLevelButton.GetComponent<Button>().onClick.AddListener(SelectPreviousLevel);
+        var turnText = AddTextMesh(gameObject, "\u2B05 \u27A1 - player controls", TextAnchor.MiddleCenter, infoColor, 3);
+        turnText.name = "Turn Text";
+        turnText.transform.Translate(new Vector3(0, 2, 0));
 
-        // Next Level Button
-        var nextLevelButton = AddButton('\u27A1'.ToString(), 160);
-        nextLevelButton.name = "Next Level Button";
-        nextLevelButton.transform.Translate(new Vector3(35, 0, 0));
-        nextLevelButton.GetComponent<Button>().onClick.AddListener(SelectNextLevel);
+        var pauseText = AddTextMesh(gameObject, "p - toggle pause", TextAnchor.MiddleCenter, infoColor, 3);
+        pauseText.name = "Pause Text";
+        pauseText.transform.Translate(new Vector3(0, -5, 0));
 
-        // Play Button
-        var playButton = AddButton("PLAY", 320);
-        playButton.name = "Play Button";
-        playButton.transform.Translate(new Vector3(-20, -18, 0));
-        playButton.GetComponent<Button>().onClick.AddListener(PlayButtonOnClick);
+        var viewText = AddTextMesh(gameObject, "v - toggle view", TextAnchor.MiddleCenter, infoColor, 3);
+        viewText.name = "View Text";
+        viewText.transform.Translate(new Vector3(0, -12, 0));
 
-        // Help Button
-        var helpButton = AddButton("HELP", 320);
-        helpButton.name = "Help Button";
-        helpButton.transform.Translate(new Vector3(20, -18, 0));
-        helpButton.GetComponent<Button>().onClick.AddListener(HelpButtonOnClick);
+        var quitText = AddTextMesh(gameObject, "esc - quit", TextAnchor.MiddleCenter, infoColor, 3);
+        quitText.name = "Quit Text";
+        quitText.transform.Translate(new Vector3(0, -19, 0));
 
+        // Close Button
+        var closeButton = AddButton("\u2716", 120);
+        closeButton.name = "Close Button";
+        closeButton.transform.Translate(new Vector3(40, 21, 0));
+        closeButton.GetComponent<Button>().onClick.AddListener(CloseButtonOnClick);
     }
 
-    public void Init(Main main, int numberOfLevels) 
+    public void Init(Main main) 
     {
         this.main = main;
-        this.numberOfLevels = numberOfLevels;
     }
 
-    public void Show(int selectedLevelNumber) {
+    public void Show() {
         InitCamera();
-        UpdateSelectedLevel(selectedLevelNumber);
         gameObject.SetActive(true);
     }
 
@@ -88,22 +79,10 @@ public class TitleScreen : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Escape)) 
         {
-            PlayButtonOnClick();
+            CloseButtonOnClick();
         } 
-        if (Input.GetKeyDown(KeyCode.H)) 
-        {
-            HelpButtonOnClick();
-        } 
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) 
-        {
-            SelectNextLevel();
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow)) 
-        {
-            SelectPreviousLevel();
-        }
     }
 
     void InitCamera() {
@@ -112,37 +91,9 @@ public class TitleScreen : MonoBehaviour
         Camera.main.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
 
-    void SelectNextLevel() {
+    void CloseButtonOnClick() {
         main.HandleButtonPressedFX();
-        var nextLevelNumber = selectedLevelNumber + 1;
-        if (nextLevelNumber > numberOfLevels) {
-            nextLevelNumber = 1;
-        }
-        UpdateSelectedLevel(nextLevelNumber);
-    }
-
-    void SelectPreviousLevel() {
-        main.HandleButtonPressedFX();
-        var prevLevelNumber = selectedLevelNumber - 1;
-        if (prevLevelNumber < 1) {
-            prevLevelNumber = numberOfLevels;
-        }
-        UpdateSelectedLevel(prevLevelNumber);
-    }
-
-    void UpdateSelectedLevel(int selectedLevelNumber) {
-        this.selectedLevelNumber = selectedLevelNumber;
-        levelText.GetComponent<TextMesh>().text = "Level " + selectedLevelNumber;
-    }
-
-    void PlayButtonOnClick() {
-        main.HandleButtonPressedFX();
-        main.HandlePlayButtonPressed(selectedLevelNumber);
-    }
-
-    void HelpButtonOnClick() {
-        main.HandleButtonPressedFX();
-        main.HandleHelpButtonPressed();
+        main.HandleHelpCloseButtonPressed();
     }
 
     public GameObject AddTextMesh(GameObject parent, string textContent, TextAnchor alignment, Color32 color, float scale) {
@@ -192,5 +143,4 @@ public class TitleScreen : MonoBehaviour
     Color ConvertColor (int r, int g, int b) {
         return new Color(r/255f, g/255f, b/255f);
     }
-
 }

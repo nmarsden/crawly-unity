@@ -23,6 +23,7 @@ public class Main : MonoBehaviour
     GameObject hud;
 
     bool isShowTitleScreen;
+    bool isShowHelpScreen;
     bool isGameOver;
     bool isGameCompleted;
 
@@ -31,6 +32,7 @@ public class Main : MonoBehaviour
     bool isPaused;
 
     GameObject titleScreen;
+    GameObject helpScreen;
 
     void Start() {
         currentLevelNum = 1;
@@ -63,6 +65,12 @@ public class Main : MonoBehaviour
         titleScreen.AddComponent<TitleScreen>();
         titleScreen.GetComponent<TitleScreen>().Init(this, numberOfLevels);
 
+        // -- Setup Help Screen --
+        helpScreen = new GameObject();
+        helpScreen.name = "Help Screen";
+        helpScreen.AddComponent<HelpScreen>();
+        helpScreen.GetComponent<HelpScreen>().Init(this);
+
         // -- Show Title Screen --
         ShowTitleScreen();
     }
@@ -80,6 +88,21 @@ public class Main : MonoBehaviour
         isShowTitleScreen = false;
         titleScreen.GetComponent<TitleScreen>().Hide();
     }
+
+    void ShowHelpScreen()
+    {
+        isShowHelpScreen = true;
+        helpScreen.GetComponent<HelpScreen>().Show();
+
+        // Play Music
+        audioController.PlayMusic();
+    }
+
+    void HideHelpScreen() {
+        isShowHelpScreen = false;
+        helpScreen.GetComponent<HelpScreen>().Hide();
+    }
+
 
     void StartLevel(int selectedLevelNumber)
     {
@@ -128,7 +151,7 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (!isShowTitleScreen) {
+        if (!isShowTitleScreen && !isShowHelpScreen) {
             // Toggle View when 'V' pressed
             if (Input.GetKeyDown(KeyCode.V)) 
             {
@@ -141,15 +164,15 @@ public class Main : MonoBehaviour
             }
             if (isGameOver) {
                 // -- Game Over --
-                // Reset when 'Space' pressed
-                if (Input.GetKeyDown(KeyCode.Space)) 
+                // Reset when 'Space' or 'Return' pressed
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
                 {
                     Reset();
                 }
             } else if (isGameCompleted) {
                 // -- Game Completed --
-                // Start Next Level when 'Space' pressed
-                if (Input.GetKeyDown(KeyCode.Space)) 
+                // Start Next Level when 'Space' or 'Return' pressed
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
                 {
                     StartNextLevel();
                 }
@@ -271,6 +294,16 @@ public class Main : MonoBehaviour
         HideTitleScreen();
 
         StartLevel(selectedLevelNumber);
+    }
+
+    public void HandleHelpButtonPressed() {
+        HideTitleScreen();
+        ShowHelpScreen();
+    }
+
+    public void HandleHelpCloseButtonPressed() {
+        HideHelpScreen();
+        ShowTitleScreen();
     }
 
     public void HandleHitFood() 

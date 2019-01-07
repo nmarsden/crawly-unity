@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
 
     GameObject target;
     Vector3 targetOffset;
-    CameraMode cameraMode = CameraMode.SIDE_FOLLOW_TURN;
+    CameraMode cameraMode = CameraMode.SIDE;
 
     public void Awake() {
         cameraModeToAction = new Dictionary<CameraMode, Action>
@@ -65,12 +65,13 @@ public class CameraController : MonoBehaviour
         } 
         else if (cameraMode.Equals(CameraMode.TOP_FOLLOW_TURN)) 
         {
-            InitCameraMode(CameraMode.FPV);
-        } 
-        else if (cameraMode.Equals(CameraMode.FPV)) 
-        {
             InitCameraMode(CameraMode.ORTHO);
-        }
+            // InitCameraMode(CameraMode.FPV);
+        } 
+        // else if (cameraMode.Equals(CameraMode.FPV)) 
+        // {
+        //     InitCameraMode(CameraMode.ORTHO);
+        // }
     }
 
     void InitCameraMode(CameraMode cameraMode) {
@@ -101,7 +102,7 @@ public class CameraController : MonoBehaviour
         cameraMode = CameraMode.SIDE;
         Camera.main.orthographic = false;
         Camera.main.fieldOfView = 40;
-        Camera.main.transform.position = new Vector3(55.6f, 45.5f, 0);
+        Camera.main.transform.position = new Vector3(50.6f, 45.5f, 0);
         Camera.main.transform.rotation = Quaternion.Euler(45, -90, 0);
     }
 
