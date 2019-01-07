@@ -232,6 +232,10 @@ public class Arena : MonoBehaviour
     }
     
     public int GetNumberOfActivatedCells() {
+        if (cellsContainer == null)
+        {
+            return 0;
+        }
         var cells = cellsContainer.GetComponentsInChildren<Cell>();
         var numberOfActiveCells = 0;
         foreach (Cell cell in cells) {

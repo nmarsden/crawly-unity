@@ -57,7 +57,7 @@ public class HelpScreen : MonoBehaviour
         quitText.transform.Translate(new Vector3(0, -19, 0));
 
         // Close Button
-        var closeButton = AddButton("\u2716", 120);
+        var closeButton = AddButton("\u2573", 120);
         closeButton.name = "Close Button";
         closeButton.transform.Translate(new Vector3(40, 21, 0));
         closeButton.GetComponent<Button>().onClick.AddListener(CloseButtonOnClick);

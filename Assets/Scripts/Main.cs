@@ -26,6 +26,7 @@ public class Main : MonoBehaviour
     bool isShowHelpScreen;
     bool isGameOver;
     bool isGameCompleted;
+    bool isOkClicked;
 
     int numberOfLevels;
     int currentLevelNum;
@@ -71,6 +72,12 @@ public class Main : MonoBehaviour
         helpScreen.AddComponent<HelpScreen>();
         helpScreen.GetComponent<HelpScreen>().Init(this);
 
+        // -- HUD --
+        hud = new GameObject();
+        hud.name = "HUD";
+        hud.AddComponent<HUD>();
+        hud.GetComponent<HUD>().Init(this);
+
         // -- Show Title Screen --
         ShowTitleScreen();
     }
@@ -103,6 +110,15 @@ public class Main : MonoBehaviour
         helpScreen.GetComponent<HelpScreen>().Hide();
     }
 
+    void ShowHUD()
+    {
+        hud.GetComponent<HUD>().Show(currentLevelNum);
+    }
+
+    void HideHUD()
+    {
+        hud.GetComponent<HUD>().Hide();
+    }
 
     void StartLevel(int selectedLevelNumber)
     {
@@ -111,6 +127,7 @@ public class Main : MonoBehaviour
         isGameOver = false;
         isGameCompleted = false;
         isPaused = false;
+        isOkClicked = false;
 
         // Play Music
         audioController.PlayMusic();
@@ -142,11 +159,8 @@ public class Main : MonoBehaviour
         food.AddComponent<Food>();
         food.GetComponent<Food>().Init(this);
 
-        // -- HUD --
-        hud = new GameObject();
-        hud.name = "HUD";
-        hud.AddComponent<HUD>();
-        hud.GetComponent<HUD>().Init(this);
+        // -- Show HUD --
+        ShowHUD();
     }
 
     void Update()
@@ -165,14 +179,14 @@ public class Main : MonoBehaviour
             if (isGameOver) {
                 // -- Game Over --
                 // Reset when 'Space' or 'Return' pressed
-                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
+                if (isOkClicked || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
                 {
                     Reset();
                 }
             } else if (isGameCompleted) {
                 // -- Game Completed --
                 // Start Next Level when 'Space' or 'Return' pressed
-                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
+                if (isOkClicked || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
                 {
                     StartNextLevel();
                 }
@@ -208,7 +222,6 @@ public class Main : MonoBehaviour
 
     void DestroyAllCreatedObjects() 
     {
-        Object.Destroy(hud);
         Object.Destroy(food);
         Object.Destroy(player);
         Object.Destroy(arena);
@@ -216,6 +229,7 @@ public class Main : MonoBehaviour
     }
 
     void QuitGame() {
+        HideHUD();
         DestroyAllCreatedObjects();
         ShowTitleScreen();
     }
@@ -304,6 +318,10 @@ public class Main : MonoBehaviour
     public void HandleHelpCloseButtonPressed() {
         HideHelpScreen();
         ShowTitleScreen();
+    }
+ 
+    public void HandleHudOkButtonClicked() {
+        isOkClicked = true;
     }
 
     public void HandleHitFood() 
