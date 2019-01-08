@@ -44,13 +44,13 @@ public class HelpScreen : MonoBehaviour
         turnText.name = "Turn Text";
         turnText.transform.Translate(new Vector3(0, 2, 0));
 
-        var pauseText = AddTextMesh(gameObject, "p - toggle pause", TextAnchor.MiddleCenter, infoColor, 3);
-        pauseText.name = "Pause Text";
-        pauseText.transform.Translate(new Vector3(0, -5, 0));
-
         var viewText = AddTextMesh(gameObject, "v - toggle view", TextAnchor.MiddleCenter, infoColor, 3);
         viewText.name = "View Text";
-        viewText.transform.Translate(new Vector3(0, -12, 0));
+        viewText.transform.Translate(new Vector3(0, -5, 0));
+
+        var pauseText = AddTextMesh(gameObject, "p - pause", TextAnchor.MiddleCenter, infoColor, 3);
+        pauseText.name = "Pause Text";
+        pauseText.transform.Translate(new Vector3(0, -12, 0));
 
         var quitText = AddTextMesh(gameObject, "esc - quit", TextAnchor.MiddleCenter, infoColor, 3);
         quitText.name = "Quit Text";

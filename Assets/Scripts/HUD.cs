@@ -14,6 +14,7 @@ public class HUD : MonoBehaviour
     GameObject fillText;
     GameObject gameCompletedText;
     GameObject gameOverText;
+    GameObject pausedText;
     GameObject okButton;
     int currentLevelNum;
 
@@ -72,6 +73,12 @@ public class HUD : MonoBehaviour
         gameOverText.transform.Translate(new Vector3(0, 10, 0));
         gameOverText.SetActive(false);
 
+        // Paused text
+        pausedText = AddTextMesh(gameObject, "PAUSED", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200), 5);
+        pausedText.name = "Paused";
+        pausedText.transform.Translate(new Vector3(0, 10, 0));
+        pausedText.SetActive(false);
+
         // OK Button
         okButton = AddButton("OK", 200);
         okButton.name = "OK Button";
@@ -85,6 +92,7 @@ public class HUD : MonoBehaviour
 
         gameOverText.SetActive(false);
         gameCompletedText.SetActive(false);
+        pausedText.SetActive(false);
         okButton.SetActive(false);
 
         gameObject.SetActive(true);
@@ -101,6 +109,7 @@ public class HUD : MonoBehaviour
     }
 
     void OkButtonOnClick() {
+        main.HandleButtonPressedFX();
         main.HandleHudOkButtonClicked();
     }
 
@@ -117,6 +126,16 @@ public class HUD : MonoBehaviour
     public void ShowGameCompletedMessage() {
         gameCompletedText.SetActive(true);
         okButton.SetActive(true);
+    }
+
+    public void ShowPausedMessage() {
+        pausedText.SetActive(true);
+        okButton.SetActive(true);
+    }
+
+    public void HidePausedMessage() {
+        pausedText.SetActive(false);
+        okButton.SetActive(false);
     }
 
     public GameObject AddTextMesh(GameObject parent, string textContent, TextAnchor alignment, Color32 color, float scale) {

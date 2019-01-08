@@ -176,6 +176,7 @@ public class Main : MonoBehaviour
             {
                 QuitGame();
             }
+            
             if (isGameOver) {
                 // -- Game Over --
                 // Reset when 'Space' or 'Return' pressed
@@ -190,18 +191,23 @@ public class Main : MonoBehaviour
                 {
                     StartNextLevel();
                 }
+            } else if (isPaused) {
+                // Unpause when when 'Space' or 'Return' pressed
+                if (isOkClicked || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
+                {
+                    Unpause();
+                }
             } else {
                 // -- Game In Progress --
+                // Pause when 'P' pressed
+                if (Input.GetKeyDown(KeyCode.P)) {
+                    Pause();
+                }
                 // Reset when 'R' pressed
                 if (Input.GetKeyDown(KeyCode.R)) 
                 {
                     Reset();
                 } 
-                // Toggle Pause when 'P' pressed
-                else if (Input.GetKeyDown(KeyCode.P)) 
-                {
-                    TogglePause();
-                }
             }
         }
 
@@ -238,13 +244,21 @@ public class Main : MonoBehaviour
         cameraController.ToggleCameraMode();
     }
 
-    void TogglePause() {
-        isPaused = !isPaused;
-        if (isPaused) {
-            Time.timeScale = 0;
-        } else {
-            Time.timeScale = 1;
-        }
+    void Pause() {
+        isPaused = true;
+        Time.timeScale = 0;
+
+        // Display Paused message
+        hud.GetComponent<HUD>().ShowPausedMessage();
+    }
+
+    void Unpause() {
+        isOkClicked = false;
+        isPaused = false;
+        Time.timeScale = 1;
+
+        // Hide Paused message
+        hud.GetComponent<HUD>().HidePausedMessage();
     }
 
     public float GetArenaWidth() 
