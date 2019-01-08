@@ -83,7 +83,7 @@ public class Tail : MonoBehaviour
             tailRigidbody.velocity = speed * direction;
 
             // Snap position to turning point
-            gameObject.transform.position = turningPoints.GetPosition(turningPointUID);;
+            gameObject.transform.position = turningPoints.GetPosition(turningPointUID);
 
             // Update the turningPointUID to be the next one
             var nextTurningPointUID = turningPoints.GetNextTurningPointUID(turningPointUID);

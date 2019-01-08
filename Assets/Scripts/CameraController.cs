@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
 
     GameObject target;
     Vector3 targetOffset;
-    CameraMode cameraMode = CameraMode.SIDE;
+    CameraMode cameraMode = CameraMode.SIDE_FOLLOW_TURN;
 
     public void Awake() {
         cameraModeToAction = new Dictionary<CameraMode, Action>
@@ -65,13 +65,12 @@ public class CameraController : MonoBehaviour
         } 
         else if (cameraMode.Equals(CameraMode.TOP_FOLLOW_TURN)) 
         {
-            InitCameraMode(CameraMode.ORTHO);
-            // InitCameraMode(CameraMode.FPV);
+            InitCameraMode(CameraMode.FPV);
         } 
-        // else if (cameraMode.Equals(CameraMode.FPV)) 
-        // {
-        //     InitCameraMode(CameraMode.ORTHO);
-        // }
+        else if (cameraMode.Equals(CameraMode.FPV)) 
+        {
+            InitCameraMode(CameraMode.ORTHO);
+        }
     }
 
     void InitCameraMode(CameraMode cameraMode) {
@@ -185,13 +184,13 @@ public class CameraController : MonoBehaviour
             else if (cameraMode.Equals(CameraMode.SIDE_FOLLOW_TURN)) 
             {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
-                var direction = target.GetComponent<Rigidbody>().velocity.normalized;
+                var direction = target.transform.rotation * Vector3.forward;
                 transform.position = Vector3.Lerp(transform.position, target.transform.position + (-40f * direction) + new Vector3(0, 60f, 0), 0.05f);
                 transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f)), 0.05f);
             }
             else if (cameraMode.Equals(CameraMode.FPV)) {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
-                var direction = target.GetComponent<Rigidbody>().velocity.normalized;
+                var direction = target.transform.rotation * Vector3.forward;
                 transform.position = target.transform.position + (-5 * direction) + new Vector3(0, 7, 0);
                 transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f)), 0.05f);
             }

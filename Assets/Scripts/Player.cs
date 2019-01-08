@@ -199,6 +199,8 @@ public class Player : MonoBehaviour
     
     void FixedUpdate() {
 
+        Vector3 direction = Vector3.Normalize(headRigidbody.velocity);
+
         if (!turning) {
 
             if (turnCommand != TurnCommand.None) {
@@ -208,7 +210,6 @@ public class Player : MonoBehaviour
 
                 // TODO Extract method getSnappedGridPositionWithinThreshold(Vector3 position, Vector3 direction, float threshold)
 
-                Vector3 direction = Vector3.Normalize(headRigidbody.velocity);
 
                 // Determine whether head is allowed to turn at its current position
                 if (direction == Vector3.forward || direction == Vector3.back) {
@@ -233,9 +234,21 @@ public class Player : MonoBehaviour
                 var distanceToGridPos2 = Vector3.Distance(head.transform.position, gridPos2);
                 diff = Mathf.Min(distanceToGridPos1, distanceToGridPos2);
 
+                // Rotate head towards the intended turn direction
+                if (turnCommand == TurnCommand.Right)
+                {
+                    // Turn Right
+                    direction = Quaternion.Euler(0, 90, 0) * direction;
+                } else 
+                {
+                    // Turn Left;
+                    direction = Quaternion.Euler(0, -90, 0) * direction;
+                }
+
                 // TODO the threshold needs to take into account the velocity
                 var threshold = 0.01F;
                 if (diff < threshold) {
+                    // -- TURN --
                     turning = true;
 
                     // Snap head position to grid
@@ -243,17 +256,6 @@ public class Player : MonoBehaviour
                     head.transform.position = snapGridPos;
 
                     var incomingDirection = direction;
-
-                    // Update direction
-                    if (turnCommand == TurnCommand.Right)
-                    {
-                        // Turn Right
-                        direction = Quaternion.Euler(0, 90, 0) * direction;
-                    } else 
-                    {
-                        // Turn Left;
-                        direction = Quaternion.Euler(0, -90, 0) * direction;
-                    }
 
                     // Prevent turning again for a short time
                     turningStartTime = Time.time;
@@ -270,9 +272,8 @@ public class Player : MonoBehaviour
                         tail = tail.GetLeader().GetComponent<Tail>();
                     }
 
-                    // Turn Head
+                    // Update Head Velocity
                     headRigidbody.velocity = direction * speed;
-                    head.transform.rotation = Quaternion.LookRotation(direction);;
 
                     // Reset turn command
                     turnCommand = TurnCommand.None;
@@ -284,6 +285,11 @@ public class Player : MonoBehaviour
             if (timePassed > 0.1) {
                 turning = false;
             }
+        }
+
+        if (head != null) {
+            // Update Head Rotation
+            head.transform.rotation = Quaternion.Lerp(head.transform.rotation, Quaternion.LookRotation(direction), 0.07f);
         }
 
         // Grow when 'G' pressed
