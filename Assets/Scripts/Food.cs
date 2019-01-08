@@ -14,7 +14,9 @@ public class Food : MonoBehaviour
         }
         void OnTriggerEnter(Collider collider) 
         {
-            main.HandleHitFood();
+            if (collider.name == "Head" || collider.name.StartsWith("Tail")) {
+                main.HandleHitFood();
+            }
         }
 
     }
@@ -27,8 +29,10 @@ public class Food : MonoBehaviour
     Main main;
 
     float gridSpacing;
-    float yPos;
-    float activeDuration = 15;
+    float groundYPos;
+    float fallingSpeed = 0.1f;
+    float fallingDistance = 20;
+    float activeDuration = 20;
     float activeStartTime;
     bool isActive;
 
@@ -39,7 +43,7 @@ public class Food : MonoBehaviour
     {
         this.main = main;
         gridSpacing = main.GetGridSpacing();
-        yPos = 1 - main.GetPlayerHeight()/2;
+        groundYPos = 1 - main.GetPlayerHeight()/2; 
     }
 
     void Start()
@@ -66,6 +70,11 @@ public class Food : MonoBehaviour
             if (Time.time - activeStartTime > activeDuration) {
                 Disappear();
             } else {
+                var remainingFallDistance = food.transform.position.y - groundYPos;
+                if (remainingFallDistance > 0) {
+                    food.transform.Translate(new Vector3(0, -fallingSpeed, 0));
+                }
+
                 Decay();
             }
         } else {
@@ -101,7 +110,7 @@ public class Food : MonoBehaviour
         List<Vector3> emptyPositions = main.GetEmptyPositions();
         var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
 
-        food.transform.position = new Vector3(position.x, yPos, position.z);
+        food.transform.position = new Vector3(position.x, groundYPos + fallingDistance, position.z);
     }
 
     void Hide() 
