@@ -234,6 +234,8 @@ public class Player : MonoBehaviour
                 var distanceToGridPos2 = Vector3.Distance(head.transform.position, gridPos2);
                 diff = Mathf.Min(distanceToGridPos1, distanceToGridPos2);
 
+                var incomingDirection = direction;
+
                 // Rotate head towards the intended turn direction
                 if (turnCommand == TurnCommand.Right)
                 {
@@ -254,8 +256,6 @@ public class Player : MonoBehaviour
                     // Snap head position to grid
                     var snapGridPos = (distanceToGridPos1 < distanceToGridPos2) ? gridPos1 : gridPos2;
                     head.transform.position = snapGridPos;
-
-                    var incomingDirection = direction;
 
                     // Prevent turning again for a short time
                     turningStartTime = Time.time;

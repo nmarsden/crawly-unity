@@ -70,7 +70,7 @@ public class TurningPoints : MonoBehaviour
         var halfGridSpacing = gridSpacing / 2;
         var halfPlayerWidth = playerWidth / 2;
         var halfTriggerWidth = 0.5f;
-        var halfDistancePerTick = 0.0f; // <-- This magic number seems to work!!!
+        var halfDistancePerTick = 0.3f; // <-- This magic number seems to work!!!
         trigger.transform.position = position + (incomingDirection * (halfPlayerWidth + halfTriggerWidth - halfDistancePerTick));
 
         if (isShowTurningPoints) {
@@ -124,5 +124,5 @@ public class TurningPoints : MonoBehaviour
         turningPoints[int.Parse(turningPointUID)].Cleanup();
         turningPoints.Remove(int.Parse(turningPointUID));
     }
-
+    
 }

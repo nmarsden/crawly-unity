@@ -39,6 +39,11 @@ public class Main : MonoBehaviour
         currentLevelNum = 1;
         isPaused = false;
 
+        // -- Console --
+        var console = new GameObject();
+        console.name = "Console";
+        console.AddComponent<Consolation.Console>();
+        
         // -- Audio Controller --
         var audio = new GameObject();
         audio.name = "Audio Controller";
