@@ -32,11 +32,11 @@ public class Food : MonoBehaviour
     float groundYPos;
     float fallingSpeed = 0.1f;
     float fallingDistance = 20;
-    float activeDuration = 20;
+    float activeDuration = 10;
     float activeStartTime;
     bool isActive;
 
-    float inactiveDuration = 5;
+    float inactiveDuration = 0.3f;
     float inactiveStartTime;
 
     public void Init(Main main) 
