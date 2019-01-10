@@ -158,7 +158,6 @@ public class Arena : MonoBehaviour
         wall.transform.position = position;
         AdjustPositionForPlayerHeight(wall.transform);
         wall.GetComponent<Renderer>().material.color = wallColor;
-        wall.GetComponent<Collider>().isTrigger = true;
         wall.AddComponent<WallTrigger>();
         wall.GetComponent<WallTrigger>().Init(main);
     }

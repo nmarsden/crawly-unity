@@ -35,6 +35,8 @@ public class Player : MonoBehaviour
 
     Rigidbody headRigidbody;
 
+    bool isKilled;
+
     // GameObject gp1;
     // GameObject gp2;
 
@@ -199,6 +201,10 @@ public class Player : MonoBehaviour
     
     void FixedUpdate() {
 
+        if (isKilled) {
+            return;
+        }
+
         Vector3 direction = Vector3.Normalize(headRigidbody.velocity);
 
         if (!turning) {
@@ -310,4 +316,18 @@ public class Player : MonoBehaviour
         lastTail = newPart;
     }
 
+    public void Kill() {
+        // Switch to Killed mode
+        isKilled = true;
+
+        // Allow rotation
+        headRigidbody.constraints = RigidbodyConstraints.FreezePositionY;
+
+        // Switch tail pieces to Killed Mode
+        var tail = lastTail.GetComponent<Tail>();
+        while(tail != null) {
+            tail.Kill();
+            tail = tail.GetLeader().GetComponent<Tail>();
+        }
+    }
 }

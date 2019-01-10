@@ -35,6 +35,10 @@ public class Main : MonoBehaviour
     GameObject titleScreen;
     GameObject helpScreen;
 
+    bool isShowDeathSequence;
+    float deathSequenceStartTime;
+    float deathSequenceDuration = 2f;
+
     void Start() {
         currentLevelNum = 1;
         isPaused = false;
@@ -132,7 +136,8 @@ public class Main : MonoBehaviour
         isGameOver = false;
         isGameCompleted = false;
         isPaused = false;
-        isOkClicked = false;
+        isOkClicked = false; 
+        isShowDeathSequence = false;
 
         // Play Music
         audioController.PlayMusic();
@@ -183,11 +188,24 @@ public class Main : MonoBehaviour
             }
             
             if (isGameOver) {
-                // -- Game Over --
-                // Reset when 'Space' or 'Return' pressed
-                if (isOkClicked || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
-                {
-                    Reset();
+                if (isShowDeathSequence) {
+                    // -- Game Over - Showing Death Sequence --
+                    if (Time.time - deathSequenceStartTime > deathSequenceDuration) {
+                        isShowDeathSequence = false;
+
+                        // Pause Game
+                        Time.timeScale = 0;
+
+                        // Display Game Over message
+                        hud.GetComponent<HUD>().ShowGameOverMessage();
+                    }
+                } else {
+                    // -- Game Over - Showing Game Over Message --
+                    // Reset when 'Space' or 'Return' pressed
+                    if (isOkClicked || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
+                    {
+                        Reset();
+                    }
                 }
             } else if (isGameCompleted) {
                 // -- Game Completed --
@@ -385,6 +403,10 @@ public class Main : MonoBehaviour
     }
     
     private void GameCompleted() {
+        if (isGameOver) {
+            return;
+        }
+
         audioController.StopMusic();
         audioController.PlayCompleteFX();
 
@@ -399,17 +421,23 @@ public class Main : MonoBehaviour
     }
 
     private void GameOver() {
+        if (isGameOver) {
+            return;
+        }
+        // Switch to Game Over mode
+        isGameOver = true; 
+
+        // De-active Food
+        food.SetActive(false);
+
+        // Show Death Sequence
+        isShowDeathSequence = true;
+        deathSequenceStartTime = Time.time;
+        player.GetComponent<Player>().Kill();
+
+        // Stop music & play game over FX
         audioController.StopMusic();
         audioController.PlayGameOverFX();
-
-        // Switch to Game Over mode
-        isGameOver = true;
-
-        // Pause Game
-        Time.timeScale = 0;
-
-        // Display Game Over message
-        hud.GetComponent<HUD>().ShowGameOverMessage();
     }
 
     public List<Vector3> GetEmptyPositions() {

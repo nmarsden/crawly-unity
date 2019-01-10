@@ -23,6 +23,7 @@ public class Tail : MonoBehaviour
     Color32 growColor = new Color32(50, 200, 200, 255);
     Color tailColor = new Color32(0, 200, 0, 255);
     float growStartTime;
+    bool isKilled;
 
 
     public void Init(Main main, float tailLength, float speed, GameObject leader, float tailMinDistance) {
@@ -66,6 +67,10 @@ public class Tail : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isKilled) {
+            return;
+        }
+
         if (isGrowing) {
             var material = gameObject.GetComponent<Renderer>().material;
             if (Time.time - growStartTime > growDuration) {
@@ -126,4 +131,16 @@ public class Tail : MonoBehaviour
     public void Turn() {
         isTurn = true;
     }
+
+    public void Kill() {
+        // Switch to Killed mode
+        isKilled = true;
+
+        // Allow rotation
+        tailRigidbody.constraints = RigidbodyConstraints.FreezePositionY;
+
+        // Allow bumping into stuff
+        gameObject.GetComponent<Collider>().isTrigger = false;
+    }
+
 }

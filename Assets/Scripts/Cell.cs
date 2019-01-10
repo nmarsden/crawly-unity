@@ -31,6 +31,7 @@ public class Cell : MonoBehaviour
             var wallHeight = main.GetWallHeight();
             gameObject.transform.localScale = Vector3.Scale(gameObject.transform.localScale, new Vector3(1, wallHeight, 1));
             gameObject.transform.position += new Vector3(0, wallHeight/2 + 0.5f, 0);
+            gameObject.GetComponent<Collider>().isTrigger = false;
         }
     }
 
