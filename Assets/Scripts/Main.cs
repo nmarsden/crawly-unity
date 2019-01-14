@@ -19,7 +19,7 @@ public class Main : MonoBehaviour
     GameObject turningPoints;
     GameObject arena;
     GameObject player;
-    GameObject food;
+    GameObject pickups;
     GameObject hud;
 
     bool isShowTitleScreen;
@@ -163,11 +163,11 @@ public class Main : MonoBehaviour
         player.AddComponent<Player>();
         player.GetComponent<Player>().Init(this);
 
-        // -- Food Container --
-        food = new GameObject();
-        food.name = "Food Container";
-        food.AddComponent<Food>();
-        food.GetComponent<Food>().Init(this);
+        // -- Pickups --
+        pickups = new GameObject();
+        pickups.name = "Pickups";
+        pickups.AddComponent<Pickups>();
+        pickups.GetComponent<Pickups>().Init(this);
 
         // -- Show HUD --
         ShowHUD();
@@ -251,7 +251,7 @@ public class Main : MonoBehaviour
 
     void DestroyAllCreatedObjects() 
     {
-        Object.Destroy(food);
+        Object.Destroy(pickups);
         Object.Destroy(player);
         Object.Destroy(arena);
         Object.Destroy(turningPoints);
@@ -361,25 +361,53 @@ public class Main : MonoBehaviour
         isOkClicked = true;
     }
 
-    public void HandleHitFood() 
+    public void HandleHitPickup(Pickup pickup) 
     {
+        // Play pickup FX
         audioController.PlayPickupFX();
 
-        // Eat food
-        food.GetComponent<Food>().Eat();
+        // Eat pickup
+        pickup.Eat();
 
-        // Grow player
-        player.GetComponent<Player>().Grow();
+        if (pickup.isFood()) 
+        {
+            // -- Handle Hit Food --
+            // Grow player
+            player.GetComponent<Player>().Grow();
+        }
+        else if (pickup.isPoison()) 
+        {
+            // -- Handle Hit Poison --
+            // Shrink player
+            if (player.GetComponent<Player>().IsShrinkable()) 
+            {
+                player.GetComponent<Player>().Shrink();
+            } 
+            else 
+            {
+                GameOver();
+            }
+        }
     }
 
-    public void HandleFoodAppear() 
+    public void HandlePickupAppear(Pickup pickup) 
     {
-        audioController.PlayFoodAppearFX();
+        if (pickup.isFood()) {
+            audioController.PlayFoodAppearFX();
+
+        } else if (pickup.isPoison()) {
+            audioController.PlayPoisonAppearFX();
+        }
     }
 
-    public void HandleFoodDisappear() 
+    public void HandlePickupDisappear(Pickup pickup) 
     {
-        audioController.PlayFoodDisappearFX();
+        if (pickup.isFood()) {
+            audioController.PlayFoodDisappearFX();
+
+        } else if (pickup.isPoison()) {
+            audioController.PlayPoisonDisappearFX();
+        }
     }
 
     public void HandleHitWall() {
@@ -427,8 +455,8 @@ public class Main : MonoBehaviour
         // Switch to Game Over mode
         isGameOver = true; 
 
-        // De-active Food
-        food.SetActive(false);
+        // De-active Pickups
+        pickups.SetActive(false);
 
         // Show Death Sequence
         isShowDeathSequence = true;
@@ -441,7 +469,13 @@ public class Main : MonoBehaviour
     }
 
     public List<Vector3> GetEmptyPositions() {
-        return arena.GetComponent<Arena>().GetEmptyPositions();
+        var arenaScript = arena.GetComponent<Arena>();
+
+        var emptyPositions = arenaScript.GetEmptyArenaPositions();
+        var pickupPositions = arenaScript.ToArenaPositions(pickups.GetComponent<Pickups>().GetPositions());
+        emptyPositions.RemoveAll(v => pickupPositions.Contains(v));
+
+        return arenaScript.ToCellPositions(emptyPositions);
     }
 
     public int GetNumberOfFillableCells() {

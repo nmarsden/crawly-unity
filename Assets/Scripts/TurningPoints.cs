@@ -34,7 +34,7 @@ public class TurningPoints : MonoBehaviour
         }
     }
 
-    SortedDictionary<int, TurningPoint> turningPoints = new SortedDictionary<int, TurningPoint>();
+    IDictionary<int, TurningPoint> turningPoints = new SortedDictionary<int, TurningPoint>();
     float gridSpacing;
     float playerWidth;
     int totalTurningPointsAdded;

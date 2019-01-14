@@ -18,11 +18,19 @@ public class Tail : MonoBehaviour
     Rigidbody leaderRigidbody;
 
     public string turningPointUID;
+
     bool isGrowing;
     float growDuration = 2f;
-    Color32 growColor = new Color32(50, 200, 200, 255);
-    Color tailColor = new Color32(0, 200, 0, 255);
     float growStartTime;
+
+    bool isShrinking;
+    float shrinkDuration = 2f;
+    float shrinkStartTime;
+
+    Color tailColor = new Color32(0, 200, 0, 255);
+    Color32 growColor = new Color32(50, 200, 200, 255); // blue-green
+    Color32 shrinkColorStart = new Color32(140, 200, 30, 255); // green-red
+    Color32 shrinkColorEnd = new Color32(140, 18, 30, 255); // dark red
     bool isKilled;
 
 
@@ -80,6 +88,15 @@ public class Tail : MonoBehaviour
                 material.color = Color32.Lerp(growColor, tailColor, (Time.time - growStartTime) / growDuration);
             }
         }
+        if (isShrinking) {
+            var material = gameObject.GetComponent<Renderer>().material;
+            if (Time.time - shrinkStartTime > shrinkDuration) {
+                isShrinking = false;
+                material.color = shrinkColorEnd;
+            } else {
+                material.color = Color32.Lerp(shrinkColorStart, shrinkColorEnd, (Time.time - shrinkStartTime) / shrinkDuration);
+            }
+        }
         if (isTurn) {
             isTurn = false;
 
@@ -125,6 +142,10 @@ public class Tail : MonoBehaviour
         return leader;
     }
     
+    public void SetAsTip() {
+        isTip = true;
+    }
+    
     public void ClearTip() {
         isTip = false;
     }
@@ -143,4 +164,8 @@ public class Tail : MonoBehaviour
         gameObject.GetComponent<Collider>().isTrigger = false;
     }
 
+    public void Shrink() {
+        isShrinking = true;
+        shrinkStartTime = Time.time;
+    }
 }

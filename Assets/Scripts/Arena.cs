@@ -19,6 +19,36 @@ public class Arena : MonoBehaviour
 
     }
 
+    public class ArenaPosition
+    {
+        public int row { get; private set; }
+        public int col { get; private set; }
+
+        public ArenaPosition(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ArenaPosition)
+            {
+                return this.Equals((ArenaPosition)obj);
+            }
+            return false;
+        }
+
+        public bool Equals(ArenaPosition p)
+        {
+            return (row == p.row) && (col == p.col);
+        }   
+
+        public override int GetHashCode()
+        {
+            return row ^ col;
+        } 
+    }
+
     public enum CellType { BASIC, WALL, ACTIVATABLE, TOUCH };
     Color floorColor = new Color32(0, 0, 0, 255); // black
     Color wallColor = new Color32(239, 27, 33, 255); // red
@@ -181,6 +211,11 @@ public class Arena : MonoBehaviour
         }
     }
 
+    public List<Vector3> ToCellPositions(List<ArenaPosition> arenaPositions) 
+    {
+        return arenaPositions.ConvertAll(ap => ToCellPosition(ap.row, ap.col));
+    }
+
     Vector3 ToCellPosition(int cellRow, int cellCol) {
         float x = -(arenaWidth/2) + (gridSpacing/2) + (cellRow * gridSpacing);
         float y = -(0.4f + (playerHeight/2));
@@ -218,16 +253,26 @@ public class Arena : MonoBehaviour
         trigger.AddComponent<CellTrigger>();
     }
 
-    public List<Vector3> GetEmptyPositions() {
+    public List<ArenaPosition> GetEmptyArenaPositions() {
         var cellTriggers = cellsContainer.GetComponentsInChildren<CellTrigger>();
-        var emptyPositions = new List<Vector3>();
+        var emptyPositions = new List<ArenaPosition>();
         foreach (CellTrigger cellTrigger in cellTriggers) {
             var cell = cellTrigger.transform.parent.GetComponent<Cell>();
             if (!cell.IsWall() && !cellTrigger.IsTriggered()) {
-                emptyPositions.Add(cellTrigger.GetPosition());
+                emptyPositions.Add(ToArenaPosition(cellTrigger.GetPosition()));
             }
         }
         return emptyPositions;
+    }
+
+    public List<ArenaPosition> ToArenaPositions(List<Vector3> positions) {
+        return positions.ConvertAll(ToArenaPosition);
+    }
+
+    ArenaPosition ToArenaPosition(Vector3 position) {
+        var row = Mathf.RoundToInt((position.x + (arenaWidth/2) - (gridSpacing/2)) / gridSpacing);
+        var col = Mathf.RoundToInt((position.z + (arenaWidth/2) - (gridSpacing/2)) / gridSpacing);
+        return new ArenaPosition(row, col);
     }
     
     public int GetNumberOfActivatedCells() {

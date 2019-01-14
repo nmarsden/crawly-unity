@@ -73,4 +73,14 @@ public class AudioController : MonoBehaviour
         audioSource.PlayOneShot(foodDisappear);
     }
 
+    public void PlayPoisonAppearFX() 
+    {
+        audioSource.PlayOneShot(foodAppear);
+    }
+
+    public void PlayPoisonDisappearFX() 
+    {
+        audioSource.PlayOneShot(foodDisappear);
+    }
+
 }

@@ -36,6 +36,10 @@ public class Player : MonoBehaviour
     Rigidbody headRigidbody;
 
     bool isKilled;
+    
+    bool isShrinking;
+    float shrinkStartTime;
+    float shrinkDuration = 1;
 
     // GameObject gp1;
     // GameObject gp2;
@@ -205,6 +209,13 @@ public class Player : MonoBehaviour
             return;
         }
 
+        if (isShrinking) {
+            if (Time.time - shrinkStartTime > shrinkDuration) {
+                isShrinking = false;
+                RemoveLastTailPart();
+            }
+        }
+
         Vector3 direction = Vector3.Normalize(headRigidbody.velocity);
 
         if (!turning) {
@@ -306,6 +317,10 @@ public class Player : MonoBehaviour
     }
 
     public void Grow() {
+        if (isShrinking) {
+            // Cannot grow when shrinking
+            return;
+        }
         // Mark the existing tail tip as no longer the tip
         lastTail.GetComponent<Tail>().ClearTip();
 
@@ -314,6 +329,31 @@ public class Player : MonoBehaviour
         newPart.transform.parent = transform;
         newPart.GetComponent<Tail>().Init(main, tailLength++, speed, lastTail, tailMinDistance);
         lastTail = newPart;
+    }
+
+    public bool IsShrinkable() {
+        return lastTail.GetComponent<Tail>().GetLeader().name != "Head";
+    }
+    
+    public void Shrink() {
+        isShrinking = true;
+        shrinkStartTime = Time.time;
+        lastTail.GetComponent<Tail>().Shrink();
+    }
+
+    void RemoveLastTailPart() {
+        // Remember old last tail part
+        var oldLastTail = lastTail;
+
+        // Second last tail part now becomes the last tail part
+        lastTail = lastTail.GetComponent<Tail>().GetLeader();
+        lastTail.GetComponent<Tail>().SetAsTip();
+
+        // Remove old last tail part
+        GameObject.Destroy(oldLastTail);
+
+        // Decrease tail length
+        tailLength--;
     }
 
     public void Kill() {
@@ -331,3 +371,4 @@ public class Player : MonoBehaviour
         }
     }
 }
+ 
