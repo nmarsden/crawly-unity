@@ -54,6 +54,11 @@ public class Main : MonoBehaviour
         audio.AddComponent<AudioController>();
         audioController = audio.GetComponent<AudioController>();
 
+        // -- Lights
+        var lights = new GameObject();
+        lights.name = "Lights";
+        lights.AddComponent<Lights>();
+
         // -- Camera Controller
         Camera camera = Camera.main;
         cameraController = camera.gameObject.AddComponent<CameraController>();

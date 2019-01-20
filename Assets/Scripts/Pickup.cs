@@ -6,21 +6,10 @@ public class Pickup : MonoBehaviour
 {
     public enum PickupType { FOOD, POISON };
 
-    struct Colors
+    static IDictionary<PickupType, Color32> pickupTypeToColors = new Dictionary<PickupType, Color32>
     {
-        public Color initial;
-        public Color decay;
-
-        public Colors(Color initial, Color decay) {
-            this.initial = initial;
-            this.decay = decay;
-        }
-    }
-
-    static IDictionary<PickupType, Colors> pickupTypeToColors = new Dictionary<PickupType, Colors>
-    {
-        { PickupType.FOOD,   new Colors(new Color32(18, 140, 30, 255), new Color32(18, 140, 30, 100)) }, // dark green
-        { PickupType.POISON, new Colors(new Color32(140, 18, 30, 255), new Color32(140, 18, 30, 100)) }, // dark red
+        { PickupType.FOOD,   new Color32(18, 140, 30, 255) }, // dark green
+        { PickupType.POISON, new Color32(140, 18, 30, 255) }, // dark red
     };
 
     public class PickupTrigger : MonoBehaviour
@@ -46,7 +35,7 @@ public class Pickup : MonoBehaviour
 
     Main main;
     PickupType pickupType;
-    Colors colors;
+    Color32 color;
 
     float gridSpacing;
     float groundYPos;
@@ -63,12 +52,16 @@ public class Pickup : MonoBehaviour
     bool isWaitToAppear;
     float waitToAppearDuration = 1;
     float waitToAppearStartTime;
+    float waitToFlashDuration = 9;
+    float waitToFlashStartTime;
+    float flashDuration = 0.05f;
+    float flashStartTime;
 
     public void Init(Main main, PickupType pickupType) 
     {
         this.main = main;
         this.pickupType = pickupType;
-        colors = Pickup.pickupTypeToColors[pickupType];
+        color = Pickup.pickupTypeToColors[pickupType];
         gridSpacing = main.GetGridSpacing();
         groundYPos = 1 - main.GetPlayerHeight()/2; 
     }
@@ -79,8 +72,9 @@ public class Pickup : MonoBehaviour
         pickup.name = "Pickup";
         pickup.transform.parent = transform;    
         pickup.transform.localScale = new Vector3(2, 2, 2);      
-        pickup.GetComponent<Renderer>().material = new Material(Shader.Find("Transparent/Diffuse"));;
-        pickup.GetComponent<Renderer>().material.color = colors.initial;
+        pickup.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
+        // pickup.GetComponent<Renderer>().material = new Material(Shader.Find("Transparent/Diffuse"));;
+        pickup.GetComponent<Renderer>().material.color = color;
         pickup.GetComponent<Collider>().isTrigger = true;
         pickup.AddComponent<PickupTrigger>();
         pickup.GetComponent<PickupTrigger>().Init(main, this);
@@ -122,12 +116,18 @@ public class Pickup : MonoBehaviour
                 if (Time.time - activeStartTime > activeDuration) {
                     Disappear();
                 } else {
+                    // Update vertical position
                     var remainingFallDistance = pickup.transform.position.y - groundYPos;
                     if (remainingFallDistance > 0) {
                         pickup.transform.Translate(new Vector3(0, -fallingSpeed, 0));
                     }
 
-                    Decay();
+                    // Check whether flashing is enabled
+                    if (Time.time - waitToFlashStartTime > waitToFlashDuration) {
+                        Flash();
+                    } else {
+                        flashStartTime = Time.time;
+                    }
                 }
             } else {
                 if (Time.time - inactiveStartTime > inactiveDuration) {
@@ -157,10 +157,12 @@ public class Pickup : MonoBehaviour
         }
     }
 
-    void Decay() 
+    void Flash() 
     {
-        // Over time change the initial color to the decay color
-        pickup.GetComponent<Renderer>().material.color = Color32.Lerp(colors.initial, colors.decay, (Time.time - activeStartTime) / activeDuration);
+        if (Time.time - flashStartTime > flashDuration) {
+            pickup.GetComponent<Renderer>().enabled = !pickup.GetComponent<Renderer>().enabled;
+            flashStartTime = Time.time;
+        }
     }
 
     void Reposition(Vector3 position) 
@@ -177,7 +179,6 @@ public class Pickup : MonoBehaviour
         var position = emptyPositions[Random.Range(0, emptyPositions.Count)];
         // Return position
         return new Vector3(position.x, groundYPos + fallingDistance, position.z);
-
     }
 
     void Hide() 
@@ -189,6 +190,11 @@ public class Pickup : MonoBehaviour
 
     void Show() 
     {
+        // Reset flashing
+        waitToFlashStartTime = Time.time;
+        pickup.GetComponent<Renderer>().enabled = true;
+
+        // Reset as active
         activeStartTime = Time.time;
         isActive = true;
         pickup.SetActive(true);

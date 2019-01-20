@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
 
     GameObject target;
     Vector3 targetOffset;
-    CameraMode cameraMode = CameraMode.SIDE_FOLLOW_TURN;
+    CameraMode cameraMode = CameraMode.ORTHO;
 
     public void Awake() {
         cameraModeToAction = new Dictionary<CameraMode, Action>
@@ -80,6 +80,7 @@ public class CameraController : MonoBehaviour
     void InitOrthographicCameraMode() {
         cameraMode = CameraMode.ORTHO;
         Camera.main.orthographic = true;
+        Camera.main.orthographicSize = 22;
         Camera.main.transform.position = new Vector3(55.6f, 45.5f, -56.5f);
         Camera.main.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
@@ -87,6 +88,7 @@ public class CameraController : MonoBehaviour
     void InitOrthographicFollowCameraMode() {
         cameraMode = CameraMode.ORTHO_FOLLOW;
         Camera.main.orthographic = true;
+        Camera.main.orthographicSize = 22;
 
         var cameraDistance = 50;
         var viewAngle = Quaternion.Euler(30, -45, 0);
@@ -127,16 +129,18 @@ public class CameraController : MonoBehaviour
 
     void InitTopCameraMode() {
         cameraMode = CameraMode.TOP;
-        Camera.main.orthographic = true;
-        Camera.main.transform.position = new Vector3(0, 100, 0);
+        Camera.main.orthographic = false;
+        Camera.main.fieldOfView = 50;
+        Camera.main.transform.position = new Vector3(0, 50, 0);
         Camera.main.transform.rotation = Quaternion.Euler(90, -90, 0);
     }
 
     void InitTopFollowCameraMode() {
         cameraMode = CameraMode.TOP_FOLLOW;
-        Camera.main.orthographic = true;
+        Camera.main.orthographic = false;
+        Camera.main.fieldOfView = 50;
 
-        var cameraDistance = 100;
+        var cameraDistance = 50;
         var viewAngle = Quaternion.Euler(90, -90, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
@@ -147,9 +151,10 @@ public class CameraController : MonoBehaviour
 
     void InitTopFollowTurnCameraMode() {
         cameraMode = CameraMode.TOP_FOLLOW_TURN;
-        Camera.main.orthographic = true;
+        Camera.main.orthographic = false;
+        Camera.main.fieldOfView = 50;
 
-        var cameraDistance = 100;
+        var cameraDistance = 50;
         var targetYRotationAngle = target.transform.rotation.eulerAngles.y;
         var viewAngle = Quaternion.Euler(90, targetYRotationAngle, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
@@ -170,29 +175,44 @@ public class CameraController : MonoBehaviour
         if (target != null) {
             if (cameraMode.Equals(CameraMode.ORTHO_FOLLOW) || cameraMode.Equals(CameraMode.SIDE_FOLLOW) || cameraMode.Equals(CameraMode.TOP_FOLLOW)) 
             {
-                transform.position = target.transform.position + targetOffset;
+                var t = 2f * Time.deltaTime;
+
+                var desiredPosition = target.transform.position + targetOffset;
+                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
             } 
             else if (cameraMode.Equals(CameraMode.TOP_FOLLOW_TURN)) 
             {
                 // Camera positioned directly above the head, looking down and rotated around Y-axis the same as the head is rotated (with rotation lerping)
-                transform.position = target.transform.position + targetOffset;
+                var t = 2f * Time.deltaTime;
 
-                var targetYRotationAngle = target.transform.rotation.eulerAngles.y;
-                var viewAngle = Quaternion.Euler(90, targetYRotationAngle, 0);
-                transform.rotation = Quaternion.Lerp(transform.rotation, viewAngle, 0.05f);
+                var desiredPosition = target.transform.position + targetOffset;
+                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+
+                var desiredRotation = Quaternion.Euler(90, target.transform.rotation.eulerAngles.y, 0);
+                transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
             } 
             else if (cameraMode.Equals(CameraMode.SIDE_FOLLOW_TURN)) 
             {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
                 var direction = target.transform.rotation * Vector3.forward;
-                transform.position = Vector3.Lerp(transform.position, target.transform.position + (-40f * direction) + new Vector3(0, 60f, 0), 0.05f);
-                transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f)), 0.05f);
+                var t = 2f * Time.deltaTime;
+
+                var desiredPosition = target.transform.position + (-40f * direction) + new Vector3(0, 60f, 0);
+                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+
+                var desiredRotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
+                transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
             }
             else if (cameraMode.Equals(CameraMode.FPV)) {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
                 var direction = target.transform.rotation * Vector3.forward;
-                transform.position = target.transform.position + (-5 * direction) + new Vector3(0, 7, 0);
-                transform.rotation = Quaternion.Lerp(transform.rotation,Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f)), 0.05f);
+                var t = 2f * Time.deltaTime;
+
+                var desiredPosition = target.transform.position + (-5 * direction) + new Vector3(0, 7, 0);
+                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+
+                var desiredRotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
+                transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
             }
         }
         
