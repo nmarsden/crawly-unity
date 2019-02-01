@@ -277,17 +277,8 @@ public class Player : MonoBehaviour
                     // Prevent turning again for a short time
                     turningStartTime = Time.time;
 
-                    // Track turning point
-                    var turningPointUID = main.AddTurningPoint(head.transform.position, incomingDirection, direction);
-
-                    // Ensure any tails without a turningPointUID are given the latest turningPointUID
-                    var tail = lastTail.GetComponent<Tail>();
-                    while(tail != null) {
-                        if (tail.GetTurningPointUID() == null) {
-                            tail.SetTurningPointUID(turningPointUID);
-                        }
-                        tail = tail.GetLeader().GetComponent<Tail>();
-                    }
+                    // Track new turning point
+                    main.AssignNewlyCreatedTurningPoint(lastTail.GetComponent<Tail>(), head.transform.position, incomingDirection, direction);
 
                     // Update Head Velocity
                     headRigidbody.velocity = direction * speed;
@@ -321,8 +312,6 @@ public class Player : MonoBehaviour
             // Cannot grow when shrinking
             return;
         }
-        // Mark the existing tail tip as no longer the tip
-        lastTail.GetComponent<Tail>().ClearTip();
 
         // Add new tail part as tip of the tail
         GameObject newPart = GameObject.Instantiate(lastTail);
@@ -347,9 +336,9 @@ public class Player : MonoBehaviour
 
         // Second last tail part now becomes the last tail part
         lastTail = lastTail.GetComponent<Tail>().GetLeader();
-        lastTail.GetComponent<Tail>().SetAsTip();
 
         // Remove old last tail part
+        main.GetTurningPoints().UnassignTurningPoint(oldLastTail.GetComponent<Tail>());
         GameObject.Destroy(oldLastTail);
 
         // Decrease tail length

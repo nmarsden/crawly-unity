@@ -9,12 +9,14 @@ public class TurningPoints : MonoBehaviour
         GameObject trigger;
         Vector3 outgoingDirection;
         string turningPointUID;
+        int useCount;
 
         public TurningPoint(Vector3 position, GameObject trigger, Vector3 outgoingDirection, string turningPointUID) {
             this.position = position;
             this.trigger = trigger;
             this.outgoingDirection = outgoingDirection;
             this.turningPointUID = turningPointUID;
+            this.useCount = 0;
         }
 
         public Vector3 GetPosition() {
@@ -31,6 +33,18 @@ public class TurningPoints : MonoBehaviour
 
         public void Cleanup() {
             Object.Destroy(trigger);
+        }
+
+        public void IncrementUseCount() {
+            useCount++;
+        }
+
+        public void DecrementUseCount() {
+            useCount--;
+        }
+
+        public bool isNotUsed() {
+            return useCount == 0;
         }
     }
 
@@ -57,14 +71,72 @@ public class TurningPoints : MonoBehaviour
         
     }
 
-    public string AddTurningPoint(Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
+    public void AssignNewlyCreatedTurningPoint(Tail lastTail, Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
+        var turningPointUID = AddTurningPoint(position, incomingDirection, outgoingDirection);
+
+        // Ensure any tails without a turningPointUID are given the latest turningPointUID
+        var tail = lastTail.GetComponent<Tail>();
+        while(tail != null) {
+            if (tail.GetTurningPointUID() == null) {
+                AssignTurningPoint(tail, turningPointUID);
+            }
+            tail = tail.GetLeader().GetComponent<Tail>();
+        }
+    }
+
+    public Vector3[] GetPositions() {
+        var positions = new Vector3[turningPoints.Count];
+        var i = 0;
+        foreach (var turningPoint in turningPoints) {
+            positions[i++] = turningPoint.Value.GetPosition();
+        }
+        return positions;
+    }
+
+    public Vector3 GetDirection(string turningPointUID) {
+        return GetTurningPoint(turningPointUID).GetOutgoingDirection();
+    }
+
+    public Vector3 GetPosition(string turningPointUID) {
+        return GetTurningPoint(turningPointUID).GetPosition();
+    }
+
+    public void AssignOldestTurningPoint(Tail tail) {
+        AssignTurningPoint(tail, GetOldestTurningPointUID());
+    }
+
+    public void UnassignTurningPoint(Tail tail) {
+        var turningPointUID = tail.GetTurningPointUID();
+        if (turningPointUID != null) {
+            DecrementUseCount(turningPointUID);
+            tail.SetTurningPointUID(null);
+        }
+    }
+
+    public void AssignNextTurningPoint(Tail tail) {
+        var turningPointUID = tail.GetTurningPointUID();
+        var nextTurningPointUID = GetNextTurningPointUID(turningPointUID);
+
+        DecrementUseCount(turningPointUID);
+        AssignTurningPoint(tail, nextTurningPointUID);
+    }
+
+    private void DecrementUseCount(string turningPointUID) {
+        var turningPoint = GetTurningPoint(turningPointUID);
+        turningPoint.DecrementUseCount();
+        if (turningPoint.isNotUsed()) {
+            RemoveTurningPoint(turningPointUID);
+        }
+    }    
+
+    private string AddTurningPoint(Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
         var turningPointUID = totalTurningPointsAdded.ToString();
         totalTurningPointsAdded++;
 
         GameObject trigger = GameObject.CreatePrimitive(PrimitiveType.Cube);
         trigger.name = "Turning Point " + turningPointUID;
         trigger.transform.parent = transform;    
-        trigger.transform.localScale = new Vector3(1, 1, 1);        
+        trigger.transform.localScale = new Vector3(1, 1, 1);    
 
         // TODO ensure the trigger is positioned taking into account velocity of tail, so it is triggered exactly when the turn is required
         var halfGridSpacing = gridSpacing / 2;
@@ -88,29 +160,16 @@ public class TurningPoints : MonoBehaviour
         return turningPointUID;
     }
 
-    public Vector3[] GetPositions() {
-        var positions = new Vector3[turningPoints.Count];
-        var i = 0;
-        foreach (var turningPoint in turningPoints) {
-            positions[i++] = turningPoint.Value.GetPosition();
-        }
-        return positions;
+    private TurningPoint GetTurningPoint(string turningPointUID) {
+        return turningPoints[int.Parse(turningPointUID)];
     }
 
-    public Vector3 GetDirection(string turningPointUID) {
-        return turningPoints[int.Parse(turningPointUID)].GetOutgoingDirection();
-    }
-
-    public Vector3 GetPosition(string turningPointUID) {
-        return turningPoints[int.Parse(turningPointUID)].GetPosition();
-    }
-
-    public string GetFirstTurningPointUID() {
+    private string GetOldestTurningPointUID() {
         var enumerator = turningPoints.GetEnumerator();
         return enumerator.MoveNext() ? enumerator.Current.Value.GetTurningPointUID() : null;
     }
 
-    public string GetNextTurningPointUID(string turningPointUID) {
+    private string GetNextTurningPointUID(string turningPointUID) {
         var enumerator = turningPoints.GetEnumerator();
         while (enumerator.MoveNext()) {
             if (enumerator.Current.Value.GetTurningPointUID() == turningPointUID) {
@@ -120,7 +179,14 @@ public class TurningPoints : MonoBehaviour
         return null;
     }
 
-    public void RemoveTurningPoint(string turningPointUID) {
+    private void AssignTurningPoint(Tail tail, string turningPointUID) {
+        tail.SetTurningPointUID(turningPointUID);
+        if (turningPointUID != null) {
+            GetTurningPoint(turningPointUID).IncrementUseCount();
+        }
+    }
+    
+    private void RemoveTurningPoint(string turningPointUID) {
         turningPoints[int.Parse(turningPointUID)].Cleanup();
         turningPoints.Remove(int.Parse(turningPointUID));
     }

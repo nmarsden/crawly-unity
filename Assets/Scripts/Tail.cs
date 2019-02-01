@@ -8,7 +8,6 @@ public class Tail : MonoBehaviour
     TurningPoints turningPoints;
     float speed;
     Vector3 direction;
-    bool isTip;
     bool isTurn;
     GameObject leader;
     float tailMinDistance;
@@ -49,8 +48,7 @@ public class Tail : MonoBehaviour
 
         this.turningPoints = main.GetTurningPoints();
         this.speed = speed;
-        turningPointUID = this.turningPoints.GetFirstTurningPointUID();
-        isTip = true;
+        this.turningPoints.AssignOldestTurningPoint(this);
         isTurn = false;
         this.tailMinDistance = tailMinDistance;
 
@@ -108,12 +106,7 @@ public class Tail : MonoBehaviour
             gameObject.transform.position = turningPoints.GetPosition(turningPointUID);
 
             // Update the turningPointUID to be the next one
-            var nextTurningPointUID = turningPoints.GetNextTurningPointUID(turningPointUID);
-
-            if (isTip) {
-                turningPoints.RemoveTurningPoint(turningPointUID);
-            }
-            turningPointUID = nextTurningPointUID;
+            turningPoints.AssignNextTurningPoint(this);
         } else {
             // Ensure minimum distance from leader when travelling the same direction
             if (Vector3.Normalize(leaderRigidbody.velocity) == Vector3.Normalize(tailRigidbody.velocity)) {
@@ -142,13 +135,6 @@ public class Tail : MonoBehaviour
         return leader;
     }
     
-    public void SetAsTip() {
-        isTip = true;
-    }
-    
-    public void ClearTip() {
-        isTip = false;
-    }
     public void Turn() {
         isTurn = true;
     }

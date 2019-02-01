@@ -333,8 +333,9 @@ public class Main : MonoBehaviour
     public int GetCurrentLevelNum() {
         return currentLevelNum;
     }
-    public string AddTurningPoint(Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
-        return turningPoints.GetComponent<TurningPoints>().AddTurningPoint(position, incomingDirection, outgoingDirection);
+    
+    public void AssignNewlyCreatedTurningPoint(Tail lastTail, Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
+        turningPoints.GetComponent<TurningPoints>().AssignNewlyCreatedTurningPoint(lastTail, position, incomingDirection, outgoingDirection);
     }
 
     public TurningPoints GetTurningPoints() {
