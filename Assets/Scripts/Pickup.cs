@@ -53,9 +53,6 @@ public class Pickup : MonoBehaviour
     float waitToAppearDuration = 1;
     float waitToAppearStartTime;
     float waitToFlashDuration = 9;
-    float waitToFlashStartTime;
-    float flashDuration = 0.05f;
-    float flashStartTime;
 
     public void Init(Main main, PickupType pickupType) 
     {
@@ -78,6 +75,7 @@ public class Pickup : MonoBehaviour
         pickup.GetComponent<Collider>().isTrigger = true;
         pickup.AddComponent<PickupTrigger>();
         pickup.GetComponent<PickupTrigger>().Init(main, this);
+        pickup.AddComponent<Flash>();
 
         Hide();
     }
@@ -121,13 +119,6 @@ public class Pickup : MonoBehaviour
                     if (remainingFallDistance > 0) {
                         pickup.transform.Translate(new Vector3(0, -fallingSpeed, 0));
                     }
-
-                    // Check whether flashing is enabled
-                    if (Time.time - waitToFlashStartTime > waitToFlashDuration) {
-                        Flash();
-                    } else {
-                        flashStartTime = Time.time;
-                    }
                 }
             } else {
                 if (Time.time - inactiveStartTime > inactiveDuration) {
@@ -157,14 +148,6 @@ public class Pickup : MonoBehaviour
         }
     }
 
-    void Flash() 
-    {
-        if (Time.time - flashStartTime > flashDuration) {
-            pickup.GetComponent<Renderer>().enabled = !pickup.GetComponent<Renderer>().enabled;
-            flashStartTime = Time.time;
-        }
-    }
-
     void Reposition(Vector3 position) 
     {
         pickup.transform.position = new Vector3(position.x, groundYPos + fallingDistance, position.z);
@@ -183,6 +166,9 @@ public class Pickup : MonoBehaviour
 
     void Hide() 
     {
+        // Turn off flashing
+        pickup.GetComponent<Flash>().TurnOff();
+
         inactiveStartTime = Time.time;
         isActive = false;
         pickup.SetActive(false);
@@ -190,9 +176,8 @@ public class Pickup : MonoBehaviour
 
     void Show() 
     {
-        // Reset flashing
-        waitToFlashStartTime = Time.time;
-        pickup.GetComponent<Renderer>().enabled = true;
+        // Turn on flashing (after delay)
+        pickup.GetComponent<Flash>().TurnOn(waitToFlashDuration);
 
         // Reset as active
         activeStartTime = Time.time;

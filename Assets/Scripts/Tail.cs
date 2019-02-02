@@ -144,5 +144,6 @@ public class Tail : MonoBehaviour
     public void Shrink() {
         isShrinking = true;
         gameObject.AddComponent<Flash>();
+        gameObject.GetComponent<Flash>().TurnOn();
     }
 }
