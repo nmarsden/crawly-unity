@@ -7,7 +7,8 @@ public class AudioController : MonoBehaviour
     AudioSource audioSource;
 
     AudioClip music;
-    AudioClip pickUp;
+    AudioClip pickUpFood;
+    AudioClip pickUpPoison;
     AudioClip activate;
     AudioClip gameOver;
     AudioClip complete;
@@ -17,7 +18,8 @@ public class AudioController : MonoBehaviour
     void Awake() 
     {
         music = Resources.Load<AudioClip>("Audio/happy_light_loop");        
-        pickUp = Resources.Load<AudioClip>("Audio/ClipsAccept1");        
+        pickUpFood = Resources.Load<AudioClip>("Audio/ClipsAccept1");
+        pickUpPoison = Resources.Load<AudioClip>("Audio/DM-CGS-33");
         activate = Resources.Load<AudioClip>("Audio/Clicks_13");
         gameOver = Resources.Load<AudioClip>("Audio/Xylo_13");
         complete = Resources.Load<AudioClip>("Audio/Coin_Pick_Up_03");
@@ -43,9 +45,14 @@ public class AudioController : MonoBehaviour
         audioSource.Stop();
     }
 
-    public void PlayPickupFX() 
+    public void PlayPickUpFoodFX() 
     {
-        audioSource.PlayOneShot(pickUp);
+        audioSource.PlayOneShot(pickUpFood);
+    }
+
+    public void PlayPickUpPoisonFX() 
+    {
+        audioSource.PlayOneShot(pickUpPoison);
     }
 
     public void PlayActivateFX() 

@@ -369,8 +369,6 @@ public class Main : MonoBehaviour
 
     public void HandleHitPickup(Pickup pickup) 
     {
-        // Play pickup FX
-        audioController.PlayPickupFX();
 
         // Eat pickup
         pickup.Eat();
@@ -378,12 +376,16 @@ public class Main : MonoBehaviour
         if (pickup.isFood()) 
         {
             // -- Handle Hit Food --
+            // Play pickup food sound FX
+            audioController.PlayPickUpFoodFX();
             // Grow player
             player.GetComponent<Player>().Grow();
         }
         else if (pickup.isPoison()) 
         {
             // -- Handle Hit Poison --
+            // Play pickup poison sound FX
+            audioController.PlayPickUpPoisonFX();
             // Shrink player
             if (player.GetComponent<Player>().IsShrinkable()) 
             {
