@@ -29,6 +29,8 @@ public class Player : MonoBehaviour
     Color pupilColor = new Color32(0, 0, 0, 255);
     Color mouthColor = new Color32(0, 0, 0, 255);
 
+    Color shieldBodyColor = new Color32(0, 35, 102, 255);
+
     Main main;
     private float playerHeight;
     private float playerWidth;
@@ -40,6 +42,10 @@ public class Player : MonoBehaviour
     bool isShrinking;
     float shrinkStartTime;
     float shrinkDuration = 1;
+
+    bool isShielded;
+    float shieldStartTime;
+    float shieldDuration = 5;
 
     // GameObject gp1;
     // GameObject gp2;
@@ -216,6 +222,21 @@ public class Player : MonoBehaviour
             }
         }
 
+        if (isShielded) {
+            // Update shield status bar
+            var shieldTimeRemainingPercentage = 1 - ((Time.time - shieldStartTime) / shieldDuration);
+            main.UpdateShieldStatusBar(shieldTimeRemainingPercentage);
+
+            if (Time.time - shieldStartTime > shieldDuration) {
+                isShielded = false;
+                // Clear shield status bar
+                main.UpdateShieldStatusBar(0);
+                // Change head color back to normal
+                // TODO use alternative way to show shield active
+                // SetBodyColor(bodyColor);
+            }
+        }
+
         Vector3 direction = Vector3.Normalize(headRigidbody.velocity);
 
         if (!turning) {
@@ -320,15 +341,30 @@ public class Player : MonoBehaviour
         lastTail = newPart;
     }
 
-    public bool IsShrinkable() {
-        return lastTail.GetComponent<Tail>().GetLeader().name != "Head";
+    private bool IsMinimumLength() {
+        return lastTail.GetComponent<Tail>().GetLeader().name == "Head";
     }
     
+    public bool IsNotShrinkable() {
+        return isShielded || IsMinimumLength();
+    }
+
     public void Shrink() {
+        if (IsNotShrinkable()) {
+            return;
+        }
         isShrinking = true;
         shrinkStartTime = Time.time;
         lastTail.GetComponent<Tail>().Shrink();
     }
+
+    public void Shield() {
+        isShielded = true;
+        shieldStartTime = Time.time;
+        // Change body color to represent being shielded
+        // TODO use alternative way to show shield active
+        //SetBodyColor(shieldBodyColor);
+   }
 
     void RemoveLastTailPart() {
         // Remember old last tail part
@@ -356,6 +392,16 @@ public class Player : MonoBehaviour
         var tail = lastTail.GetComponent<Tail>();
         while(tail != null) {
             tail.Kill();
+            tail = tail.GetLeader().GetComponent<Tail>();
+        }
+    }
+
+    private void SetBodyColor(Color32 color) {
+        head.GetComponent<Renderer>().material.color = color;
+
+        var tail = lastTail.GetComponent<Tail>();
+        while(tail != null) {
+            tail.gameObject.GetComponent<Renderer>().material.color = color;
             tail = tail.GetLeader().GetComponent<Tail>();
         }
     }

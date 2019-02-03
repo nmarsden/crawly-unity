@@ -9,22 +9,26 @@ public class AudioController : MonoBehaviour
     AudioClip music;
     AudioClip pickUpFood;
     AudioClip pickUpPoison;
+    AudioClip pickUpShield;
+    AudioClip destroyPoison;
     AudioClip activate;
     AudioClip gameOver;
     AudioClip complete;
-    AudioClip foodAppear;
-    AudioClip foodDisappear;
+    AudioClip pickupAppear;
+    AudioClip pickupDisappear;
 
     void Awake() 
     {
         music = Resources.Load<AudioClip>("Audio/happy_light_loop");        
         pickUpFood = Resources.Load<AudioClip>("Audio/ClipsAccept1");
         pickUpPoison = Resources.Load<AudioClip>("Audio/DM-CGS-33");
+        pickUpShield = Resources.Load<AudioClip>("Audio/DM-CGS-45");
+        destroyPoison = Resources.Load<AudioClip>("Audio/DM-CGS-32");
         activate = Resources.Load<AudioClip>("Audio/Clicks_13");
         gameOver = Resources.Load<AudioClip>("Audio/Xylo_13");
         complete = Resources.Load<AudioClip>("Audio/Coin_Pick_Up_03");
-        foodAppear = Resources.Load<AudioClip>("Audio/BellishAccept6");
-        foodDisappear = Resources.Load<AudioClip>("Audio/Blips_14");
+        pickupAppear = Resources.Load<AudioClip>("Audio/BellishAccept6");
+        pickupDisappear = Resources.Load<AudioClip>("Audio/Blips_14");
 
         gameObject.AddComponent<AudioSource>();
         audioSource = gameObject.GetComponent<AudioSource>();
@@ -55,6 +59,16 @@ public class AudioController : MonoBehaviour
         audioSource.PlayOneShot(pickUpPoison);
     }
 
+    public void PlayPickUpShieldFX() 
+    {
+        audioSource.PlayOneShot(pickUpShield);
+    }
+
+    public void PlayDestroyPoisonFX() 
+    {
+        audioSource.PlayOneShot(destroyPoison);
+    }
+
     public void PlayActivateFX() 
     {
         audioSource.PlayOneShot(activate);
@@ -70,24 +84,13 @@ public class AudioController : MonoBehaviour
         audioSource.PlayOneShot(gameOver);
     }
 
-    public void PlayFoodAppearFX() 
+    public void PlayPickupAppearFX() 
     {
-        audioSource.PlayOneShot(foodAppear);
+        audioSource.PlayOneShot(pickupAppear);
     }
 
-    public void PlayFoodDisappearFX() 
+    public void PlayPickupDisappearFX() 
     {
-        audioSource.PlayOneShot(foodDisappear);
+        audioSource.PlayOneShot(pickupDisappear);
     }
-
-    public void PlayPoisonAppearFX() 
-    {
-        audioSource.PlayOneShot(foodAppear);
-    }
-
-    public void PlayPoisonDisappearFX() 
-    {
-        audioSource.PlayOneShot(foodDisappear);
-    }
-
 }

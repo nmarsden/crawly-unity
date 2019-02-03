@@ -8,17 +8,20 @@ public class Pickups : MonoBehaviour
 
     GameObject food;
     GameObject poison;
+    GameObject shield;
 
     public void Init(Main main) {
         this.main = main;
         food = CreateFood();
         poison = CreatePoison();
+        shield = CreateShield();
     }
 
     public List<Vector3> GetPositions() {
         List<Vector3> positions = new List<Vector3>();
         AddNonNullPosition(positions, food.GetComponent<Pickup>());
         AddNonNullPosition(positions, poison.GetComponent<Pickup>());
+        AddNonNullPosition(positions, shield.GetComponent<Pickup>());
         return positions;
     }
 
@@ -46,4 +49,14 @@ public class Pickups : MonoBehaviour
         poison.GetComponent<Pickup>().Init(main, Pickup.PickupType.POISON);
         return poison;
     }
+
+    GameObject CreateShield() {
+        var shield = new GameObject();
+        shield.name = "Shield";
+        shield.transform.parent = transform;    
+        shield.AddComponent<Pickup>();
+        shield.GetComponent<Pickup>().Init(main, Pickup.PickupType.SHIELD);
+        return shield;
+    }
+
 }

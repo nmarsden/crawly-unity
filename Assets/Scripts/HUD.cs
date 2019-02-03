@@ -9,7 +9,6 @@ public class HUD : MonoBehaviour
     Main main;
     Font font;
     GameObject menuButtonPrefab;
-
     GameObject levelNumText;    
     GameObject fillText;
     GameObject gameCompletedText;
@@ -17,6 +16,9 @@ public class HUD : MonoBehaviour
     GameObject pausedText;
     GameObject okButton;
     int currentLevelNum;
+
+    StatusBar shieldStatusBar;
+    Color32 shieldStatusColor = new Color32(0, 35, 102, 200);
 
     public void Init(Main main) 
     {
@@ -41,7 +43,7 @@ public class HUD : MonoBehaviour
         var canvas = gameObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
         canvas.worldCamera = Camera.main;
-        canvas.planeDistance = 20;
+        canvas.planeDistance = 5;
 
         // Setup font
         font = Resources.Load<Font>("Font/FiraMono-Bold");
@@ -85,10 +87,14 @@ public class HUD : MonoBehaviour
         okButton.transform.Translate(new Vector3(0, -10, 0));
         okButton.GetComponent<Button>().onClick.AddListener(OkButtonOnClick);
         okButton.SetActive(false);
+
+        // Shield Status Bar
+        shieldStatusBar = CreateShieldStatusBar(shieldStatusColor);
     }
 
     public void Show(int selectedLevelNumber) {
         UpdateSelectedLevel(selectedLevelNumber);
+        UpdateShieldStatusValue(0);
 
         gameOverText.SetActive(false);
         gameCompletedText.SetActive(false);
@@ -96,7 +102,6 @@ public class HUD : MonoBehaviour
         okButton.SetActive(false);
 
         gameObject.SetActive(true);
-
     }
 
     public void Hide() {
@@ -182,7 +187,38 @@ public class HUD : MonoBehaviour
         return button;
     }
 
+    public void UpdateShieldStatusValue(float value) {
+        shieldStatusBar.UpdateValue(value);
+    }
+
+    StatusBar CreateShieldStatusBar(Color32 color) {
+        // Add Shield Icon
+        var shieldIcon = new GameObject();        
+        shieldIcon.name = "Shield Icon";
+        shieldIcon.transform.SetParent(gameObject.transform, false);
+        shieldIcon.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        shieldIcon.transform.Translate(new Vector3(-43, 25, 0));
+        shieldIcon.AddComponent<SpriteRenderer>();
+        shieldIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Image/Shield");
+        shieldIcon.GetComponent<SpriteRenderer>().color = ConvertColor(color.r, color.g, color.b, color.a);
+
+        // Add Shield Status Bar
+        var shieldStatusBar = new GameObject();
+        shieldStatusBar.name = "Shield Status Bar";
+        shieldStatusBar.transform.SetParent(gameObject.transform, false);
+        shieldStatusBar.transform.localScale = new Vector3(2, 2, 2);
+        shieldStatusBar.transform.Translate(new Vector3(-30, 25, 0));
+
+        var statusBar = shieldStatusBar.AddComponent<StatusBar>();
+        statusBar.Init(color);
+        statusBar.UpdateValue(0);
+        return statusBar;
+    }
+
     Color ConvertColor (int r, int g, int b) {
         return new Color(r/255f, g/255f, b/255f);
+    }
+    Color ConvertColor (int r, int g, int b, int a) {
+        return new Color(r/255f, g/255f, b/255f, a/255f);
     }
 }

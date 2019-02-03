@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Pickup : MonoBehaviour
 {
-    public enum PickupType { FOOD, POISON };
+    public enum PickupType { FOOD, POISON, SHIELD };
 
     static IDictionary<PickupType, Color32> pickupTypeToColors = new Dictionary<PickupType, Color32>
     {
         { PickupType.FOOD,   new Color32(18, 140, 30, 255) }, // dark green
         { PickupType.POISON, new Color32(140, 18, 30, 255) }, // dark red
+        { PickupType.SHIELD, new Color32(0, 35, 102, 255) }, // dark blue
     };
 
     public class PickupTrigger : MonoBehaviour
@@ -88,6 +89,11 @@ public class Pickup : MonoBehaviour
     public bool isPoison() 
     {
         return pickupType.Equals(PickupType.POISON);
+    }
+
+    public bool isShield() 
+    {
+        return pickupType.Equals(PickupType.SHIELD);
     }
 
     public void Eat() {

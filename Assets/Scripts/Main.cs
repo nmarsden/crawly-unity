@@ -384,38 +384,34 @@ public class Main : MonoBehaviour
         else if (pickup.isPoison()) 
         {
             // -- Handle Hit Poison --
-            // Play pickup poison sound FX
-            audioController.PlayPickUpPoisonFX();
-            // Shrink player
-            if (player.GetComponent<Player>().IsShrinkable()) 
-            {
+            if (player.GetComponent<Player>().IsNotShrinkable()) {
+                // Play destroy poison sound FX
+                audioController.PlayDestroyPoisonFX();
+            } else {
+                // Play pickup poison sound FX
+                audioController.PlayPickUpPoisonFX();
+                // Shrink player
                 player.GetComponent<Player>().Shrink();
-            } 
-            else 
-            {
-                GameOver();
             }
+        }
+        else if (pickup.isShield()) 
+        {
+            // -- Handle Hit Shield --
+            // Play pickup shield sound FX
+            audioController.PlayPickUpShieldFX();
+            // Shield player
+            player.GetComponent<Player>().Shield();
         }
     }
 
     public void HandlePickupAppear(Pickup pickup) 
     {
-        if (pickup.isFood()) {
-            audioController.PlayFoodAppearFX();
-
-        } else if (pickup.isPoison()) {
-            audioController.PlayPoisonAppearFX();
-        }
+        audioController.PlayPickupAppearFX();
     }
 
     public void HandlePickupDisappear(Pickup pickup) 
     {
-        if (pickup.isFood()) {
-            audioController.PlayFoodDisappearFX();
-
-        } else if (pickup.isPoison()) {
-            audioController.PlayPoisonDisappearFX();
-        }
+        audioController.PlayPickupDisappearFX();
     }
 
     public void HandleHitWall() {
@@ -496,5 +492,9 @@ public class Main : MonoBehaviour
 
     public Arena.CellType[,] GetLevelCellTypes() {
         return levels.GetComponent<Levels>().GetLevelCellTypes();
+    }
+
+    public void UpdateShieldStatusBar(float value) {
+        hud.GetComponent<HUD>().UpdateShieldStatusValue(value);
     }
 }
