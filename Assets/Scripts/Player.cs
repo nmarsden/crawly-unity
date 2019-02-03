@@ -80,6 +80,8 @@ public class Player : MonoBehaviour
         head.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
         head.transform.position = new Vector3(0, yPos, 0);
         head.GetComponent<Renderer>().material.color = bodyColor;
+        head.GetComponent<Renderer>().material.SetInt("_SmoothnessTextureChannel", 1);
+        head.GetComponent<Renderer>().material.SetFloat("_Glossiness", 0.93f);
         head.AddComponent<Rigidbody>();
 
         headRigidbody = head.GetComponent<Rigidbody>();
@@ -173,6 +175,8 @@ public class Player : MonoBehaviour
         tail.transform.parent = transform;    
         tail.transform.localScale = new Vector3(playerWidth, playerHeight, playerWidth);        
         tail.GetComponent<Renderer>().material.color = bodyColor;
+        tail.GetComponent<Renderer>().material.SetInt("_SmoothnessTextureChannel", 1);
+        tail.GetComponent<Renderer>().material.SetFloat("_Glossiness", 0.93f);
         tail.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid bumping the head while moving
         tail.AddComponent<Rigidbody>();
         tail.AddComponent<Tail>();
@@ -231,9 +235,8 @@ public class Player : MonoBehaviour
                 isShielded = false;
                 // Clear shield status bar
                 main.UpdateShieldStatusBar(0);
-                // Change head color back to normal
-                // TODO use alternative way to show shield active
-                // SetBodyColor(bodyColor);
+                // Clear body metallic
+                SetBodyMetallic(0);
             }
         }
 
@@ -361,9 +364,8 @@ public class Player : MonoBehaviour
     public void Shield() {
         isShielded = true;
         shieldStartTime = Time.time;
-        // Change body color to represent being shielded
-        // TODO use alternative way to show shield active
-        //SetBodyColor(shieldBodyColor);
+        // Make body metallic to represent being shielded
+        SetBodyMetallic(0.5f);
    }
 
     void RemoveLastTailPart() {
@@ -396,12 +398,13 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void SetBodyColor(Color32 color) {
-        head.GetComponent<Renderer>().material.color = color;
+    private void SetBodyMetallic(float metallic) {
+        head.GetComponent<Renderer>().material.SetFloat("_Metallic", metallic);
 
         var tail = lastTail.GetComponent<Tail>();
         while(tail != null) {
-            tail.gameObject.GetComponent<Renderer>().material.color = color;
+            tail.gameObject.GetComponent<Renderer>().material.SetFloat("_Metallic", metallic);
+
             tail = tail.GetLeader().GetComponent<Tail>();
         }
     }
