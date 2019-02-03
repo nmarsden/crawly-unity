@@ -18,10 +18,8 @@ public class Lights : MonoBehaviour
         light.transform.position = position;
         light.transform.rotation = Quaternion.Euler(90, 0, 0);
         light.color = new Color32(248, 248, 248, 255);
-        light.lightmapBakeType = LightmapBakeType.Mixed;
         light.intensity = 1;
         light.shadows = LightShadows.Soft;
-        light.shadowAngle = 0;
         light.shadowStrength = 1;
         light.shadowResolution = LightShadowResolution.FromQualitySettings;
         light.shadowBias = 0.05f;
