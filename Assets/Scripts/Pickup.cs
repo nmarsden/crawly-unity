@@ -79,13 +79,20 @@ public class Pickup : MonoBehaviour
 
     void Start()
     {
+        var material = new Material(Shader.Find("Standard"));
+        material.color = color;
+
+        // Give pickup material an edge emission texture
+        var emissionTexture =  Resources.Load<Texture>("Image/Edge_Emission");
+        material.EnableKeyword("_EMISSION");
+        material.SetColor("_EmissionColor", color);
+        material.SetTexture("_EmissionMap", emissionTexture);
+
         pickup = GameObject.CreatePrimitive(PrimitiveType.Cube);
         pickup.name = "Pickup";
         pickup.transform.parent = transform;    
         pickup.transform.localScale = new Vector3(2, 2, 2);      
-        pickup.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
-        // pickup.GetComponent<Renderer>().material = new Material(Shader.Find("Transparent/Diffuse"));;
-        pickup.GetComponent<Renderer>().material.color = color;
+        pickup.GetComponent<Renderer>().material = material;
         pickup.GetComponent<Collider>().isTrigger = true;
         pickup.AddComponent<PickupTrigger>();
         pickup.GetComponent<PickupTrigger>().Init(main, this);

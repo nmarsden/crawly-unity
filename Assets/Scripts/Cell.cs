@@ -6,7 +6,7 @@ public class Cell : MonoBehaviour
 {
     Color basicColor = new Color32(42, 255, 42, 255); // green
     Color activatableColor = new Color32(255, 255, 255, 255); // white
-    Color touchColor = new Color32(85, 107, 47, 255); // olive green
+    Color touchColor = new Color32(255, 255, 255, 255); // white
     Color activeColor = new Color32(74, 255, 0, 255); // lighter green
     Color wallColor = new Color32(239, 27, 33, 255); // red
 
@@ -28,10 +28,25 @@ public class Cell : MonoBehaviour
         cellMaterial.color = GetInitialColor();
 
         if (cellType.Equals(Arena.CellType.WALL)) {
+            // -- Wall Cell --
+            // Adjust height & disable trigger
             var wallHeight = main.GetWallHeight();
             gameObject.transform.localScale = Vector3.Scale(gameObject.transform.localScale, new Vector3(1, wallHeight, 1));
             gameObject.transform.position += new Vector3(0, wallHeight/2 + 0.5f, 0);
             gameObject.GetComponent<Collider>().isTrigger = false;
+        } else {
+            // -- Non-Wall Cell --
+            // Give cell material an edge emission texture
+            var emissionTexture =  Resources.Load<Texture>("Image/Edge_Emission");
+            cellMaterial.EnableKeyword("_EMISSION");
+            cellMaterial.SetColor("_EmissionColor", new Color32(255, 255, 255, 255)); // White
+            cellMaterial.SetTexture("_EmissionMap", emissionTexture);
+
+            // Set main texture for Touch Cell
+            if (cellType.Equals(Arena.CellType.TOUCH)) {
+                var cellTexture =  Resources.Load<Texture>("Image/Touch_Cell");
+                cellMaterial.SetTexture("_MainTex", cellTexture);
+            }
         }
     }
 
