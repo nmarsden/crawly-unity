@@ -10,6 +10,8 @@ public class Player : MonoBehaviour
 
     TurnCommand turnCommand;
 
+    TurningPoints turningPoints;
+
     GameObject head;
     GameObject lastTail;
     bool turning = false;
@@ -37,6 +39,7 @@ public class Player : MonoBehaviour
 
     Rigidbody headRigidbody;
 
+    bool isPosingForTitleScreen;
     bool isKilled;
     
     bool isShrinking;
@@ -46,9 +49,7 @@ public class Player : MonoBehaviour
     bool isShielded;
     float shieldStartTime;
     float shieldDuration = 5;
-
-    // GameObject gp1;
-    // GameObject gp2;
+    Vector3 startingDirection = Vector3.left;
 
     public void Init(Main main) {
         this.main = main;
@@ -57,14 +58,22 @@ public class Player : MonoBehaviour
         playerWidth = main.GetPlayerWidth();
         speed = main.GetPlayerSpeed();
         tailMinDistance = main.GetTailMinDistance();
+        isPosingForTitleScreen = false;
+    }
+
+    public void InitForTitleScreen(Main main) {
+        Init(main);
+
+        isPosingForTitleScreen = true;
     }
 
     void Start()
     {
-        // TODO Extract a Head object
+        // -- Turning Points --
+        turningPoints = InitTurningPoints();
 
         // Direction
-        var initialHeadDirection = Vector3.left;
+        var initialHeadDirection = startingDirection;
 
         // Turn command
         turnCommand = TurnCommand.None;
@@ -87,7 +96,9 @@ public class Player : MonoBehaviour
         headRigidbody = head.GetComponent<Rigidbody>();
         headRigidbody.isKinematic = false;
         headRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
-        headRigidbody.velocity = initialHeadDirection * speed;
+        if (!isPosingForTitleScreen) {
+            headRigidbody.velocity = initialHeadDirection * speed;
+        }
 
         // Left Eye
         GameObject leftEye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -166,7 +177,9 @@ public class Player : MonoBehaviour
         head.transform.rotation = Quaternion.LookRotation(initialHeadDirection);
 
         // Trigger head created event
-        main.HandleHeadCreated(head);
+        if (!isPosingForTitleScreen) {
+            main.HandleHeadCreated(head);
+        }
 
         // Tail
         GameObject tail = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -184,25 +197,47 @@ public class Player : MonoBehaviour
         tailRigidbody.isKinematic = false;
         tailRigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionY;
 
-        tail.GetComponent<Tail>().Init(main, tailLength++, speed, head, tailMinDistance);
+        tail.GetComponent<Tail>().Init(main, turningPoints, tailLength++, speed, head, tailMinDistance);
 
         lastTail = tail;
 
-        // Grid Point 1
-        // gp1 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // gp1.name = "GP1";
-        // gp1.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        // gp1.GetComponent<Renderer>().material.color = new Color32(200, 0, 0, 255);
-        // gp1.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
 
-        // // Grid Point 2
-        // gp2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        // gp2.name = "GP2";
-        // gp2.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        // gp2.GetComponent<Renderer>().material.color = new Color32(200, 0, 0, 255);
-        // gp2.GetComponent<Collider>().isTrigger = true; // Making a trigger to avoid altering the head's center-of-mass
+        if (isPosingForTitleScreen) {
+            // -- Setup Pose For Title Screen --
+            Grow();            
+            Grow();            
+            Grow();            
+
+            // Position Head
+            head.transform.position = new Vector3(-6, -0.6f, -6);
+            head.transform.rotation = Quaternion.Euler(-6, 125, 0);
+
+            var direction = head.transform.rotation * Vector3.forward;
+
+            // Position Tail
+            var t = lastTail.GetComponent<Tail>();
+            var i = 1;
+            while(t != null) {
+                t.transform.position = head.transform.position + (i * -5 * direction);
+
+                t = t.GetLeader().GetComponent<Tail>();
+                i++;
+            }
+
+        }
+
     }
 
+    private TurningPoints InitTurningPoints() {
+        var turningPoints = new GameObject();
+        turningPoints.name = "Turning Points";
+
+        turningPoints.transform.parent = this.transform;
+
+        turningPoints.AddComponent<TurningPoints>();
+        turningPoints.GetComponent<TurningPoints>().Init(this.main);
+        return turningPoints.GetComponent<TurningPoints>();
+    }
     void Update() {
         if (!turning && turnCommand == TurnCommand.None) {
             float horizontal = Input.GetAxisRaw("Horizontal");
@@ -215,7 +250,7 @@ public class Player : MonoBehaviour
     
     void FixedUpdate() {
 
-        if (isKilled) {
+        if (isPosingForTitleScreen || isKilled) {
             return;
         }
 
@@ -267,10 +302,6 @@ public class Player : MonoBehaviour
                     gridPos1 = new Vector3(xPos1, head.transform.position.y, head.transform.position.z);
                     gridPos2 = new Vector3(xPos2, head.transform.position.y, head.transform.position.z);
                 }
-                // Update gp1 & gp2
-                // gp1.transform.position = gridPos1 + (Vector3.down * playerHeight * 0.5f);
-                // gp2.transform.position = gridPos2 + (Vector3.down * playerHeight * 0.5f);
-
                 var distanceToGridPos1 = Vector3.Distance(head.transform.position, gridPos1);
                 var distanceToGridPos2 = Vector3.Distance(head.transform.position, gridPos2);
                 diff = Mathf.Min(distanceToGridPos1, distanceToGridPos2);
@@ -302,7 +333,7 @@ public class Player : MonoBehaviour
                     turningStartTime = Time.time;
 
                     // Track new turning point
-                    main.AssignNewlyCreatedTurningPoint(lastTail.GetComponent<Tail>(), head.transform.position, incomingDirection, direction);
+                    turningPoints.AssignNewlyCreatedTurningPoint(lastTail.GetComponent<Tail>(), head.transform.position, incomingDirection, direction);
 
                     // Update Head Velocity
                     headRigidbody.velocity = direction * speed;
@@ -340,7 +371,7 @@ public class Player : MonoBehaviour
         // Add new tail part as tip of the tail
         GameObject newPart = GameObject.Instantiate(lastTail);
         newPart.transform.parent = transform;
-        newPart.GetComponent<Tail>().Init(main, tailLength++, speed, lastTail, tailMinDistance);
+        newPart.GetComponent<Tail>().Init(main, turningPoints, tailLength++, speed, lastTail, tailMinDistance);
         lastTail = newPart;
     }
 
@@ -376,7 +407,7 @@ public class Player : MonoBehaviour
         lastTail = lastTail.GetComponent<Tail>().GetLeader();
 
         // Remove old last tail part
-        main.GetTurningPoints().UnassignTurningPoint(oldLastTail.GetComponent<Tail>());
+        turningPoints.UnassignTurningPoint(oldLastTail.GetComponent<Tail>());
         GameObject.Destroy(oldLastTail);
 
         // Decrease tail length

@@ -111,7 +111,7 @@ public class Arena : MonoBehaviour
 
     void Update()
     {
-        var yPos = 0.1f - playerHeight/2;
+        // var yPos = 0.1f - playerHeight/2;
         
         // Draw grid lines
         // for (float i = -(arenaWidth/2) + gridSpacing; i < (arenaWidth/2); i = i + gridSpacing) {
@@ -120,15 +120,15 @@ public class Arena : MonoBehaviour
         // }
 
         // Draw turning path
-        if (isShowTurningPoints) {
-            var turningPositions = main.GetTurningPoints().GetPositions();
+        // if (isShowTurningPoints) {
+        //     var turningPositions = main.GetTurningPoints().GetPositions();
 
-            for (var i = 0; i<turningPositions.Length-1; i++) {
-                var pos1 = new Vector3(turningPositions[i].x, yPos, turningPositions[i].z);
-                var pos2 = new Vector3(turningPositions[i+1].x, yPos, turningPositions[i+1].z);
-                DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
-            }
-        }
+        //     for (var i = 0; i<turningPositions.Length-1; i++) {
+        //         var pos1 = new Vector3(turningPositions[i].x, yPos, turningPositions[i].z);
+        //         var pos2 = new Vector3(turningPositions[i+1].x, yPos, turningPositions[i+1].z);
+        //         DrawLine(gridLines, pos1, pos2, pathColor, 1, 0.2f);
+        //     }
+        // }
     }
 
     void LateUpdate() {

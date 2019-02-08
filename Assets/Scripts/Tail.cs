@@ -30,7 +30,7 @@ public class Tail : MonoBehaviour
     bool isKilled;
 
 
-    public void Init(Main main, float tailLength, float speed, GameObject leader, float tailMinDistance) {
+    public void Init(Main main, TurningPoints turningPoints, float tailLength, float speed, GameObject leader, float tailMinDistance) {
         this.main = main;
         this.leader = leader;
         tailRigidbody = gameObject.GetComponent<Rigidbody>();
@@ -43,7 +43,7 @@ public class Tail : MonoBehaviour
         gameObject.transform.position = leader.transform.position;
         gameObject.GetComponent<Rigidbody>().velocity = direction * speed;
 
-        this.turningPoints = main.GetTurningPoints();
+        this.turningPoints = turningPoints;
         this.speed = speed;
         this.turningPoints.AssignOldestTurningPoint(this);
         isTurn = false;

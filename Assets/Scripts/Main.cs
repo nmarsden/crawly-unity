@@ -16,7 +16,6 @@ public class Main : MonoBehaviour
     AudioController audioController;
     CameraController cameraController;
     GameObject levels;
-    GameObject turningPoints;
     GameObject arena;
     GameObject player;
     GameObject pickups;
@@ -150,12 +149,6 @@ public class Main : MonoBehaviour
         // -- Levels --
         levels.GetComponent<Levels>().Init(currentLevelNum);
 
-        // -- Turning Points --
-        turningPoints = new GameObject();
-        turningPoints.name = "Turning Points";
-        turningPoints.AddComponent<TurningPoints>();
-        turningPoints.GetComponent<TurningPoints>().Init(this);
-
         // -- Arena --
         arena = new GameObject();
         arena.name = "Arena";
@@ -259,7 +252,6 @@ public class Main : MonoBehaviour
         Object.Destroy(pickups);
         Object.Destroy(player);
         Object.Destroy(arena);
-        Object.Destroy(turningPoints);
     }
 
     void QuitGame() {
@@ -334,14 +326,6 @@ public class Main : MonoBehaviour
         return currentLevelNum;
     }
     
-    public void AssignNewlyCreatedTurningPoint(Tail lastTail, Vector3 position, Vector3 incomingDirection, Vector3 outgoingDirection) {
-        turningPoints.GetComponent<TurningPoints>().AssignNewlyCreatedTurningPoint(lastTail, position, incomingDirection, outgoingDirection);
-    }
-
-    public TurningPoints GetTurningPoints() {
-        return turningPoints.GetComponent<TurningPoints>();
-    }
-
     public void HandleHeadCreated(GameObject head) 
     {
         cameraController.Init(head);
