@@ -82,11 +82,19 @@ public class Cell : MonoBehaviour
     }
 
     public bool IsActivated() {
-        return isActivated;
+        return (IsTouch() || IsActivatable()) && isActivated;
     }
 
     public bool IsWall() {
         return cellType.Equals(Arena.CellType.WALL);
+    }
+
+    private bool IsTouch() {
+        return cellType.Equals(Arena.CellType.TOUCH);
+    }
+
+    private bool IsActivatable() {
+        return cellType.Equals(Arena.CellType.ACTIVATABLE);
     }
 
     void UpdateColor(Color32 nonActiveColor, float activatedDuration) {

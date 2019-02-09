@@ -47,6 +47,10 @@ public class TitleScreen : MonoBehaviour
     }
 
     public void Show(int selectedLevelNumber) {
+        // Set intial camera position/rotation
+        Camera.main.transform.position = new Vector3(25.6f, 25.5f, -26.5f);
+        Camera.main.transform.rotation = Quaternion.Euler(30, -45, 0);
+
         InitScreenMode(ScreenMode.MAIN_MENU);
         UpdateSelectedLevel(selectedLevelNumber);
         gameObject.SetActive(true);

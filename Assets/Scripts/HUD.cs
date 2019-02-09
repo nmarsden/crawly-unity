@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class HUD : MonoBehaviour
 {
     Main main;
-    Font font;
     GameObject menuButtonPrefab;
     GameObject levelNumText;    
-    GameObject fillText;
+    GameObject overlay;
     GameObject gameCompletedText;
     GameObject gameOverText;
     GameObject pausedText;
@@ -18,18 +18,14 @@ public class HUD : MonoBehaviour
     int currentLevelNum;
 
     StatusBar shieldStatusBar;
+    StatusBar filledStatusBar;
     Color32 shieldStatusColor = new Color32(0, 35, 102, 200);
+    Color32 filledStatusColor = new Color32(0, 102, 35, 200);
 
     public void Init(Main main) 
     {
         this.main = main;
         currentLevelNum = main.GetCurrentLevelNum();
-    }
-
-    void Awake()
-    {
-        // Initially not active
-        gameObject.SetActive(false);
 
         // Load menuButton prefab
         menuButtonPrefab = Resources.Load<GameObject>("UI/MenuButton");
@@ -45,57 +41,62 @@ public class HUD : MonoBehaviour
         canvas.worldCamera = Camera.main;
         canvas.planeDistance = 5;
 
-        // Setup font
-        font = Resources.Load<Font>("Font/FiraMono-Bold");
+        var levelTextColor = new Color32(255, 255, 255, 200);
+        var levelOutlineColor = new Color32(0, 0, 0, 200);
 
-        // Title text
-        var titleText = AddTextMesh(gameObject, "crawly", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 3);
-        titleText.name = "Title";
-        titleText.transform.Translate(new Vector3(-35, -25, 0));
+        var textColor = new Color32(250, 189, 135, 255);
+        var outlineColor = new Color32(247, 255, 0, 255);
+
+        var textSize = new Vector2 (160, 50);
+        var largeTextSize = new Vector2 (360, 90);
 
         // Level Number text
-        levelNumText = AddTextMesh(gameObject, "Level " + currentLevelNum, TextAnchor.MiddleCenter, new Color32(255, 255, 255, 100), 3);
-        levelNumText.name = "Level Number";
-        levelNumText.transform.Translate(new Vector3(31, 25, 0));
+        levelNumText = AddTextMeshPro(gameObject, "Level " + currentLevelNum, TextAnchor.MiddleCenter, levelTextColor, textSize, levelOutlineColor);
+        levelNumText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(levelTextColor);
 
-        // Fill text
-        fillText = AddTextMesh(gameObject, "Fill", TextAnchor.MiddleCenter, new Color32(0, 255, 0, 100), 3);
-        fillText.name = "Fill";
-        fillText.transform.Translate(new Vector3(25, -25, 0));
+        levelNumText.name = "Level Number";
+        levelNumText.transform.Translate(new Vector3(37, 25, 0));
+
+        // Overlay
+        overlay = AddOverlay();
 
         // Game Completed text
-        gameCompletedText = AddTextMesh(gameObject, "COMPLETE", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200), 5);
+        gameCompletedText = AddTextMeshPro(gameObject, "COMPLETE", TextAnchor.MiddleCenter, textColor, largeTextSize, outlineColor);
         gameCompletedText.name = "Game Completed";
-        gameCompletedText.transform.Translate(new Vector3(0, 10, 0));
+        gameCompletedText.transform.Translate(new Vector3(0, 6, 0));
         gameCompletedText.SetActive(false);
 
         // Game Over text
-        gameOverText = AddTextMesh(gameObject, "GAME OVER", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200), 5);
+        gameOverText = AddTextMeshPro(gameObject, "GAME OVER", TextAnchor.MiddleCenter, textColor, largeTextSize, outlineColor);
         gameOverText.name = "Game Over";
-        gameOverText.transform.Translate(new Vector3(0, 10, 0));
-        gameOverText.SetActive(false);
+        gameOverText.transform.Translate(new Vector3(0, 6, 0));
 
         // Paused text
-        pausedText = AddTextMesh(gameObject, "PAUSED", TextAnchor.MiddleCenter, new Color32(0, 0, 100, 200), 5);
+        pausedText = AddTextMeshPro(gameObject, "PAUSED", TextAnchor.MiddleCenter, textColor, largeTextSize, outlineColor);
         pausedText.name = "Paused";
-        pausedText.transform.Translate(new Vector3(0, 10, 0));
-        pausedText.SetActive(false);
+        pausedText.transform.Translate(new Vector3(0, 6, 0));
 
         // OK Button
-        okButton = AddButton("OK", 200);
+        okButton = AddButton(canvas, "OK", 200);
         okButton.name = "OK Button";
-        okButton.transform.Translate(new Vector3(0, -10, 0));
+        okButton.transform.Translate(new Vector3(0, -6, 0));
         okButton.GetComponent<Button>().onClick.AddListener(OkButtonOnClick);
-        okButton.SetActive(false);
 
         // Shield Status Bar
         shieldStatusBar = CreateShieldStatusBar(shieldStatusColor);
+
+        // Filled Status Bar
+        filledStatusBar = CreateFilledStatusBar(filledStatusColor);
+
+        gameObject.SetActive(false);
     }
 
     public void Show(int selectedLevelNumber) {
         UpdateSelectedLevel(selectedLevelNumber);
         UpdateShieldStatusValue(0);
+        UpdateFilledStatusBarWidth();                   
 
+        overlay.SetActive(false);
         gameOverText.SetActive(false);
         gameCompletedText.SetActive(false);
         pausedText.SetActive(false);
@@ -110,7 +111,7 @@ public class HUD : MonoBehaviour
 
     void UpdateSelectedLevel(int selectedLevelNumber) {
         this.currentLevelNum = selectedLevelNumber;
-        levelNumText.GetComponent<TextMesh>().text = "Level " + currentLevelNum;
+        levelNumText.GetComponent<TextMeshProUGUI>().text = "Level " + currentLevelNum;
     }
 
     void OkButtonOnClick() {
@@ -120,54 +121,68 @@ public class HUD : MonoBehaviour
 
     void Update()
     {   
-        fillText.GetComponent<TextMesh>().text = "filled " + main.GetFilledPercentage() + "%";
+        filledStatusBar.UpdateValue(main.GetFilledPercentage());
     }
 
     public void ShowGameOverMessage() {
+        overlay.SetActive(true);
         gameOverText.SetActive(true);
         okButton.SetActive(true);
     }
 
     public void ShowGameCompletedMessage() {
+        overlay.SetActive(true);
         gameCompletedText.SetActive(true);
         okButton.SetActive(true);
     }
 
     public void ShowPausedMessage() {
+        overlay.SetActive(true);
         pausedText.SetActive(true);
         okButton.SetActive(true);
     }
 
     public void HidePausedMessage() {
+        overlay.SetActive(false);
         pausedText.SetActive(false);
         okButton.SetActive(false);
     }
 
-    public GameObject AddTextMesh(GameObject parent, string textContent, TextAnchor alignment, Color32 color, float scale) {
-        // Note: TextMesh scales better than regular Text
+    public GameObject AddTextMeshPro(GameObject parent, string textContent, TextAnchor alignment, Color32 color, Vector2 size, Color32 outlineColor) {
         var txtMesh = new GameObject();
         txtMesh.transform.SetParent(parent.transform, false);
-        txtMesh.transform.localScale = new Vector3(scale, scale, scale);
-        var tm = txtMesh.AddComponent<TextMesh>();
+        txtMesh.layer = 5; // UI
+
+        var tm = txtMesh.AddComponent<TextMeshProUGUI>();
         tm.text = textContent;
-        tm.font = font;
-        tm.fontSize = 200;
-        tm.fontStyle = FontStyle.Bold;
-        tm.color = color;
-        tm.offsetZ = -1;
-        tm.anchor = alignment;
+
+        var rectTransform = tm.GetComponent<RectTransform>();
+        rectTransform.sizeDelta = size;
+
+        tm.enableAutoSizing = true;
+        tm.fontSizeMax = 700;
+        tm.alignment = TextAlignmentOptions.Center;
+        tm.faceColor = color;
+
+        tm.enableVertexGradient = true;
+        var topColor = new Color32(255, 133, 0, 255);
+        var bottomColor = new Color32(255, 211, 120, 255);
+        tm.colorGradient = new VertexGradient(topColor, topColor, bottomColor, bottomColor);
+
+        tm.outlineColor = outlineColor;
 
         return txtMesh;
     }
 
-    public GameObject AddButton(string textContent, int width) {
+    public GameObject AddButton(Canvas canvas, string textContent, int width) {
         // Create button & set parent
         var button = Instantiate(menuButtonPrefab);
-        button.transform.SetParent(gameObject.transform, false);
+        button.transform.SetParent(canvas.transform, false);
+        button.transform.localScale = new Vector3(1, 1, 1);
 
         // Setup button width & height
         var playButtonRectTransform = button.GetComponent<RectTransform>();
-        playButtonRectTransform.sizeDelta = new Vector2 (width, 120);
+        playButtonRectTransform.sizeDelta = new Vector2 (width, 60);
 
         // Setup button colors
         var btnColorBlock = ColorBlock.defaultColorBlock;
@@ -181,8 +196,8 @@ public class HUD : MonoBehaviour
         txt.text = "";
 
         // Add TextMesh
-        var txtMesh = AddTextMesh(button, textContent, TextAnchor.MiddleCenter, new Color32(255, 255, 255, 255), 5);
-        txtMesh.name = "TextMesh";
+        var txtMesh = AddTextMeshPro(button, textContent, TextAnchor.MiddleCenter, new Color32(32, 255, 0, 100), new Vector2 (70, 50), new Color32(255, 255, 255, 255));
+        txtMesh.name = "TextMeshPro";
 
         return button;
     }
@@ -191,7 +206,25 @@ public class HUD : MonoBehaviour
         shieldStatusBar.UpdateValue(value);
     }
 
-    StatusBar CreateShieldStatusBar(Color32 color) {
+    private void UpdateFilledStatusBarWidth() {
+        filledStatusBar.SetWidth(main.GetNumberOfFillableCells() * 20);
+    }
+
+    GameObject AddOverlay() 
+    {
+        var overlay = new GameObject();        
+        overlay.name = "Overlay";
+        overlay.transform.SetParent(gameObject.transform, false);
+        overlay.transform.localScale = new Vector3(5f, 5f, 1f);
+        overlay.transform.Translate(new Vector3(0, 0, 1));
+        overlay.AddComponent<SpriteRenderer>();
+        overlay.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Image/Overlay");
+        overlay.GetComponent<SpriteRenderer>().color = ConvertColor(0, 0, 0, 80);
+        return overlay;
+    }
+
+    StatusBar CreateShieldStatusBar(Color32 color) 
+    {
         // Add Shield Icon
         var shieldIcon = new GameObject();        
         shieldIcon.name = "Shield Icon";
@@ -212,6 +245,21 @@ public class HUD : MonoBehaviour
         var statusBar = shieldStatusBar.AddComponent<StatusBar>();
         statusBar.Init(color);
         statusBar.UpdateValue(0);
+        return statusBar;
+    }
+
+    StatusBar CreateFilledStatusBar(Color32 color) 
+    {
+        var filledStatusBar = new GameObject();
+        filledStatusBar.name = "Filled Status Bar";
+        filledStatusBar.transform.SetParent(gameObject.transform, false);
+        filledStatusBar.transform.localScale = new Vector3(2, 2, 2);
+        filledStatusBar.transform.Translate(new Vector3(0, -25, 0));
+
+        var statusBar = filledStatusBar.AddComponent<StatusBar>();
+        statusBar.Init(color);
+        statusBar.UpdateValue(0);
+        statusBar.SetUpdateSpeedFactor(10);
         return statusBar;
     }
 

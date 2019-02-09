@@ -22,7 +22,6 @@ public class Main : MonoBehaviour
     GameObject hud;
 
     bool isShowTitleScreen;
-    bool isShowHelpScreen;
     bool isGameOver;
     bool isGameCompleted;
     bool isOkClicked;
@@ -90,6 +89,7 @@ public class Main : MonoBehaviour
 
     void ShowTitleScreen()
     {
+        Time.timeScale = 1;
         isShowTitleScreen = true;
         titleScreen.GetComponent<TitleScreen>().Show(currentLevelNum);
 
@@ -152,7 +152,7 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        if (!isShowTitleScreen && !isShowHelpScreen) {
+        if (!isShowTitleScreen) {
             // Toggle View when 'V' pressed
             if (Input.GetKeyDown(KeyCode.V)) 
             {
@@ -439,8 +439,8 @@ public class Main : MonoBehaviour
         return levels.GetComponent<Levels>().GetNumberOfFillableCells();
     }
 
-    public int GetFilledPercentage() {
-        return (int) Mathf.Floor((arena.GetComponent<Arena>().GetNumberOfActivatedCells() / (float) GetNumberOfFillableCells()) * 100);
+    public float GetFilledPercentage() {
+        return (arena.GetComponent<Arena>().GetNumberOfActivatedCells() / (float) GetNumberOfFillableCells());
     }
 
     public Arena.CellType[,] GetLevelCellTypes() {

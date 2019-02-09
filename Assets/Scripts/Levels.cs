@@ -146,7 +146,8 @@ public class Levels : MonoBehaviour
         var cellTypes = GetLevelCellTypes(levelMap);
         for (var row = 0; row < levelMap.Length; row++) {
             for (var col = 0; col < levelMap.Length; col++) {
-                if (!GetCellType(levelMap[row][col]).Equals(Arena.CellType.WALL)) {
+                var cellType = GetCellType(levelMap[row][col]);
+                if (cellType.Equals(Arena.CellType.ACTIVATABLE) || cellType.Equals(Arena.CellType.TOUCH)) {
                     count++;
                 }
             }
