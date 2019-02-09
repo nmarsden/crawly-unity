@@ -32,7 +32,6 @@ public class Main : MonoBehaviour
     bool isPaused;
 
     GameObject titleScreen;
-    GameObject helpScreen;
 
     bool isShowDeathSequence;
     float deathSequenceStartTime;
@@ -79,12 +78,6 @@ public class Main : MonoBehaviour
         titleScreen.AddComponent<TitleScreen>();
         titleScreen.GetComponent<TitleScreen>().Init(this, numberOfLevels);
 
-        // -- Setup Help Screen --
-        helpScreen = new GameObject();
-        helpScreen.name = "Help Screen";
-        helpScreen.AddComponent<HelpScreen>();
-        helpScreen.GetComponent<HelpScreen>().Init(this);
-
         // -- HUD --
         hud = new GameObject();
         hud.name = "HUD";
@@ -107,20 +100,6 @@ public class Main : MonoBehaviour
     void HideTitleScreen() {
         isShowTitleScreen = false;
         titleScreen.GetComponent<TitleScreen>().Hide();
-    }
-
-    void ShowHelpScreen()
-    {
-        isShowHelpScreen = true;
-        helpScreen.GetComponent<HelpScreen>().Show();
-
-        // Play Music
-        audioController.PlayMusic();
-    }
-
-    void HideHelpScreen() {
-        isShowHelpScreen = false;
-        helpScreen.GetComponent<HelpScreen>().Hide();
     }
 
     void ShowHUD()
@@ -337,16 +316,6 @@ public class Main : MonoBehaviour
         StartLevel(selectedLevelNumber);
     }
 
-    public void HandleHelpButtonPressed() {
-        HideTitleScreen();
-        ShowHelpScreen();
-    }
-
-    public void HandleHelpCloseButtonPressed() {
-        HideHelpScreen();
-        ShowTitleScreen();
-    }
- 
     public void HandleHudOkButtonClicked() {
         isOkClicked = true;
     }

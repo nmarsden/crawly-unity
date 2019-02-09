@@ -60,7 +60,6 @@
      <Compile Include="Assets\Scripts\CellTrigger.cs" />
      <Compile Include="Assets\Scripts\Console.cs" />
      <Compile Include="Assets\Scripts\Flash.cs" />
-     <Compile Include="Assets\Scripts\HelpScreen.cs" />
      <Compile Include="Assets\Scripts\HUD.cs" />
      <Compile Include="Assets\Scripts\Levels.cs" />
      <Compile Include="Assets\Scripts\Lights.cs" />

@@ -7,45 +7,129 @@ using TMPro;
 
 public class TitleScreen : MonoBehaviour
 {
+    enum ScreenMode { MAIN_MENU, HELP };
+
+    delegate void Action();
+
+    IDictionary<ScreenMode, Action> screenModeToAction;
+
+    ScreenMode screenMode;
     Main main;
     int numberOfLevels;
     GameObject menuButtonPrefab;
     GameObject levelText;
     int selectedLevelNumber;
+    GameObject cameraMount;
 
-    GameObject player;
+    public void Awake() {
+        screenModeToAction = new Dictionary<ScreenMode, Action>
+        {
+            { ScreenMode.MAIN_MENU, InitMainMenuScreenMode },
+            { ScreenMode.HELP,      InitHelpScreenMode },
+        };
 
-    void Awake()
+    }
+
+    public void Init(Main main, int numberOfLevels) 
     {
+        this.main = main;
+        this.numberOfLevels = numberOfLevels;
+
         // Load menuButton prefab
         menuButtonPrefab = Resources.Load<GameObject>("UI/MenuButton");
 
-        // Add components
-        gameObject.AddComponent<Canvas>();
-        gameObject.AddComponent<CanvasScaler>();
-        gameObject.AddComponent<GraphicRaycaster>();
-        gameObject.transform.position = new Vector3 (0, 0, 0);
-        gameObject.layer = 5; // UI
+        InitCameraMount();
+        InitMainMenuScreen();
+        InitHelpScreen();
 
-        // Setup canvas
-        var canvas = gameObject.GetComponent<Canvas>();
-        canvas.transform.position = new Vector3 (0, 0, 0);
+        // Initially not active
+        gameObject.SetActive(false);
+    }
 
-        canvas.renderMode = RenderMode.WorldSpace;
+    public void Show(int selectedLevelNumber) {
+        InitScreenMode(ScreenMode.MAIN_MENU);
+        UpdateSelectedLevel(selectedLevelNumber);
+        gameObject.SetActive(true);
+    }
 
-        var canvasRectTransform = canvas.GetComponent<RectTransform>();
-        canvasRectTransform.localScale = new Vector3(0.05f, 0.05f, 1);
-        canvasRectTransform.sizeDelta = new Vector2(960, 600);
-        canvasRectTransform.anchorMin = new Vector2(0, 0);
-        canvasRectTransform.anchorMax = new Vector2(0, 0);
+    public void Hide() {
+        gameObject.SetActive(false);
+    }
+
+    void Update()
+    {
+        if (screenMode.Equals(ScreenMode.MAIN_MENU)) {
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
+            {
+                PlayButtonOnClick();
+            } 
+            if (Input.GetKeyDown(KeyCode.H)) 
+            {
+                HelpButtonOnClick();
+            } 
+            else if (Input.GetKeyDown(KeyCode.RightArrow)) 
+            {
+                SelectNextLevel();
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftArrow)) 
+            {
+                SelectPreviousLevel();
+            }
+        } else if (screenMode.Equals(ScreenMode.HELP)) {
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Escape)) 
+            {
+                BackButtonOnClick();
+            } 
+        }
+    }
+
+    void LateUpdate() {
+        // Move the camera to the mount position/rotation
+        var t = 8f * Time.deltaTime;
+        Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, cameraMount.transform.position, t);
+        Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, cameraMount.transform.rotation, t);
+    }
+
+    void InitScreenMode(ScreenMode screenMode) {
+        this.screenMode = screenMode;
+        screenModeToAction[screenMode]();
+    }
+
+    void InitMainMenuScreenMode() {
+        Camera.main.orthographic = false;
+        Camera.main.fieldOfView = 55;
+
+        cameraMount.transform.position = new Vector3(0, 1.5f, -15);
+        cameraMount.transform.rotation = Quaternion.Euler(0, -18, 0);
+    }
+
+    void InitHelpScreenMode() {
+        Camera.main.orthographic = false;
+        Camera.main.fieldOfView = 55;
+
+        cameraMount.transform.position = new Vector3(56, 1.5f, -15);
+        cameraMount.transform.rotation = Quaternion.Euler(0, -18, 0);
+    }
+
+    void InitCameraMount() {
+        cameraMount = new GameObject();
+        cameraMount.name = "Camera Mount";
+        cameraMount.transform.parent = gameObject.transform;
+    }
+
+    void InitMainMenuScreen() {
+
+        GameObject screen = InitScreen();
+        screen.name = "Main Menu Screen";
+        var canvas = screen.GetComponent<Canvas>();
 
         // Title text
-        var titleText = AddTextMeshPro(gameObject, "CRAWLY", TextAnchor.MiddleCenter, new Color32(250, 189, 135, 255), new Vector2 (700, 170), new Color32(247, 255, 0, 255));
+        var titleText = AddTextMeshPro(screen, "CRAWLY", TextAnchor.MiddleCenter, new Color32(250, 189, 135, 255), new Vector2 (700, 170), new Color32(247, 255, 0, 255));
         titleText.name = "Title";
         titleText.transform.Translate(new Vector3(-8.5f, 4.5f, 0));
 
         // Level text
-        levelText = AddTextMeshPro(gameObject, "LEVEL 1", TextAnchor.MiddleCenter, new Color32(32, 255, 0, 100), new Vector2 (140, 30), new Color32(255, 255, 255, 255));
+        levelText = AddTextMeshPro(screen, "LEVEL 1", TextAnchor.MiddleCenter, new Color32(32, 255, 0, 100), new Vector2 (140, 30), new Color32(255, 255, 255, 255));
         levelText.transform.Translate(new Vector3(0, 0.2f, 0));
         levelText.name = "Level";
 
@@ -73,59 +157,72 @@ public class TitleScreen : MonoBehaviour
         helpButton.transform.Translate(new Vector3(0, -4, 0));
         helpButton.GetComponent<Button>().onClick.AddListener(HelpButtonOnClick);
 
-        // Initially not active
-        gameObject.SetActive(false);
-    }
-
-    public void Init(Main main, int numberOfLevels) 
-    {
-        this.main = main;
-        this.numberOfLevels = numberOfLevels;
-    }
-
-    public void Show(int selectedLevelNumber) {
-        InitCamera();
-        UpdateSelectedLevel(selectedLevelNumber);
-        gameObject.SetActive(true);
-
-        // Title Screen Player
-        player = new GameObject();
-        player.name = "Title Screen Player";
+        // Main Menu Player
+        var player = new GameObject();
+        player.name = "Main Menu Player";
+        player.transform.parent = screen.transform;
         player.AddComponent<Player>();
         player.GetComponent<Player>().InitForTitleScreen(this.main);
     }
 
-    public void Hide() {
-        gameObject.SetActive(false);
+    void InitHelpScreen() {
+        GameObject screen = InitScreen();
+        screen.name = "Help Screen";
+        screen.transform.Translate(new Vector3(50, 0, 0));
+        var canvas = screen.GetComponent<Canvas>();
 
-        Object.Destroy(player);
+        // Title text
+        var titleText = AddTextMeshPro(screen, "HELP", TextAnchor.MiddleCenter, new Color32(250, 189, 135, 255), new Vector2 (700, 50), new Color32(247, 255, 0, 255));
+        titleText.name = "Title";
+        titleText.transform.Translate(new Vector3(0, 7, 0));
+
+        // Info Text
+        var infoColor = new Color32(12, 46, 18, 100);
+        var outlineColor = new Color32(247, 255, 0, 255);
+
+        var turnText = AddTextMeshPro(screen, "< > - player controls", TextAnchor.MiddleCenter, infoColor, new Vector2 (700, 50), outlineColor);
+        turnText.name = "Turn Text";
+        turnText.transform.Translate(new Vector3(0, 4, 0));
+
+        var viewText = AddTextMeshPro(screen, "v - toggle view", TextAnchor.MiddleCenter, infoColor, new Vector2 (700, 50), outlineColor);
+        viewText.name = "View Text";
+        viewText.transform.Translate(new Vector3(0, 1, 0));
+
+        var pauseText = AddTextMeshPro(screen, "p - pause", TextAnchor.MiddleCenter, infoColor, new Vector2 (700, 50), outlineColor);
+        pauseText.name = "Pause Text";
+        pauseText.transform.Translate(new Vector3(0, -2, 0));
+
+        // Back Button
+        var helpButton = AddButton(canvas, "BACK", 100);
+        helpButton.name = "Back Button";
+        helpButton.transform.Translate(new Vector3(0, -5, 0));
+        helpButton.GetComponent<Button>().onClick.AddListener(BackButtonOnClick);
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) 
-        {
-            PlayButtonOnClick();
-        } 
-        if (Input.GetKeyDown(KeyCode.H)) 
-        {
-            HelpButtonOnClick();
-        } 
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) 
-        {
-            SelectNextLevel();
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow)) 
-        {
-            SelectPreviousLevel();
-        }
-    }
+    GameObject InitScreen() {
+        GameObject screen = new GameObject();
+        screen.transform.parent = gameObject.transform;
 
-    void InitCamera() {
-        Camera.main.orthographic = false;
-        Camera.main.transform.position = new Vector3(0, 1.5f, -15);
-        Camera.main.transform.rotation = Quaternion.Euler(0, -18, 0);
-        Camera.main.fieldOfView = 55;
+        // Add components
+        screen.AddComponent<Canvas>();
+        screen.AddComponent<CanvasScaler>();
+        screen.AddComponent<GraphicRaycaster>();
+        screen.transform.position = new Vector3 (0, 0, 0);
+        screen.layer = 5; // UI
+
+        // Setup canvas
+        var canvas = screen.GetComponent<Canvas>();
+        canvas.transform.position = new Vector3 (0, 0, 0);
+
+        canvas.renderMode = RenderMode.WorldSpace;
+
+        var canvasRectTransform = canvas.GetComponent<RectTransform>();
+        canvasRectTransform.localScale = new Vector3(0.05f, 0.05f, 1);
+        canvasRectTransform.sizeDelta = new Vector2(960, 600);
+        canvasRectTransform.anchorMin = new Vector2(0, 0);
+        canvasRectTransform.anchorMax = new Vector2(0, 0);
+
+        return screen;
     }
 
     void SelectNextLevel() {
@@ -158,7 +255,12 @@ public class TitleScreen : MonoBehaviour
 
     void HelpButtonOnClick() {
         main.HandleButtonPressedFX();
-        main.HandleHelpButtonPressed();
+        InitScreenMode(ScreenMode.HELP);
+    }
+
+    void BackButtonOnClick() {
+        main.HandleButtonPressedFX();
+        InitScreenMode(ScreenMode.MAIN_MENU);
     }
 
     public GameObject AddTextMeshPro(GameObject parent, string textContent, TextAnchor alignment, Color32 color, Vector2 size, Color32 outlineColor) {
