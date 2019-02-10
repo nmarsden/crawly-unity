@@ -17,6 +17,8 @@ public class TitleScreen : MonoBehaviour
     Main main;
     int numberOfLevels;
     GameObject menuButtonPrefab;
+    TMP_SpriteAsset spriteAsset;
+
     GameObject levelText;
     int selectedLevelNumber;
     GameObject cameraMount;
@@ -37,6 +39,9 @@ public class TitleScreen : MonoBehaviour
 
         // Load menuButton prefab
         menuButtonPrefab = Resources.Load<GameObject>("UI/MenuButton");
+
+        // Load sprite asset
+        spriteAsset = Resources.Load<TMP_SpriteAsset>("UI/SpriteAsset");
 
         InitCameraMount();
         InitMainMenuScreen();
@@ -183,15 +188,15 @@ public class TitleScreen : MonoBehaviour
         titleText.transform.Translate(new Vector3(0, 7, 0));
 
         // Info Text
-        var turnText = AddInfoText(screen, "< > - player controls");
+        var turnText = AddInfoText(screen, "<sprite=0> <sprite=1> - player controls");
         turnText.name = "Turn Text";
         turnText.transform.Translate(new Vector3(0, 4, 0));
 
-        var viewText = AddInfoText(screen, "v - toggle view");
+        var viewText = AddInfoText(screen, "<sprite=2> - toggle view");
         viewText.name = "View Text";
         viewText.transform.Translate(new Vector3(0, 1, 0));
 
-        var pauseText = AddInfoText(screen, "p - pause");
+        var pauseText = AddInfoText(screen, "<sprite=3> - pause");
         pauseText.name = "Pause Text";
         pauseText.transform.Translate(new Vector3(0, -2, 0));
 
@@ -280,12 +285,13 @@ public class TitleScreen : MonoBehaviour
 
     private GameObject AddInfoText(GameObject parent, string textContent) 
     {
-        var infoColor = new Color32(12, 46, 18, 100);
-        var outlineColor = new Color32(247, 255, 0, 255);
+        var infoColor = new Color32(255, 255, 255, 250);
+        var outlineColor = new Color32(0, 0, 0, 200);
         var size = new Vector2 (700, 50);
 
         var infoText = AddTextMeshPro(parent, textContent, infoColor, size, outlineColor);
         infoText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(infoColor);
+        infoText.GetComponent<TextMeshProUGUI>().spriteAsset = spriteAsset;
 
         return infoText;
     }
