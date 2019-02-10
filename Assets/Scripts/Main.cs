@@ -122,6 +122,9 @@ public class Main : MonoBehaviour
         isOkClicked = false; 
         isShowDeathSequence = false;
 
+        // Deactivate camera Fly Around mode (if active)
+        cameraController.DeactivateFlyAroundMode();
+
         // Play Music
         audioController.PlayMusic();
 
@@ -403,6 +406,9 @@ public class Main : MonoBehaviour
 
         // Display Game Completed message
         hud.GetComponent<HUD>().ShowGameCompletedMessage();
+
+        // Active camera Fly Around mode
+        cameraController.ActivateFlyAroundMode();
     }
 
     private void GameOver() {
@@ -423,6 +429,9 @@ public class Main : MonoBehaviour
         // Stop music & play game over FX
         audioController.StopMusic();
         audioController.PlayGameOverFX();
+
+        // Active camera Fly Around mode
+        cameraController.ActivateFlyAroundMode();
     }
 
     public List<Vector3> GetEmptyPositions() {

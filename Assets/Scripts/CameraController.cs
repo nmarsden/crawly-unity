@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    enum CameraMode { ORTHO, ORTHO_FOLLOW, SIDE, SIDE_FOLLOW, SIDE_FOLLOW_TURN, TOP, TOP_FOLLOW, TOP_FOLLOW_TURN, FPV };
+    enum CameraMode { ORTHO, ORTHO_FOLLOW, SIDE, SIDE_FOLLOW, SIDE_FOLLOW_TURN, TOP, TOP_FOLLOW, TOP_FOLLOW_TURN, FPV, FLY_AROUND };
 
     delegate void Action();
 
@@ -13,6 +13,7 @@ public class CameraController : MonoBehaviour
     GameObject target;
     Vector3 targetOffset;
     CameraMode cameraMode = CameraMode.ORTHO;
+    CameraMode cameraModePreFlyAround;
 
     public void Awake() {
         cameraModeToAction = new Dictionary<CameraMode, Action>
@@ -26,6 +27,7 @@ public class CameraController : MonoBehaviour
             { CameraMode.TOP_FOLLOW,        InitTopFollowCameraMode },
             { CameraMode.TOP_FOLLOW_TURN,   InitTopFollowTurnCameraMode },
             { CameraMode.FPV,               InitFirstPersonCameraMode },
+            { CameraMode.FLY_AROUND,        InitFlyAroundCameraMode },
         };
 
     }
@@ -71,6 +73,21 @@ public class CameraController : MonoBehaviour
         {
             InitCameraMode(CameraMode.ORTHO);
         }
+    }
+
+    public void ActivateFlyAroundMode() {
+        if (cameraMode.Equals(CameraMode.FLY_AROUND)) {
+            return;
+        }
+        cameraModePreFlyAround = cameraMode;
+        InitCameraMode(CameraMode.FLY_AROUND);
+    }
+
+    public void DeactivateFlyAroundMode() {
+        if (!cameraMode.Equals(CameraMode.FLY_AROUND)) {
+            return;
+        }
+        InitCameraMode(cameraModePreFlyAround);
     }
 
     void InitCameraMode(CameraMode cameraMode) {
@@ -170,6 +187,20 @@ public class CameraController : MonoBehaviour
         Camera.main.fieldOfView = 80;
     }
 
+    void InitFlyAroundCameraMode() {
+        cameraMode = CameraMode.FLY_AROUND;
+        Camera.main.orthographic = false;
+        Camera.main.fieldOfView = 40;
+
+        var cameraDistance = 70;
+        var viewAngle = Quaternion.Euler(45, -90, 0);
+        Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
+
+        Camera.main.transform.position = target.transform.position - (viewDirection * cameraDistance);
+        Camera.main.transform.rotation = viewAngle;
+        targetOffset = Camera.main.transform.position - target.transform.position;
+    }
+
     void LateUpdate()
     {
         if (target != null) {
@@ -214,7 +245,30 @@ public class CameraController : MonoBehaviour
                 var desiredRotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
                 transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
             }
+            else if (cameraMode.Equals(CameraMode.FLY_AROUND)) {
+                // Update camera position/rotation according to target offset
+                var desiredPosition = target.transform.position + targetOffset;
+                transform.position = desiredPosition;
+
+                var heading = target.transform.position - transform.position;
+                var distance = heading.magnitude;
+                var direction = heading / distance;
+
+                var desiredRotation = Quaternion.LookRotation(direction, Vector3.up);
+                transform.rotation = desiredRotation;
+
+                // Update targetOffset by rotating 0.3 degrees around the target position
+                var rotatedPoint = RotatePointAroundPivot(transform.position, target.transform.position, new Vector3(0, 0.3f, 0));
+                targetOffset = rotatedPoint - target.transform.position;
+            }
         }
-        
+    }
+
+    private Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Vector3 angles) 
+    {
+        var dir = point - pivot;
+        var rotatedDir = Quaternion.Euler(angles) * dir;
+        var rotatedPoint = rotatedDir + pivot;
+        return rotatedPoint;
     }
 }
