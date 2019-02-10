@@ -128,12 +128,13 @@ public class TitleScreen : MonoBehaviour
         var canvas = screen.GetComponent<Canvas>();
 
         // Title text
-        var titleText = AddTextMeshPro(screen, "CRAWLY", TextAnchor.MiddleCenter, new Color32(250, 189, 135, 255), new Vector2 (700, 170), new Color32(247, 255, 0, 255));
+        var titleText = AddTextMeshPro(screen, "CRAWLY", new Color32(250, 189, 135, 255), new Vector2 (700, 170), new Color32(247, 255, 0, 255));
         titleText.name = "Title";
         titleText.transform.Translate(new Vector3(-8.5f, 4.5f, 0));
 
         // Level text
-        levelText = AddTextMeshPro(screen, "LEVEL 1", TextAnchor.MiddleCenter, new Color32(32, 255, 0, 100), new Vector2 (140, 30), new Color32(255, 255, 255, 255));
+        levelText = AddTextMeshPro(screen, "LEVEL 1", new Color32(255, 255, 255, 250), new Vector2 (140, 30), new Color32(0, 0, 0, 200));
+        levelText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(new Color32(255, 255, 255, 250));
         levelText.transform.Translate(new Vector3(0, 0.2f, 0));
         levelText.name = "Level";
 
@@ -174,32 +175,30 @@ public class TitleScreen : MonoBehaviour
         screen.name = "Help Screen";
         screen.transform.Translate(new Vector3(50, 0, 0));
         var canvas = screen.GetComponent<Canvas>();
+        canvas.transform.Translate(new Vector3(0, 1, 0));
 
         // Title text
-        var titleText = AddTextMeshPro(screen, "HELP", TextAnchor.MiddleCenter, new Color32(250, 189, 135, 255), new Vector2 (700, 50), new Color32(247, 255, 0, 255));
+        var titleText = AddTitleText(screen, "HELP");
         titleText.name = "Title";
         titleText.transform.Translate(new Vector3(0, 7, 0));
 
         // Info Text
-        var infoColor = new Color32(12, 46, 18, 100);
-        var outlineColor = new Color32(247, 255, 0, 255);
-
-        var turnText = AddTextMeshPro(screen, "< > - player controls", TextAnchor.MiddleCenter, infoColor, new Vector2 (700, 50), outlineColor);
+        var turnText = AddInfoText(screen, "< > - player controls");
         turnText.name = "Turn Text";
         turnText.transform.Translate(new Vector3(0, 4, 0));
 
-        var viewText = AddTextMeshPro(screen, "v - toggle view", TextAnchor.MiddleCenter, infoColor, new Vector2 (700, 50), outlineColor);
+        var viewText = AddInfoText(screen, "v - toggle view");
         viewText.name = "View Text";
         viewText.transform.Translate(new Vector3(0, 1, 0));
 
-        var pauseText = AddTextMeshPro(screen, "p - pause", TextAnchor.MiddleCenter, infoColor, new Vector2 (700, 50), outlineColor);
+        var pauseText = AddInfoText(screen, "p - pause");
         pauseText.name = "Pause Text";
         pauseText.transform.Translate(new Vector3(0, -2, 0));
 
         // Back Button
         var helpButton = AddButton(canvas, "BACK", 100);
         helpButton.name = "Back Button";
-        helpButton.transform.Translate(new Vector3(0, -5, 0));
+        helpButton.transform.Translate(new Vector3(0, -5.5f, 0));
         helpButton.GetComponent<Button>().onClick.AddListener(BackButtonOnClick);
     }
 
@@ -267,14 +266,37 @@ public class TitleScreen : MonoBehaviour
         InitScreenMode(ScreenMode.MAIN_MENU);
     }
 
-    public GameObject AddTextMeshPro(GameObject parent, string textContent, TextAnchor alignment, Color32 color, Vector2 size, Color32 outlineColor) {
+    private GameObject AddTitleText(GameObject parent, string textContent) 
+    {
+        var titleColor = new Color32(12, 46, 18, 200);
+        var outlineColor = new Color32(255, 255, 255, 250);
+        var size = new Vector2 (700, 50);
+
+        var titleText = AddTextMeshPro(parent, textContent, titleColor, size, outlineColor);
+        titleText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(titleColor);
+
+        return titleText;
+    }
+
+    private GameObject AddInfoText(GameObject parent, string textContent) 
+    {
+        var infoColor = new Color32(12, 46, 18, 100);
+        var outlineColor = new Color32(247, 255, 0, 255);
+        var size = new Vector2 (700, 50);
+
+        var infoText = AddTextMeshPro(parent, textContent, infoColor, size, outlineColor);
+        infoText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(infoColor);
+
+        return infoText;
+    }
+
+    public GameObject AddTextMeshPro(GameObject parent, string textContent, Color32 color, Vector2 size, Color32 outlineColor) {
         var txtMesh = new GameObject();
         txtMesh.transform.SetParent(parent.transform, false);
         txtMesh.layer = 5; // UI
 
         var tm = txtMesh.AddComponent<TextMeshProUGUI>();
         tm.text = textContent;
-
 
         var rectTransform = tm.GetComponent<RectTransform>();
         rectTransform.sizeDelta = size;
@@ -306,7 +328,7 @@ public class TitleScreen : MonoBehaviour
 
         // Setup button colors
         var btnColorBlock = ColorBlock.defaultColorBlock;
-        btnColorBlock.normalColor = ConvertColor(49, 77, 121);
+        btnColorBlock.normalColor = ConvertColor(0, 100, 0);
         btnColorBlock.highlightedColor = ConvertColor(0, 150, 0);
         btnColorBlock.pressedColor = ConvertColor(0, 100, 0);
         button.GetComponent<Button>().colors = btnColorBlock;
@@ -316,7 +338,10 @@ public class TitleScreen : MonoBehaviour
         txt.text = "";
 
         // Add TextMesh
-        var txtMesh = AddTextMeshPro(button, textContent, TextAnchor.MiddleCenter, new Color32(32, 255, 0, 100), new Vector2 (70, 30), new Color32(255, 255, 255, 255));
+        var textColor = new Color32(255, 255, 255, 250);
+        var outlineColor = new Color32(0, 0, 0, 200);
+        var txtMesh = AddTextMeshPro(button, textContent, textColor, new Vector2 (70, 30), outlineColor);
+        txtMesh.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(textColor);
         txtMesh.name = "TextMeshPro";
 
         return button;

@@ -25,7 +25,6 @@ _A 'snake' like game with a twist._
 * Start each level with more body parts
 * Mystery (Rainbow) cubes cause unexpected changes (eg. change turning behaviour, shrink, grow, etc.)
 * Instructions Screen - describing how the game works
-* Title Screen - improve layout & UI. Include an animated Crawly, pictures of levels, etc.
 * Difficulty Setting - Easy/Medium/Hard - increase difficulty by having more frequent red cubes, less green cubes, etc..
 * Improve look by using custom shaders.
 * Ramps for multi-tier arenas

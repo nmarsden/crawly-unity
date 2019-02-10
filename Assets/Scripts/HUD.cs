@@ -41,7 +41,7 @@ public class HUD : MonoBehaviour
         canvas.worldCamera = Camera.main;
         canvas.planeDistance = 5;
 
-        var levelTextColor = new Color32(255, 255, 255, 200);
+        var levelTextColor = new Color32(255, 255, 255, 250);
         var levelOutlineColor = new Color32(0, 0, 0, 200);
 
         var textColor = new Color32(250, 189, 135, 255);
@@ -53,7 +53,6 @@ public class HUD : MonoBehaviour
         // Level Number text
         levelNumText = AddTextMeshPro(gameObject, "Level " + currentLevelNum, TextAnchor.MiddleCenter, levelTextColor, textSize, levelOutlineColor);
         levelNumText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(levelTextColor);
-
         levelNumText.name = "Level Number";
         levelNumText.transform.Translate(new Vector3(37, 25, 0));
 
@@ -186,7 +185,7 @@ public class HUD : MonoBehaviour
 
         // Setup button colors
         var btnColorBlock = ColorBlock.defaultColorBlock;
-        btnColorBlock.normalColor = ConvertColor(49, 77, 121);
+        btnColorBlock.normalColor = ConvertColor(0, 100, 0);
         btnColorBlock.highlightedColor = ConvertColor(0, 150, 0);
         btnColorBlock.pressedColor = ConvertColor(0, 100, 0);
         button.GetComponent<Button>().colors = btnColorBlock;
@@ -196,7 +195,10 @@ public class HUD : MonoBehaviour
         txt.text = "";
 
         // Add TextMesh
-        var txtMesh = AddTextMeshPro(button, textContent, TextAnchor.MiddleCenter, new Color32(32, 255, 0, 100), new Vector2 (70, 50), new Color32(255, 255, 255, 255));
+        var textColor = new Color32(255, 255, 255, 250);
+        var outlineColor = new Color32(0, 0, 0, 200);
+        var txtMesh = AddTextMeshPro(button, textContent, TextAnchor.MiddleCenter, textColor, new Vector2 (70, 50), outlineColor);
+        txtMesh.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(textColor);
         txtMesh.name = "TextMeshPro";
 
         return button;
