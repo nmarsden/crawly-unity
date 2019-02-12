@@ -108,7 +108,7 @@ public class TitleScreen : MonoBehaviour
         Camera.main.orthographic = false;
         Camera.main.fieldOfView = 55;
 
-        cameraMount.transform.position = new Vector3(0, 1.5f, -15);
+        cameraMount.transform.position = new Vector3(1, 1, -16);
         cameraMount.transform.rotation = Quaternion.Euler(0, -18, 0);
     }
 
@@ -166,6 +166,12 @@ public class TitleScreen : MonoBehaviour
         helpButton.name = "Help Button";
         helpButton.transform.Translate(new Vector3(0, -4, 0));
         helpButton.GetComponent<Button>().onClick.AddListener(HelpButtonOnClick);
+
+        // Demo Button
+        var demoButton = AddButton(canvas, "DEMO", 130);
+        demoButton.name = "Demo Button";
+        demoButton.transform.Translate(new Vector3(0, -6, 0));
+        demoButton.GetComponent<Button>().onClick.AddListener(DemoButtonOnClick);
 
         // Main Menu Player
         var player = new GameObject();
@@ -264,6 +270,11 @@ public class TitleScreen : MonoBehaviour
     void HelpButtonOnClick() {
         main.HandleButtonPressedFX();
         InitScreenMode(ScreenMode.HELP);
+    }
+
+    void DemoButtonOnClick() {
+        main.HandleButtonPressedFX();
+        main.HandleDemoButtonPressed();
     }
 
     void BackButtonOnClick() {

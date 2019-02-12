@@ -20,6 +20,13 @@ public class CellTrigger : MonoBehaviour
         triggerTime = 0;
     }
 
+    void OnTriggerEnter(Collider collider) {
+        if (collider.gameObject.name == "Head" && !cell.IsWall()) 
+        {
+            cell.TriggerEnter();
+        }
+    }
+
     void OnTriggerStay(Collider collider) {
 
         if (collider.gameObject.name == "Head" || collider.gameObject.name.StartsWith("Tail")) {

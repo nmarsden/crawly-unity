@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
+    public enum PlayMode { STANDARD, DEMO };
+
     const float GRID_SPACING = 7f;
     const float PLAYER_HEIGHT = 5f;
     const float PLAYER_WIDTH = 5f;
@@ -25,6 +27,7 @@ public class Main : MonoBehaviour
     bool isGameOver;
     bool isGameCompleted;
     bool isOkClicked;
+    bool isDemoMode;
 
     int numberOfLevels;
     int currentLevelNum;
@@ -102,9 +105,9 @@ public class Main : MonoBehaviour
         titleScreen.GetComponent<TitleScreen>().Hide();
     }
 
-    void ShowHUD()
+    void ShowHUD(PlayMode playMode)
     {
-        hud.GetComponent<HUD>().Show(currentLevelNum);
+        hud.GetComponent<HUD>().Show(currentLevelNum, playMode);
     }
 
     void HideHUD()
@@ -112,7 +115,7 @@ public class Main : MonoBehaviour
         hud.GetComponent<HUD>().Hide();
     }
 
-    void StartLevel(int selectedLevelNumber)
+    void StartLevel(int selectedLevelNumber, PlayMode playMode)
     {
         currentLevelNum = selectedLevelNumber;
         Time.timeScale = 1;
@@ -121,6 +124,7 @@ public class Main : MonoBehaviour
         isPaused = false;
         isOkClicked = false; 
         isShowDeathSequence = false;
+        isDemoMode = playMode.Equals(PlayMode.DEMO);
 
         // Deactivate camera Fly Around mode (if active)
         cameraController.DeactivateFlyAroundMode();
@@ -142,6 +146,9 @@ public class Main : MonoBehaviour
         player.name = "Player";
         player.AddComponent<Player>();
         player.GetComponent<Player>().Init(this);
+        if (isDemoMode) {
+            player.GetComponent<Player>().ToggleAutopilotMode();
+        }
 
         // -- Pickups --
         pickups = new GameObject();
@@ -150,7 +157,7 @@ public class Main : MonoBehaviour
         pickups.GetComponent<Pickups>().Init(this);
 
         // -- Show HUD --
-        ShowHUD();
+        ShowHUD(playMode);
     }
 
     void Update()
@@ -226,7 +233,11 @@ public class Main : MonoBehaviour
     
     void Reset() {
         DestroyAllCreatedObjects();
-        StartLevel(currentLevelNum);
+        StartLevel(currentLevelNum, PlayMode.STANDARD);
+    }
+
+    void ToggleAutopilotMode() {
+        player.GetComponent<Player>().ToggleAutopilotMode();
     }
 
     void DestroyAllCreatedObjects() 
@@ -261,6 +272,10 @@ public class Main : MonoBehaviour
 
         // Hide Paused message
         hud.GetComponent<HUD>().HidePausedMessage();
+    }
+
+    void StartDemoMode() {
+        StartLevel(1, PlayMode.DEMO);
     }
 
     public float GetArenaWidth() 
@@ -311,12 +326,27 @@ public class Main : MonoBehaviour
     public void HandleHeadCreated(GameObject head) 
     {
         cameraController.Init(head);
+        if (isDemoMode) {
+            cameraController.ActivateFlyAroundMode();
+        }
+    }
+
+    public void HandleHeadEnteredCell(Vector3 position)
+    {
+        var arenaPosition = arena.GetComponent<Arena>().ToArenaPosition(position);
+        player.GetComponent<Player>().HeadEnteredCell(arenaPosition.row, arenaPosition.col);
     }
 
     public void HandlePlayButtonPressed(int selectedLevelNumber) {
         HideTitleScreen();
 
-        StartLevel(selectedLevelNumber);
+        StartLevel(selectedLevelNumber, PlayMode.STANDARD);
+    }
+
+    public void HandleDemoButtonPressed() {
+        HideTitleScreen();
+
+        StartDemoMode();
     }
 
     public void HandleHudOkButtonClicked() {

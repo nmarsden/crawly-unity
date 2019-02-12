@@ -270,7 +270,7 @@ public class Arena : MonoBehaviour
         return positions.ConvertAll(ToArenaPosition);
     }
 
-    ArenaPosition ToArenaPosition(Vector3 position) {
+    public ArenaPosition ToArenaPosition(Vector3 position) {
         var row = Mathf.RoundToInt((position.x + (arenaWidth/2) - (gridSpacing/2)) / gridSpacing);
         var col = Mathf.RoundToInt((position.z + (arenaWidth/2) - (gridSpacing/2)) / gridSpacing);
         return new ArenaPosition(row, col);

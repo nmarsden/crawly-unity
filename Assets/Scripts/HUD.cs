@@ -11,6 +11,7 @@ public class HUD : MonoBehaviour
     GameObject menuButtonPrefab;
     GameObject levelNumText;    
     GameObject overlay;
+    GameObject demoText;
     GameObject gameCompletedText;
     GameObject gameOverText;
     GameObject pausedText;
@@ -48,7 +49,13 @@ public class HUD : MonoBehaviour
         var outlineColor = new Color32(247, 255, 0, 255);
 
         var textSize = new Vector2 (160, 50);
+        var mediumTextSize = new Vector2 (236, 80);
         var largeTextSize = new Vector2 (360, 90);
+
+        // Title text
+        var titleText = AddTextMeshPro(gameObject, "CRAWLY", TextAnchor.MiddleCenter, textColor, mediumTextSize, outlineColor);
+        titleText.name = "Title";
+        titleText.transform.Translate(new Vector3(0, 25.5f, 0));
 
         // Level Number text
         levelNumText = AddTextMeshPro(gameObject, "Level " + currentLevelNum, TextAnchor.MiddleCenter, levelTextColor, textSize, levelOutlineColor);
@@ -59,11 +66,16 @@ public class HUD : MonoBehaviour
         // Overlay
         overlay = AddOverlay();
 
+        // Demo text
+        demoText = AddTextMeshPro(gameObject, "DEMO", TextAnchor.MiddleCenter, levelTextColor, textSize, levelOutlineColor);
+        demoText.GetComponent<TextMeshProUGUI>().colorGradient = new VertexGradient(levelTextColor);
+        demoText.name = "Demo";
+        demoText.transform.Translate(new Vector3(-37.5f, -25, 0));
+
         // Game Completed text
         gameCompletedText = AddTextMeshPro(gameObject, "COMPLETE", TextAnchor.MiddleCenter, textColor, largeTextSize, outlineColor);
         gameCompletedText.name = "Game Completed";
         gameCompletedText.transform.Translate(new Vector3(0, 6, 0));
-        gameCompletedText.SetActive(false);
 
         // Game Over text
         gameOverText = AddTextMeshPro(gameObject, "GAME OVER", TextAnchor.MiddleCenter, textColor, largeTextSize, outlineColor);
@@ -90,10 +102,12 @@ public class HUD : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void Show(int selectedLevelNumber) {
+    public void Show(int selectedLevelNumber, Main.PlayMode playMode) {
         UpdateSelectedLevel(selectedLevelNumber);
         UpdateShieldStatusValue(0);
         UpdateFilledStatusBarWidth();                   
+
+        demoText.SetActive(playMode.Equals(Main.PlayMode.DEMO));
 
         overlay.SetActive(false);
         gameOverText.SetActive(false);

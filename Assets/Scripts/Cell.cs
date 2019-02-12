@@ -70,6 +70,10 @@ public class Cell : MonoBehaviour
         }
     }
 
+    public void TriggerEnter() {
+        main.HandleHeadEnteredCell(gameObject.transform.position);
+    }
+
     public void Activate() {
         activatedTime = Time.time;
 

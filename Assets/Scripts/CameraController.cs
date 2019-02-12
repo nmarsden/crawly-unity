@@ -98,7 +98,7 @@ public class CameraController : MonoBehaviour
         cameraMode = CameraMode.ORTHO;
         Camera.main.orthographic = true;
         Camera.main.orthographicSize = 22;
-        Camera.main.transform.position = new Vector3(55.6f, 45.5f, -56.5f);
+        Camera.main.transform.position = new Vector3(56.2f, 45.5f, -56.5f);
         Camera.main.transform.rotation = Quaternion.Euler(30, -45, 0);
     }
 

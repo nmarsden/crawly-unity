@@ -4,8 +4,20 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    // Auto turn commands which work for levels 1-4 only
+    string[] autoTurnCommands = 
+        new string[] {
+            "L LLL",
+            "LR   ",
+            "LR   ",
+            "LRRR ",
+            " L  L",
+        };
+
+    TurnCommand autoTurnCommand = TurnCommand.None;
 
     public enum TurnCommand {Right, Left, None};
+
     public enum HittableStatus {HITTABLE, UNHITTABLE};
 
     TurnCommand turnCommand;
@@ -50,6 +62,7 @@ public class Player : MonoBehaviour
     float shieldStartTime;
     float shieldDuration = 5;
     Vector3 startingDirection = Vector3.left;
+    bool isAutoPilotMode = false;
 
     public void Init(Main main) {
         this.main = main;
@@ -240,10 +253,16 @@ public class Player : MonoBehaviour
     }
     void Update() {
         if (!turning && turnCommand == TurnCommand.None) {
-            float horizontal = Input.GetAxisRaw("Horizontal");
 
-            if (horizontal != 0) {
-                turnCommand = (horizontal == 1) ? TurnCommand.Right : TurnCommand.Left;
+            if (isAutoPilotMode) {
+                // Set turn command from calculated auto turn command
+                turnCommand = autoTurnCommand;
+            } else {
+                float horizontal = Input.GetAxisRaw("Horizontal");
+
+                if (horizontal != 0) {
+                    turnCommand = (horizontal == 1) ? TurnCommand.Right : TurnCommand.Left;
+                }
             }
         }
     }
@@ -345,7 +364,7 @@ public class Player : MonoBehaviour
         } else {
             // Prevent turning again for a short time
             float timePassed = (Time.time - turningStartTime);
-            if (timePassed > 0.1) {
+            if (timePassed > 0.2) {
                 turning = false;
             }
         }
@@ -360,6 +379,10 @@ public class Player : MonoBehaviour
             Grow();
         }
 
+    }
+
+    public void ToggleAutopilotMode() {
+        isAutoPilotMode = !isAutoPilotMode;
     }
 
     public void Grow() {
@@ -426,6 +449,30 @@ public class Player : MonoBehaviour
         while(tail != null) {
             tail.Kill();
             tail = tail.GetLeader().GetComponent<Tail>();
+        }
+    }
+
+    public void HeadEnteredCell(int row, int col) {
+        if (isAutoPilotMode) {
+
+            // TODO Implement a 'Smarter' way to calculate the autoTurnCommand
+            // Perhaps use AStar Algorithm or the longest path algorithm (also refer to hamiltonian circuit solver)
+            // - avoid wall
+            // - avoid self
+            // - avoid red cube
+            // - attracted to green cube
+            // - attracted to blue cube
+            // - attracted to non-activated tile
+
+            // Set the autoTurnCommand using hard coded turn commands (works for levels 1-4 only)
+            var turnChar = autoTurnCommands[row][col];
+            if (turnChar.Equals('L')) {
+                autoTurnCommand = TurnCommand.Left;
+            } else if (turnChar.Equals('R')) {
+                autoTurnCommand = TurnCommand.Right;
+            } else if (turnChar.Equals(' ')) {
+                autoTurnCommand = TurnCommand.None;
+            }
         }
     }
 
