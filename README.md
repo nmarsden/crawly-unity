@@ -5,8 +5,8 @@ _A 'snake' like game with a twist._
 ## Instructions
 
 * Collect Green cubes to grow.
-* Collect Blue cubes to active your shields.
-* Avoid collecting Red cubes which cause you to shrink unless your shields are active.
+* Collect Blue tall & thin cuboid to active your shields.
+* Avoid collecting Red short & wide cuboid which cause you to shrink unless your shields are active.
 * Avoid bumping into walls and yourself.
 * Complete a level by making all the floor tiles green.
 * A white floor tile becomes green and remains green for a few seconds once touched.
@@ -28,3 +28,7 @@ _A 'snake' like game with a twist._
 * Difficulty Setting - Easy/Medium/Hard - increase difficulty by having more frequent red cubes, less green cubes, etc..
 * Improve look by using custom shaders.
 * Ramps for multi-tier arenas
+* Camera shake when shrinking & exploding
+* Particle effect when picking up
+* Trail when pickups falling
+* Fix UI appearing behind player in FPV, by using a seperate camera for UI with a higher depth value (See: https://www.youtube.com/watch?v=l8k88iZWcB8)

@@ -8,19 +8,21 @@ public class Pickup : MonoBehaviour
 
     static IDictionary<PickupType, PickupProperties> pickupTypeToProperties = new Dictionary<PickupType, PickupProperties>
     {
-        { PickupType.FOOD,   new PickupProperties(new Color32(18, 140,  30, 255), 0.3f) }, // dark green
-        { PickupType.SHIELD, new PickupProperties(new Color32(0,   35, 102, 255),    5) }, // dark blue
-        { PickupType.POISON, new PickupProperties(new Color32(140, 18,  30, 255),    7) }, // dark red
+        { PickupType.SHIELD, new PickupProperties(new Color32(0,   35, 102, 255),    5, new Vector3(1.5f,    4, 1.5f)) }, // dark blue
+        { PickupType.FOOD,   new PickupProperties(new Color32(18, 140,  30, 255), 0.3f, new Vector3(2.5f, 2.5f, 2.5f)) }, // dark green
+        { PickupType.POISON, new PickupProperties(new Color32(140, 18,  30, 255),    7, new Vector3(   4, 1.5f,    4)) }, // dark red
     };
 
     public class PickupProperties 
     {
         public Color32 color;
         public float inactiveDuration;
+        public Vector3 scale;
 
-        public PickupProperties(Color32 color, float inactiveDuration) {
+        public PickupProperties(Color32 color, float inactiveDuration, Vector3 scale) {
             this.color = color;
             this.inactiveDuration = inactiveDuration;
+            this.scale = scale;
         }
     }
 
@@ -47,7 +49,7 @@ public class Pickup : MonoBehaviour
 
     Main main;
     PickupType pickupType;
-    Color32 color;
+    PickupProperties pickupProperties;
 
     float gridSpacing;
     float groundYPos;
@@ -58,7 +60,6 @@ public class Pickup : MonoBehaviour
     float activeStartTime;
     bool isActive;
 
-    float inactiveDuration;
     float inactiveStartTime;
 
     bool isWaitToAppear;
@@ -70,28 +71,26 @@ public class Pickup : MonoBehaviour
     {
         this.main = main;
         this.pickupType = pickupType;
-        var pickupProperties = Pickup.pickupTypeToProperties[pickupType];
-        color = pickupProperties.color;
-        inactiveDuration = pickupProperties.inactiveDuration;
+        this.pickupProperties = Pickup.pickupTypeToProperties[pickupType];
         gridSpacing = main.GetGridSpacing();
-        groundYPos = 1 - main.GetPlayerHeight()/2; 
+        groundYPos = (pickupProperties.scale.y/2) - main.GetPlayerHeight()/2; 
     }
 
     void Start()
     {
         var material = new Material(Shader.Find("Standard"));
-        material.color = color;
+        material.color = pickupProperties.color;
 
         // Give pickup material an edge emission texture
         var emissionTexture =  Resources.Load<Texture>("Image/Edge_Emission");
         material.EnableKeyword("_EMISSION");
-        material.SetColor("_EmissionColor", color);
+        material.SetColor("_EmissionColor", pickupProperties.color);
         material.SetTexture("_EmissionMap", emissionTexture);
 
         pickup = GameObject.CreatePrimitive(PrimitiveType.Cube);
         pickup.name = "Pickup";
         pickup.transform.parent = transform;    
-        pickup.transform.localScale = new Vector3(2, 2, 2);      
+        pickup.transform.localScale = pickupProperties.scale;
         pickup.GetComponent<Renderer>().material = material;
         pickup.GetComponent<Collider>().isTrigger = true;
         pickup.AddComponent<PickupTrigger>();
@@ -147,7 +146,7 @@ public class Pickup : MonoBehaviour
                     }
                 }
             } else {
-                if (Time.time - inactiveStartTime > inactiveDuration) {
+                if (Time.time - inactiveStartTime > pickupProperties.inactiveDuration) {
                     Appear();
                 }
             }
