@@ -12,8 +12,14 @@ public class CameraController : MonoBehaviour
 
     GameObject target;
     Vector3 targetOffset;
+    Transform moveTransform;
     CameraMode cameraMode = CameraMode.ORTHO;
     CameraMode cameraModePreFlyAround;
+    bool isShaking;
+    float shakeStartTime;
+    float shakeDuration;
+    float shakeMagnitude = 0.2f;
+
 
     public void Awake() {
         cameraModeToAction = new Dictionary<CameraMode, Action>
@@ -33,6 +39,7 @@ public class CameraController : MonoBehaviour
     }
     public void Init(GameObject target) {
         this.target = target;
+        moveTransform = transform;
         InitCameraMode(cameraMode);
     }
 
@@ -90,6 +97,12 @@ public class CameraController : MonoBehaviour
         InitCameraMode(cameraModePreFlyAround);
     }
 
+    public void Shake(float shakeDuration) {
+        this.shakeDuration = shakeDuration;
+        shakeStartTime = Time.time;
+        isShaking = true;
+    }
+
     void InitCameraMode(CameraMode cameraMode) {
         cameraModeToAction[cameraMode]();
     }
@@ -98,8 +111,8 @@ public class CameraController : MonoBehaviour
         cameraMode = CameraMode.ORTHO;
         Camera.main.orthographic = true;
         Camera.main.orthographicSize = 22;
-        Camera.main.transform.position = new Vector3(56.2f, 45.5f, -56.5f);
-        Camera.main.transform.rotation = Quaternion.Euler(30, -45, 0);
+        moveTransform.position = new Vector3(56.2f, 45.5f, -56.5f);
+        moveTransform.rotation = Quaternion.Euler(30, -45, 0);
     }
 
     void InitOrthographicFollowCameraMode() {
@@ -111,17 +124,17 @@ public class CameraController : MonoBehaviour
         var viewAngle = Quaternion.Euler(30, -45, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
-        Camera.main.transform.position = target.transform.position - (viewDirection * cameraDistance);
-        Camera.main.transform.rotation = viewAngle;
-        targetOffset = Camera.main.transform.position - target.transform.position;
+        moveTransform.position = target.transform.position - (viewDirection * cameraDistance);
+        moveTransform.rotation = viewAngle;
+        targetOffset = moveTransform.position - target.transform.position;
     }
 
     void InitSideCameraMode() {
         cameraMode = CameraMode.SIDE;
         Camera.main.orthographic = false;
         Camera.main.fieldOfView = 40;
-        Camera.main.transform.position = new Vector3(50.6f, 45.5f, 0);
-        Camera.main.transform.rotation = Quaternion.Euler(45, -90, 0);
+        moveTransform.position = new Vector3(50.6f, 45.5f, 0);
+        moveTransform.rotation = Quaternion.Euler(45, -90, 0);
     }
 
     void InitSideFollowCameraMode() {
@@ -133,9 +146,9 @@ public class CameraController : MonoBehaviour
         var viewAngle = Quaternion.Euler(45, -90, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
-        Camera.main.transform.position = target.transform.position - (viewDirection * cameraDistance);
-        Camera.main.transform.rotation = viewAngle;
-        targetOffset = Camera.main.transform.position - target.transform.position;
+        moveTransform.position = target.transform.position - (viewDirection * cameraDistance);
+        moveTransform.rotation = viewAngle;
+        targetOffset = moveTransform.position - target.transform.position;
     }
 
     void InitSideFollowTurnCameraMode() {
@@ -148,8 +161,8 @@ public class CameraController : MonoBehaviour
         cameraMode = CameraMode.TOP;
         Camera.main.orthographic = false;
         Camera.main.fieldOfView = 50;
-        Camera.main.transform.position = new Vector3(0, 50, 0);
-        Camera.main.transform.rotation = Quaternion.Euler(90, -90, 0);
+        moveTransform.position = new Vector3(0, 50, 0);
+        moveTransform.rotation = Quaternion.Euler(90, -90, 0);
     }
 
     void InitTopFollowCameraMode() {
@@ -161,9 +174,9 @@ public class CameraController : MonoBehaviour
         var viewAngle = Quaternion.Euler(90, -90, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
-        Camera.main.transform.position = target.transform.position - (viewDirection * cameraDistance);
-        Camera.main.transform.rotation = viewAngle;
-        targetOffset = Camera.main.transform.position - target.transform.position;
+        moveTransform.position = target.transform.position - (viewDirection * cameraDistance);
+        moveTransform.rotation = viewAngle;
+        targetOffset = moveTransform.position - target.transform.position;
     }
 
     void InitTopFollowTurnCameraMode() {
@@ -176,9 +189,9 @@ public class CameraController : MonoBehaviour
         var viewAngle = Quaternion.Euler(90, targetYRotationAngle, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
-        Camera.main.transform.position = target.transform.position - (viewDirection * cameraDistance);
-        Camera.main.transform.rotation = viewAngle;
-        targetOffset = Camera.main.transform.position - target.transform.position;
+        moveTransform.position = target.transform.position - (viewDirection * cameraDistance);
+        moveTransform.rotation = viewAngle;
+        targetOffset = moveTransform.position - target.transform.position;
     }
 
     void InitFirstPersonCameraMode() {
@@ -196,9 +209,9 @@ public class CameraController : MonoBehaviour
         var viewAngle = Quaternion.Euler(45, -90, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
-        Camera.main.transform.position = target.transform.position - (viewDirection * cameraDistance);
-        Camera.main.transform.rotation = viewAngle;
-        targetOffset = Camera.main.transform.position - target.transform.position;
+        moveTransform.position = target.transform.position - (viewDirection * cameraDistance);
+        moveTransform.rotation = viewAngle;
+        targetOffset = moveTransform.position - target.transform.position;
     }
 
     void LateUpdate()
@@ -209,7 +222,7 @@ public class CameraController : MonoBehaviour
                 var t = 2f * Time.deltaTime;
 
                 var desiredPosition = target.transform.position + targetOffset;
-                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+                moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
             } 
             else if (cameraMode.Equals(CameraMode.TOP_FOLLOW_TURN)) 
             {
@@ -217,10 +230,10 @@ public class CameraController : MonoBehaviour
                 var t = 2f * Time.deltaTime;
 
                 var desiredPosition = target.transform.position + targetOffset;
-                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+                moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
 
                 var desiredRotation = Quaternion.Euler(90, target.transform.rotation.eulerAngles.y, 0);
-                transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
+                moveTransform.rotation = Quaternion.Lerp(moveTransform.rotation, desiredRotation, t);
             } 
             else if (cameraMode.Equals(CameraMode.SIDE_FOLLOW_TURN)) 
             {
@@ -229,10 +242,10 @@ public class CameraController : MonoBehaviour
                 var t = 2f * Time.deltaTime;
 
                 var desiredPosition = target.transform.position + (-40f * direction) + new Vector3(0, 60f, 0);
-                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+                moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
 
                 var desiredRotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
-                transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
+                moveTransform.rotation = Quaternion.Lerp(moveTransform.rotation, desiredRotation, t);
             }
             else if (cameraMode.Equals(CameraMode.FPV)) {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
@@ -240,26 +253,42 @@ public class CameraController : MonoBehaviour
                 var t = 2f * Time.deltaTime;
 
                 var desiredPosition = target.transform.position + (-5 * direction) + new Vector3(0, 7, 0);
-                transform.position = Vector3.Lerp(transform.position, desiredPosition, t);
+                moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
 
                 var desiredRotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
-                transform.rotation = Quaternion.Lerp(transform.rotation, desiredRotation, t);
+                moveTransform.rotation = Quaternion.Lerp(moveTransform.rotation, desiredRotation, t);
             }
             else if (cameraMode.Equals(CameraMode.FLY_AROUND)) {
                 // Update camera position/rotation according to target offset
                 var desiredPosition = target.transform.position + targetOffset;
-                transform.position = desiredPosition;
+                moveTransform.position = desiredPosition;
 
-                var heading = target.transform.position - transform.position;
+                var heading = target.transform.position - moveTransform.position;
                 var distance = heading.magnitude;
                 var direction = heading / distance;
 
                 var desiredRotation = Quaternion.LookRotation(direction, Vector3.up);
-                transform.rotation = desiredRotation;
+                moveTransform.rotation = desiredRotation;
 
                 // Update targetOffset by rotating 0.3 degrees around the target position
-                var rotatedPoint = RotatePointAroundPivot(transform.position, target.transform.position, new Vector3(0, 0.3f, 0));
+                var rotatedPoint = RotatePointAroundPivot(moveTransform.position, target.transform.position, new Vector3(0, 0.3f, 0));
                 targetOffset = rotatedPoint - target.transform.position;
+            }
+
+            // Update camera position/rotation
+            Camera.main.transform.position = moveTransform.position;
+            Camera.main.transform.rotation = moveTransform.rotation;
+
+            // Shake camera
+            if (isShaking) {
+                if (Time.time - shakeStartTime > shakeDuration) {
+                    isShaking = false;
+                } else {
+                    float offsetX = Random.Range(-1f, 1f) * shakeMagnitude;
+                    float offsetY = Random.Range(-1f, 1f) * shakeMagnitude;
+                    float offsetZ = Random.Range(-1f, 1f) * shakeMagnitude;
+                    Camera.main.transform.Rotate(offsetX, offsetY, offsetZ);
+                }
             }
         }
     }

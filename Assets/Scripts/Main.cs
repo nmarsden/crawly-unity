@@ -378,6 +378,8 @@ public class Main : MonoBehaviour
                 audioController.PlayPickUpPoisonFX();
                 // Shrink player
                 player.GetComponent<Player>().Shrink();
+                // Shake camera
+                cameraController.Shake(1);
             }
         }
         else if (pickup.isShield()) 
@@ -462,6 +464,8 @@ public class Main : MonoBehaviour
 
         // Active camera Fly Around mode
         cameraController.ActivateFlyAroundMode();
+        // Shake camera
+        cameraController.Shake(1);
     }
 
     public List<Vector3> GetEmptyPositions() {

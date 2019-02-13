@@ -28,7 +28,6 @@ _A 'snake' like game with a twist._
 * Difficulty Setting - Easy/Medium/Hard - increase difficulty by having more frequent red cubes, less green cubes, etc..
 * Improve look by using custom shaders.
 * Ramps for multi-tier arenas
-* Camera shake when shrinking & exploding
 * Particle effect when picking up
 * Trail when pickups falling
 * Fix UI appearing behind player in FPV, by using a seperate camera for UI with a higher depth value (See: https://www.youtube.com/watch?v=l8k88iZWcB8)
