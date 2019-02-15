@@ -39,7 +39,7 @@ public class CameraController : MonoBehaviour
     }
     public void Init(GameObject target) {
         this.target = target;
-        moveTransform = transform;
+        moveTransform = new GameObject().transform;
         InitCameraMode(cameraMode);
     }
 

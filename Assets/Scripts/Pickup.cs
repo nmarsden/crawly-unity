@@ -8,9 +8,9 @@ public class Pickup : MonoBehaviour
 
     static IDictionary<PickupType, PickupProperties> pickupTypeToProperties = new Dictionary<PickupType, PickupProperties>
     {
-        { PickupType.SHIELD, new PickupProperties(new Color32(0,   35, 102, 255),    5, new Vector3(1.5f,    4, 1.5f)) }, // dark blue
-        { PickupType.FOOD,   new PickupProperties(new Color32(18, 140,  30, 255), 0.3f, new Vector3(2.5f, 2.5f, 2.5f)) }, // dark green
-        { PickupType.POISON, new PickupProperties(new Color32(140, 18,  30, 255),    7, new Vector3(   4, 1.5f,    4)) }, // dark red
+        { PickupType.SHIELD, new PickupProperties(new Color32(0,   35, 102, 255),    5, new Vector3(1.5f,    4, 1.5f), 150) }, 
+        { PickupType.FOOD,   new PickupProperties(new Color32(18, 140,  30, 255), 0.3f, new Vector3(2.5f, 2.5f, 2.5f), 165) }, 
+        { PickupType.POISON, new PickupProperties(new Color32(140, 18,  30, 255),    7, new Vector3(   4, 1.5f,    4), 300) }, 
     };
 
     public class PickupProperties 
@@ -18,11 +18,13 @@ public class Pickup : MonoBehaviour
         public Color32 color;
         public float inactiveDuration;
         public Vector3 scale;
+        public float particleEmissionRate;
 
-        public PickupProperties(Color32 color, float inactiveDuration, Vector3 scale) {
+        public PickupProperties(Color32 color, float inactiveDuration, Vector3 scale, float particleEmissionRate) {
             this.color = color;
             this.inactiveDuration = inactiveDuration;
             this.scale = scale;
+            this.particleEmissionRate = particleEmissionRate;
         }
     }
 
@@ -96,6 +98,8 @@ public class Pickup : MonoBehaviour
         pickup.AddComponent<PickupTrigger>();
         pickup.GetComponent<PickupTrigger>().Init(main, this);
         pickup.AddComponent<Flash>();
+
+        AddParticleSystem(pickup, material);
 
         Hide();
     }
@@ -208,5 +212,94 @@ public class Pickup : MonoBehaviour
         activeStartTime = Time.time;
         isActive = true;
         pickup.SetActive(true);
+    }
+
+    void AddParticleSystem(GameObject pickup, Material material) {
+
+        // Add ParticleSystem
+        pickup.AddComponent<ParticleSystem>();
+        var ps = pickup.GetComponent<ParticleSystem>();
+
+        // -- ColorOverLifetimeModule --
+        var colorOverLifetime = ps.colorOverLifetime;
+
+        var colorKeys = new GradientColorKey[] {
+            new GradientColorKey(pickupProperties.color, 0),
+            new GradientColorKey(pickupProperties.color, 0.3f),
+            new GradientColorKey(Color.white, 1)
+        };
+        var alphaKeys = new GradientAlphaKey[] {
+            new GradientAlphaKey(0, 0),
+            new GradientAlphaKey(1, 0.3f),
+            new GradientAlphaKey(0, 1),
+        };
+        var gradient = new Gradient();
+        gradient.SetKeys(colorKeys, alphaKeys);
+
+        colorOverLifetime.enabled = true;
+        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
+
+        // -- MainModule --
+        var m = ps.main;
+        var c = pickupProperties.color;
+        m.startSize3D = true;
+        m.startSizeXMultiplier = 0.4f / pickupProperties.scale.x;
+        m.startSizeYMultiplier = 0.4f / pickupProperties.scale.y;
+        m.startSizeZMultiplier = 0.4f / pickupProperties.scale.z;
+        m.startLifetime = .3f;
+        m.startSpeed = 20f / pickupProperties.scale.y;
+
+        // -- TrailModule --
+        // var trails = ps.trails;
+        // trails.enabled = true;
+        // trails.dieWithParticles = true;
+        // trails.mode = ParticleSystemTrailMode.PerParticle;
+
+        // -- ParticleSystemRenderer --
+        var psr = ps.GetComponent<ParticleSystemRenderer>();
+
+        // Create cube mesh
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.GetComponent<Renderer>().material = material;
+        MeshFilter cubeMeshFilter = cube.GetComponent<MeshFilter>();
+        var cubeMesh = cubeMeshFilter.mesh;
+        GameObject.Destroy(cube);
+
+        // Get default sprite material
+        var psMaterial = new Material(Shader.Find("Sprites/Default"));;
+
+        psr.material = psMaterial; 
+        psr.trailMaterial = psMaterial;
+        psr.renderMode = ParticleSystemRenderMode.Mesh;
+        psr.mesh = cubeMesh;
+
+        // -- ShapeModule --
+        var shape = ps.shape;
+
+        // Create quad mesh shape
+        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        quad.transform.parent = pickup.transform;
+        quad.GetComponent<Renderer>().material = material;
+        MeshFilter viewedModelFilter = quad.GetComponent<MeshFilter>();
+        var quadMesh = viewedModelFilter.mesh;
+        GameObject.Destroy(quad);
+
+        shape.scale = new Vector3(1, 1, 1);
+        shape.alignToDirection = true;
+        shape.rotation = new Vector3(90, 0, 0);
+        shape.shapeType = ParticleSystemShapeType.Mesh;
+        shape.mesh = quadMesh;
+        shape.meshShapeType = ParticleSystemMeshShapeType.Triangle;
+        shape.meshSpawnMode = ParticleSystemShapeMultiModeValue.Loop;
+        shape.normalOffset = 0.3f;
+
+        // Using texture for clipping
+        shape.texture = Resources.Load<Sprite>("Image/Pickup_Particle").texture;
+        shape.textureClipChannel = ParticleSystemShapeTextureChannel.Alpha;
+
+        // -- EmissionModule --
+        var emission = ps.emission;
+        emission.rateOverDistance = 0;
+        emission.rateOverTime = pickupProperties.particleEmissionRate; 
     }
 }
