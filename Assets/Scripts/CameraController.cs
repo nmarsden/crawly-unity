@@ -6,20 +6,25 @@ public class CameraController : MonoBehaviour
 {
     enum CameraMode { ORTHO, ORTHO_FOLLOW, SIDE, SIDE_FOLLOW, SIDE_FOLLOW_TURN, TOP, TOP_FOLLOW, TOP_FOLLOW_TURN, FPV, FLY_AROUND };
 
+    public class MoveTransform
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+
     delegate void Action();
 
     IDictionary<CameraMode, Action> cameraModeToAction;
 
     GameObject target;
     Vector3 targetOffset;
-    Transform moveTransform;
+    MoveTransform moveTransform;
     CameraMode cameraMode = CameraMode.ORTHO;
     CameraMode cameraModePreFlyAround;
     bool isShaking;
     float shakeStartTime;
     float shakeDuration;
     float shakeMagnitude = 0.2f;
-
 
     public void Awake() {
         cameraModeToAction = new Dictionary<CameraMode, Action>
@@ -35,11 +40,12 @@ public class CameraController : MonoBehaviour
             { CameraMode.FPV,               InitFirstPersonCameraMode },
             { CameraMode.FLY_AROUND,        InitFlyAroundCameraMode },
         };
-
+        moveTransform = new MoveTransform();
     }
+
     public void Init(GameObject target) {
         this.target = target;
-        moveTransform = new GameObject().transform;
+
         InitCameraMode(cameraMode);
     }
 

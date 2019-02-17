@@ -22,8 +22,6 @@ public class Tail : MonoBehaviour
     float growDuration = 2f;
     float growStartTime;
 
-    bool isShrinking;
-
     Color tailColor = new Color32(0, 200, 0, 255);
     Color32 growColor = new Color32(50, 200, 200, 255); // blue-green
     Color32 shrinkColor = new Color32(140, 90, 30, 255);
@@ -83,9 +81,6 @@ public class Tail : MonoBehaviour
                 material.color = Color32.Lerp(growColor, tailColor, (Time.time - growStartTime) / growDuration);
             }
         }
-        if (isShrinking) {
-            gameObject.GetComponent<Renderer>().material.color = shrinkColor;
-        }
         if (isTurn) {
             isTurn = false;
 
@@ -142,8 +137,6 @@ public class Tail : MonoBehaviour
     }
 
     public void Shrink() {
-        isShrinking = true;
-        gameObject.AddComponent<Flash>();
-        gameObject.GetComponent<Flash>().TurnOn();
+        gameObject.AddComponent<Dissolve>();
     }
 }

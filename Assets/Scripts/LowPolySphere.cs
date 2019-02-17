@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Sources:-
+// http://wiki.unity3d.com/index.php/CreateIcoSphere
 // https://medium.com/@peter_winslow/creating-procedural-planets-in-unity-part-1-df83ecb12e91
 // http://wiki.unity3d.com/index.php/ProceduralPrimitives#C.23_-_IcoSphere
 public class LowPolySphere : MonoBehaviour
@@ -193,9 +194,20 @@ public class LowPolySphere : MonoBehaviour
             normals[i * 3 + 2] = m_Vertices[poly.m_Vertices[2]].normalized;
         }
 
+        Vector2[] UVs = new Vector2[vertices.Length];
+ 
+        for(var i= 0; i < vertices.Length; i++){
+            var unitVector = vertices[i].normalized;
+            Vector2 ICOuv = new Vector2(0, 0);
+            ICOuv.x = (Mathf.Atan2(unitVector.x, unitVector.z) + Mathf.PI) / Mathf.PI / 2;
+            ICOuv.y = (Mathf.Acos(unitVector.y) + Mathf.PI) / Mathf.PI - 1;
+            UVs[i] = new Vector2(ICOuv.x, ICOuv.y);
+        }
+
         lowPolySphereMesh.vertices = vertices;
         lowPolySphereMesh.normals  = normals;
         lowPolySphereMesh.colors32 = colors;
+        lowPolySphereMesh.uv = UVs;
 
         lowPolySphereMesh.SetTriangles(indices, 0);
     }    
