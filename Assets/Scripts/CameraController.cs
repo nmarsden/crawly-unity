@@ -8,8 +8,8 @@ public class CameraController : MonoBehaviour
 
     public class MoveTransform
     {
-        public Vector3 position;
-        public Quaternion rotation;
+        public Vector3 position = Vector3.zero;
+        public Quaternion rotation = Quaternion.Euler(0, 0, 0);
     }
 
     delegate void Action();
@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
 
     GameObject target;
     Vector3 targetOffset;
-    MoveTransform moveTransform;
+    MoveTransform moveTransform = new MoveTransform();
     CameraMode cameraMode = CameraMode.ORTHO;
     CameraMode cameraModePreFlyAround;
     bool isShaking;
@@ -40,13 +40,13 @@ public class CameraController : MonoBehaviour
             { CameraMode.FPV,               InitFirstPersonCameraMode },
             { CameraMode.FLY_AROUND,        InitFlyAroundCameraMode },
         };
-        moveTransform = new MoveTransform();
     }
 
     public void Init(GameObject target) {
         this.target = target;
 
         InitCameraMode(cameraMode);
+        InitCameraTransform();
     }
 
     public void ToggleCameraMode() {
@@ -113,6 +113,25 @@ public class CameraController : MonoBehaviour
         cameraModeToAction[cameraMode]();
     }
 
+    void InitCameraTransform() {
+        // Set the initial position/rotation of the camera relative to the moveTransform in order to force an initial camera animation
+        if (Camera.main.orthographic) {
+            // -- Orthographic View --
+            // Rotate camera 30 degrees around the X-axis from the movementTransform position
+            // Position camera closer so that the arena remains in view
+            var scaleFactor = 0.01f;
+            Camera.main.transform.position = new Vector3(moveTransform.position.x * scaleFactor, moveTransform.position.y * scaleFactor, moveTransform.position.z * scaleFactor);
+            Camera.main.transform.rotation = moveTransform.rotation;
+            Camera.main.transform.Rotate(-30, 0, 0);
+        } else {
+            // -- Perspective View --
+            // Position camera 100 back from the moveTransform position
+            Vector3 viewDirection = (moveTransform.rotation * Vector3.forward).normalized;
+            Camera.main.transform.position = moveTransform.position - (viewDirection * 100);
+            Camera.main.transform.rotation = moveTransform.rotation;
+        }
+    }
+
     void InitOrthographicCameraMode() {
         cameraMode = CameraMode.ORTHO;
         Camera.main.orthographic = true;
@@ -126,7 +145,7 @@ public class CameraController : MonoBehaviour
         Camera.main.orthographic = true;
         Camera.main.orthographicSize = 22;
 
-        var cameraDistance = 50;
+        var cameraDistance = 100;
         var viewAngle = Quaternion.Euler(30, -45, 0);
         Vector3 viewDirection = (viewAngle * Vector3.forward).normalized;
 
@@ -161,6 +180,10 @@ public class CameraController : MonoBehaviour
         cameraMode = CameraMode.SIDE_FOLLOW_TURN;
         Camera.main.orthographic = false;
         Camera.main.fieldOfView = 40;
+
+        var direction = target.transform.rotation * Vector3.forward;
+        moveTransform.position = target.transform.position + (-40f * direction) + new Vector3(0, 60f, 0);
+        moveTransform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
     }
 
     void InitTopCameraMode() {
@@ -204,6 +227,10 @@ public class CameraController : MonoBehaviour
         cameraMode = CameraMode.FPV;
         Camera.main.orthographic = false;
         Camera.main.fieldOfView = 80;
+
+        var direction = target.transform.rotation * Vector3.forward;
+        moveTransform.position = target.transform.position + (-5 * direction) + new Vector3(0, 7, 0);
+        moveTransform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(direction, Vector3.down, 1f, 0f));
     }
 
     void InitFlyAroundCameraMode() {
@@ -223,18 +250,16 @@ public class CameraController : MonoBehaviour
     void LateUpdate()
     {
         if (target != null) {
+            var t = 2f * Time.deltaTime;
+
             if (cameraMode.Equals(CameraMode.ORTHO_FOLLOW) || cameraMode.Equals(CameraMode.SIDE_FOLLOW) || cameraMode.Equals(CameraMode.TOP_FOLLOW)) 
             {
-                var t = 2f * Time.deltaTime;
-
                 var desiredPosition = target.transform.position + targetOffset;
                 moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
             } 
             else if (cameraMode.Equals(CameraMode.TOP_FOLLOW_TURN)) 
             {
                 // Camera positioned directly above the head, looking down and rotated around Y-axis the same as the head is rotated (with rotation lerping)
-                var t = 2f * Time.deltaTime;
-
                 var desiredPosition = target.transform.position + targetOffset;
                 moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
 
@@ -245,7 +270,6 @@ public class CameraController : MonoBehaviour
             {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
                 var direction = target.transform.rotation * Vector3.forward;
-                var t = 2f * Time.deltaTime;
 
                 var desiredPosition = target.transform.position + (-40f * direction) + new Vector3(0, 60f, 0);
                 moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
@@ -256,7 +280,6 @@ public class CameraController : MonoBehaviour
             else if (cameraMode.Equals(CameraMode.FPV)) {
                 // Camera positioned above & behind head, looking slightly down (with rotation lerping)
                 var direction = target.transform.rotation * Vector3.forward;
-                var t = 2f * Time.deltaTime;
 
                 var desiredPosition = target.transform.position + (-5 * direction) + new Vector3(0, 7, 0);
                 moveTransform.position = Vector3.Lerp(moveTransform.position, desiredPosition, t);
@@ -282,8 +305,9 @@ public class CameraController : MonoBehaviour
             }
 
             // Update camera position/rotation
-            Camera.main.transform.position = moveTransform.position;
-            Camera.main.transform.rotation = moveTransform.rotation;
+            var t2 = 5f * Time.deltaTime;
+            Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, moveTransform.position, t2);
+            Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, moveTransform.rotation, t2);
 
             // Shake camera
             if (isShaking) {
