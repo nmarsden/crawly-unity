@@ -117,6 +117,10 @@ public class Main : MonoBehaviour
 
     void StartLevel(int selectedLevelNumber, PlayMode playMode)
     {
+        // Disable physics
+        // Note: otherwise the cell's particle system adversely effects the player on start
+        DisablePhysics();
+
         currentLevelNum = selectedLevelNumber;
         Time.timeScale = 1;
         isGameOver = false;
@@ -158,8 +162,22 @@ public class Main : MonoBehaviour
 
         // -- Show HUD --
         ShowHUD(playMode);
+
+        // Enable physics after 0.1 seconds (Note: long enough for all objects to have started)
+        StartCoroutine(EnablePhysicsAfterSeconds(0.1f));
     }
 
+    void DisablePhysics() {
+        Physics.autoSimulation = false;
+    }
+
+    IEnumerator EnablePhysicsAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+ 
+        Physics.autoSimulation = true;
+    }
+    
     void Update()
     {
         if (!isShowTitleScreen) {

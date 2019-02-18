@@ -21,7 +21,7 @@ public class HUD : MonoBehaviour
     StatusBar shieldStatusBar;
     StatusBar filledStatusBar;
     Color32 shieldStatusColor = new Color32(0, 35, 102, 200);
-    Color32 filledStatusColor = new Color32(0, 102, 35, 200);
+    Color32 filledStatusColor = new Color32(255, 255, 0, 200);
 
     public void Init(Main main) 
     {

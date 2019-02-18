@@ -305,9 +305,15 @@ public class CameraController : MonoBehaviour
             }
 
             // Update camera position/rotation
-            var t2 = 5f * Time.deltaTime;
-            Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, moveTransform.position, t2);
-            Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, moveTransform.rotation, t2);
+            if (cameraMode.Equals(CameraMode.FLY_AROUND))
+            {
+                Camera.main.transform.position = moveTransform.position;
+                Camera.main.transform.rotation = moveTransform.rotation;
+            } else {
+                var t2 = 5f * Time.deltaTime;
+                Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, moveTransform.position, t2);
+                Camera.main.transform.rotation = Quaternion.Lerp(Camera.main.transform.rotation, moveTransform.rotation, t2);
+            }
 
             // Shake camera
             if (isShaking) {
